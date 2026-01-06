@@ -1,4 +1,5 @@
-# Versioning Strategy
+versioning
+==========
 
 > Specification for Docora's versioning system with Auto-Release and Conventional Commits.
 
