@@ -294,4 +294,4 @@ Follows the strategy defined in `versioning.md`:
 
 # Current STEP DONE
 
-*1.5*
+*2.6*
