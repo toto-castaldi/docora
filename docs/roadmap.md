@@ -99,8 +99,7 @@ docora/
 | 2.2 | Create entry point | `src/index.ts` |
 | 2.3 | Create route aggregator | `src/routes/index.ts` |
 | 2.4 | Create health endpoints | `src/routes/health.ts` |
-| 2.5 | Create version endpoint | `src/routes/version.route.ts` |
-| 2.6 | Create hello endpoint | `src/routes/hello.ts` |
+| 2.5 | Create version endpoint | `src/routes/version.ts` |
 
 ### Phase 3: Testing Infrastructure
 
@@ -112,8 +111,7 @@ docora/
 | 3.2 | Create test setup | `tests/setup.ts` |
 | 3.3 | Create health tests | `tests/health.test.ts` |
 | 3.4 | Create version tests | `tests/version.test.ts` |
-| 3.5 | Create hello tests | `tests/hello.test.ts` |
-| 3.6 | Verify all tests pass | - |
+| 3.5 | Verify all tests pass | - |
 
 ### Phase 4: Commit Validation
 
@@ -171,8 +169,6 @@ Push to main
 | Step | Task | File |
 |------|------|------|
 | 7.1 | Create environment template | `.env.example` |
-| 7.2 | Update git ignore | `.gitignore` |
-| 7.3 | Update README | `README.md` |
 
 ---
 
@@ -209,37 +205,11 @@ Push to main
 NODE_ENV=production
 PORT=3000
 DOMAIN=docora.toto-castaldi.com
-CADDY_EMAIL=admin@toto-castaldi.com
+CADDY_EMAIL=toto.castaldi@gmail.com
 ```
 
 ---
 
-## Local Development
-
-```bash
-# Install dependencies
-pnpm install
-
-# Start development server (hot reload)
-pnpm dev
-
-# Run tests
-pnpm test
-
-# Run tests in watch mode
-pnpm test:watch
-
-# Type checking
-pnpm typecheck
-
-# Build for production
-pnpm build
-
-# Start production build
-pnpm start
-```
-
----
 
 ## Versioning System
 
