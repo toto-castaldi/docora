@@ -1,4 +1,5 @@
-# Docora
+project documentation
+=====================
 
 ## Overview
 Docora is a headless service that monitors GitHub repositories, detects structural file changes, optionally applies transformation plugins, and notifies registered client applications through a well-defined API.
