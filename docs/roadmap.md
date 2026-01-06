@@ -292,6 +292,6 @@ Follows the strategy defined in `versioning.md`:
 
 
 
-# Current STEP
+# Current STEP DONE
 
-*1.1*
+*1.5*
