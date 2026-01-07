@@ -3,9 +3,8 @@ services:
     image: ghcr.io/toto-castaldi/docora:latest
     container_name: docora-api
     restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
+    env_file:
+      - .env
     expose:
       - "3000"
     networks:
@@ -15,6 +14,8 @@ services:
     image: caddy:2-alpine
     container_name: docora-caddy
     restart: unless-stopped
+    env_file:
+      - .env
     ports:
       - "80:80"
       - "443:443"
