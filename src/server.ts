@@ -3,23 +3,40 @@ import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 //in ES modules with TypeScript, imports need .js even though the source is .ts. TypeScript compiles ./routes/index.ts → ./routes/index.js.
 import { registerRoutes } from "./routes/index.js";
+import rateLimit from "@fastify/rate-limit";
+import {
+  serializerCompiler,
+  validatorCompiler,
+} from "fastify-type-provider-zod";
+import { registerSwagger } from "./plugins/swagger.js";
 
 export async function buildServer(): Promise<FastifyInstance> {
-    //server with built-in logging
-    const server = Fastify({
-        logger: {
-        level: process.env.LOG_LEVEL || "info",
-        },
-    });
+  //server with built-in logging
+  const server = Fastify({
+    logger: {
+      level: process.env.LOG_LEVEL || "info",
+    },
+  });
 
-    //security headers (XSS, clickjacking protection)
-    await server.register(helmet);
-    //allows cross-origin requests
-    await server.register(cors, {
-        origin: process.env.CORS_ORIGIN || "*",
-    });
+  server.setValidatorCompiler(validatorCompiler);
+  server.setSerializerCompiler(serializerCompiler);
 
-    await registerRoutes(server);
+  //security headers (XSS, clickjacking protection)
+  await server.register(helmet);
+  //allows cross-origin requests
+  await server.register(cors, {
+    origin: process.env.CORS_ORIGIN || "*",
+  });
 
-    return server;
+  await registerSwagger(server);
+
+  // Rate limiting
+  await server.register(rateLimit, {
+      max: 100,
+      timeWindow: '1 minute',
+  });
+
+  await registerRoutes(server);
+
+  return server;
 }

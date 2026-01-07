@@ -4,3 +4,4 @@ coverage
 .husky/_
 docora_dev_data
 .env
+dist
