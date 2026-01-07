@@ -51,6 +51,12 @@ liquibase
     update
 ```
 
+sql query
+
+```bash
+docker exec -it docora-postgres psql -U docora -d docora -c "SELECT app_id, app_name, email FROM apps;"
+```
+
 # PROD
 
 

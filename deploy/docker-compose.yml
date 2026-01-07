@@ -9,6 +9,9 @@ services:
       - "3000"
     networks:
       - docora-network
+    depends_on:
+      liquibase:
+        condition: service_completed_successfully
 
   caddy:
     image: caddy:2-alpine
@@ -38,6 +41,29 @@ services:
       - docora-network
     volumes:
       - docora_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docora -d docora"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  liquibase:
+    image: liquibase/liquibase:4.25
+    container_name: docora-liquibase
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - /opt/docora/liquibase:/liquibase/workspace:ro
+    working_dir: /liquibase/workspace
+    command: >
+      --url=jdbc:postgresql://postgres:5432/docora
+      --username=docora
+      --password=docora
+      --changelog-file=changelog/db.changelog-master.yml
+      update
+    networks:
+      - docora-network
 
 networks:
   docora-network:

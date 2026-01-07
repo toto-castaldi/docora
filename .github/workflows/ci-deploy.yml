@@ -180,7 +180,7 @@ jobs:
                     host: ${{ secrets.DEPLOY_HOST }}
                     username: ${{ secrets.DEPLOY_USER }}
                     key: ${{ secrets.DEPLOY_SSH_KEY }}
-                    source: "deploy/docker-compose.yml,deploy/caddy/Caddyfile"
+                    source: "deploy/docker-compose.yml,deploy/caddy/Caddyfile,liquibase"
                     target: "/opt/docora"
                     strip_components: 1
 
