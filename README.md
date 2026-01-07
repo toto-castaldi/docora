@@ -44,7 +44,7 @@ liquibase
 ```bash
   docker run --rm \
     --network host \
-    -v $(pwd)/liquibase:/liquibase/workspace \
+    -v $(pwd)/deploy/liquibase:/liquibase/workspace \
     -w /liquibase/workspace \
     liquibase/liquibase:4.25 \
     --defaults-file=liquibase.properties \

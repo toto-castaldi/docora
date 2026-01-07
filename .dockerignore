@@ -6,7 +6,6 @@ docs
 bruno
 deploy
 docora_dev_data
-liquibase
 dist
 
 .husky
