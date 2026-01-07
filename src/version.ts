@@ -4,7 +4,7 @@
  * This version is updated authomatically 
  * do not change by hand.
  */
-export const VERSION = "0.2.1";
+export const VERSION = "0.2.2";
 
 /**
  * Build info filled at build time from CI.
