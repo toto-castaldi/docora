@@ -132,8 +132,7 @@ docora/
 | 5.1 | Create Dockerfile | `Dockerfile` |
 | 5.2 | Create Docker ignore | `.dockerignore` |
 | 5.3 | Create production compose | `deploy/docker-compose.yml` |
-| 5.4 | Create dev compose | `deploy/docker-compose.dev.yml` |
-| 5.5 | Create Caddy config | `deploy/caddy/Caddyfile` |
+| 5.4 | Create Caddy config | `deploy/caddy/Caddyfile` |
 
 ### Phase 6: CI/CD Pipeline
 
@@ -263,4 +262,4 @@ Follows the strategy defined in `versioning.md`:
 
 # Current STEP DONE
 
-*4.4*
+*5.4*

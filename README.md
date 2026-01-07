@@ -25,3 +25,9 @@ pnpm test -- --coverage
 //view the test coverage
 google-chrome coverage/index.html
 ```
+
+# PROD
+
+Environment variables needed in production:
+DOMAIN=docora.toto-castaldi.com
+CADDY_EMAIL=[XYZ]@[DOMAIN] //Email for Let's Encrypt notifications

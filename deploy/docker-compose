@@ -1,0 +1,38 @@
+services:
+  docora:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: docora-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    expose:
+      - "3000"
+    networks:
+      - docora-network
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: docora-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - docora-network
+    depends_on:
+      - docora
+
+networks:
+  docora-network:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

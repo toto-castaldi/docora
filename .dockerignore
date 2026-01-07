@@ -1,0 +1,17 @@
+node_modules
+dist
+coverage
+tests
+docs
+bruno
+deploy
+
+.husky
+.vscode
+.claude
+
+.gitignore
+.env
+.env.*
+.git
+*.md
