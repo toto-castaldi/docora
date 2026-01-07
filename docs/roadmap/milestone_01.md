@@ -1,17 +1,11 @@
-roadmap
-=======
+Infrastructure Setup
+====================
 
-## Version 1.0.0
-
----
-
-# Milestone 1: Infrastructure Setup
-
-## Goal
+# Goal
 
 Establish a production-ready foundation: a cloud-hosted TypeScript REST API with automated CI/CD, returning "hello world".
 
-## Stack
+# Stack
 
 | Component | Choice |
 |-----------|--------|
@@ -28,7 +22,7 @@ Establish a production-ready foundation: a cloud-hosted TypeScript REST API with
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```
 docora/
@@ -75,9 +69,9 @@ docora/
 
 ---
 
-## Implementation Phases
+# Implementation Phases
 
-### Phase 1: Project Initialization
+## Phase 1: Project Initialization
 
 **Objective**: Establish the pnpm project with TypeScript tooling.
 
@@ -89,7 +83,7 @@ docora/
 | 1.4 | Configure TypeScript | `tsconfig.json` |
 | 1.5 | Specify Node version | `.nvmrc` |
 
-### Phase 2: Fastify Application
+## Phase 2: Fastify Application
 
 **Objective**: Create the API server with required endpoints.
 
@@ -101,7 +95,7 @@ docora/
 | 2.4 | Create health endpoints | `src/routes/health.ts` |
 | 2.5 | Create version endpoint | `src/routes/version.ts` |
 
-### Phase 3: Testing Infrastructure
+## Phase 3: Testing Infrastructure
 
 **Objective**: Set up Vitest with endpoint tests.
 
@@ -112,7 +106,7 @@ docora/
 | 3.3 | Create health tests | `tests/health.test.ts` |
 | 3.4 | Verify all tests pass | - |
 
-### Phase 4: Commit Validation
+## Phase 4: Commit Validation
 
 **Objective**: Enforce Conventional Commits with Husky + Commitlint.
 
@@ -123,7 +117,7 @@ docora/
 | 4.3 | Create commit-msg hook | `.husky/commit-msg` |
 | 4.4 | Create pre-commit hook | `.husky/pre-commit` |
 
-### Phase 5: Docker Configuration
+## Phase 5: Docker Configuration
 
 **Objective**: Create production-ready containerization.
 
@@ -134,7 +128,7 @@ docora/
 | 5.3 | Create production compose | `deploy/docker-compose.yml` |
 | 5.4 | Create Caddy config | `deploy/caddy/Caddyfile` |
 
-### Phase 6: CI/CD Pipeline
+## Phase 6: CI/CD Pipeline
 
 **Objective**: Automated build, test, versioning, and deployment.
 
@@ -160,7 +154,7 @@ Push to main
     └─► Deploy to DigitalOcean (SSH + docker compose)
 ```
 
-### Phase 7: Final Configuration
+## Phase 7: Final Configuration
 
 **Objective**: Complete project setup.
 
@@ -168,98 +162,3 @@ Push to main
 |------|------|------|
 | 7.1 | Create environment template | `.env.example` |
 
----
-
-## API Endpoints
-
-| Method | Path | Description | Response |
-|--------|------|-------------|----------|
-| GET | `/health` | Health status | `{ "status": "healthy", "timestamp": "...", "uptime": 123 }` |
-| GET | `/version` | Version info | `{ "version": "v0.0.0", "full": "...", "details": {...} }` |
-
----
-
-## Deployment Configuration
-
-### GitHub Secrets Required
-
-| Secret | Description |
-|--------|-------------|
-| `DEPLOY_HOST` | DigitalOcean droplet IP or hostname |
-| `DEPLOY_USER` | SSH username (e.g., `root` or `deploy`) |
-| `DEPLOY_SSH_KEY` | Private SSH key for deployment |
-
-### Server Prerequisites
-
-1. Docker and Docker Compose installed
-2. Git installed
-3. Repository cloned to `/opt/docora`
-4. DNS configured: `docora.toto-castaldi.com` → droplet IP
-5. Environment file created at `/opt/docora/.env`
-
-### Production Environment Variables
-
-```bash
-NODE_ENV=production
-PORT=3000
-DOMAIN=docora.toto-castaldi.com
-CADDY_EMAIL=toto.castaldi@gmail.com
-```
-
----
-
-
-## Versioning System
-
-Follows the strategy defined in `versioning.md`:
-
-- **Single source of truth**: `src/version.ts`
-- **Conventional Commits**: `feat:`, `fix:`, `docs:`, etc.
-- **Auto-release**: GitHub Actions analyzes commits and bumps version
-- **Semantic Versioning**: `feat` → MINOR, `fix` → PATCH, `!` → MAJOR
-
----
-
-## Success Criteria
-
-- [ ] API responds at `https://docora.toto-castaldi.com`
-- [ ] `GET /` returns `{ "message": "hello world" }`
-- [ ] `GET /health` returns healthy status
-- [ ] `GET /version` returns current version
-- [ ] All tests pass (`pnpm test`)
-- [ ] Commits are validated (Conventional Commits)
-- [ ] Push to `main` triggers automatic deployment
-- [ ] Version is automatically bumped based on commit types
-- [ ] Local development works with hot reload (`pnpm dev`)
-
----
-
-## Dependencies Summary
-
-### Production
-
-| Package | Purpose |
-|---------|---------|
-| fastify | Web framework |
-| @fastify/cors | CORS middleware |
-| @fastify/helmet | Security headers |
-| dotenv | Environment variables |
-
-### Development
-
-| Package | Purpose |
-|---------|---------|
-| typescript | Type system |
-| tsx | TypeScript execution with hot reload |
-| @types/node | Node.js type definitions |
-| vitest | Testing framework |
-| @vitest/coverage-v8 | Code coverage |
-| husky | Git hooks |
-| @commitlint/cli | Commit message linting |
-| @commitlint/config-conventional | Conventional commits config |
-
-
-
-# Current STEP DONE
-
-*5.4*
