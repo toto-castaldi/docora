@@ -68,7 +68,7 @@ jobs:
         if: needs.release.outputs.released == 'true'
         runs-on: ubuntu-latest
         permissions:
-            contents: read
+            contents: write
             packages: write
         steps:
             -   uses: actions/checkout@v4
