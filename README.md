@@ -6,7 +6,7 @@ docora
 # AI
 
 ```
-read CLAUDE.md, README.md and all the files in docs folder. Now you are ready.
+read CLAUDE.md, README.md, CHANGELOG.md and all the files in docs folder. Now you are ready.
 ```
 
 
