@@ -142,18 +142,30 @@ pnpm add -D @types/pg @types/bcrypt
 
 ### Phase 2: Docker & Database Setup
 
-**Files to create/modify:**
+**Local Development:** Standalone Docker containers (no docker-compose)
+
+```bash
+# Dev database (port 5432)
+docker run -d --name docora-postgres \
+  -e POSTGRES_USER=docora \
+  -e POSTGRES_PASSWORD=docora \
+  -e POSTGRES_DB=docora \
+  -p 5432:5432 \
+  -v docora_dev_data:/var/lib/postgresql/data \
+  postgres:16-alpine
+
+```
+
+**Production:** PostgreSQL in docker-compose stack
 
 | File | Action |
 |------|--------|
-| `docker-compose.dev.yml` | CREATE - Dev PostgreSQL (port 5432) + Test DB (port 5433) |
 | `deploy/docker-compose.yml` | MODIFY - Add PostgreSQL service |
 | `.env.example` | CREATE - Environment template |
 
 **Environment variables to add:**
 ```
-DATABASE_URL=postgres://docora:password@localhost:5432/docora
-TEST_DATABASE_URL=postgres://docora_test:docora_test@localhost:5433/docora_test
+DATABASE_URL=postgres://docora:docora@localhost:5432/docora
 ```
 
 ---
@@ -316,7 +328,6 @@ liquibase/
     ├── db.changelog-master.xml   (NEW)
     └── 001-create-apps-table.xml (NEW)
 
-docker-compose.dev.yml    (NEW)
 deploy/docker-compose.yml (MODIFY)
 .env.example              (NEW)
 package.json              (MODIFY)

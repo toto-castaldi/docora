@@ -5,6 +5,8 @@ tests
 docs
 bruno
 deploy
+docora_dev_data
+liquibase
 
 .husky
 .vscode

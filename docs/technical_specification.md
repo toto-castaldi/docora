@@ -27,26 +27,12 @@ Follows the strategy defined in `versioning.md`:
 - **Auto-release**: GitHub Actions analyzes commits and bumps version
 - **Semantic Versioning**: `feat` → MINOR, `fix` → PATCH, `!` → MAJOR
 
-# Dependencies Summary
+# Docker
 
-## Production
+In prod Docora is running with a Docker Compose stack.
+In dev al needed service are executed by a single container.
 
-| Package | Purpose |
-|---------|---------|
-| fastify | Web framework |
-| @fastify/cors | CORS middleware |
-| @fastify/helmet | Security headers |
-| dotenv | Environment variables |
+# Database
 
-## Development
-
-| Package | Purpose |
-|---------|---------|
-| typescript | Type system |
-| tsx | TypeScript execution with hot reload |
-| @types/node | Node.js type definitions |
-| vitest | Testing framework |
-| @vitest/coverage-v8 | Code coverage |
-| husky | Git hooks |
-| @commitlint/cli | Commit message linting |
-| @commitlint/config-conventional | Conventional commits config |
+Potsgresql
+schema managed via Liquibase

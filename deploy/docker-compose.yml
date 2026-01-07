@@ -27,6 +27,17 @@ services:
       - docora-network
     depends_on:
       - docora
+  
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: docora
+      POSTGRES_PASSWORD: docora
+      POSTGRES_DB: docora
+    networks:
+      - docora-network
+    volumes:
+      - docora_pg_data:/var/lib/postgresql/data
 
 networks:
   docora-network:
@@ -35,3 +46,4 @@ networks:
 volumes:
   caddy_data:
   caddy_config:
+  docora_pg_data:

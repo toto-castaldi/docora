@@ -1,0 +1,72 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001
+      author: docora
+      changes:
+        - createTable:
+            tableName: apps
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: app_id
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: token_hash
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: app_name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: base_url
+                  type: varchar(2048)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: website
+                  type: varchar(2048)
+              - column:
+                  name: description
+                  type: varchar(500)
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            tableName: apps
+            indexName: idx_apps_app_id
+            columns:
+              - column:
+                  name: app_id
+
+        - createIndex:
+            tableName: apps
+            indexName: idx_apps_token_hash
+            columns:
+              - column:
+                  name: token_hash

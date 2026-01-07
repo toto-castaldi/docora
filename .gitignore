@@ -2,3 +2,5 @@
 node_modules
 coverage
 .husky/_
+docora_dev_data
+.env
