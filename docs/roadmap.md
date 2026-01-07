@@ -110,8 +110,7 @@ docora/
 | 3.1 | Configure Vitest | `vitest.config.ts` |
 | 3.2 | Create test setup | `tests/setup.ts` |
 | 3.3 | Create health tests | `tests/health.test.ts` |
-| 3.4 | Create version tests | `tests/version.test.ts` |
-| 3.5 | Verify all tests pass | - |
+| 3.4 | Verify all tests pass | - |
 
 ### Phase 4: Commit Validation
 
@@ -264,4 +263,4 @@ Follows the strategy defined in `versioning.md`:
 
 # Current STEP DONE
 
-*2.6*
+*3.4*
