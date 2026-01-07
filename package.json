@@ -1,6 +1,6 @@
 {
   "name": "docora",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
-    "commit" : "czg"
+    "commit": "czg"
   },
   "author": "toto-castaldi",
   "engines": {
