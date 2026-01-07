@@ -110,3 +110,229 @@ Response (201 Created)
 - Validation rules are enforced with clear error responses.
 - App metadata is stored for future update delivery.
 - No token expiration or ownership requirement is enforced.
+
+---
+
+# Implementation Plan
+
+## Technology Stack
+
+| Component | Choice |
+|-----------|--------|
+| Database | PostgreSQL 16 |
+| Migrations | Liquibase |
+| Query Builder | Kysely |
+| Validation | Zod |
+| API Docs | zod-openapi + @fastify/swagger |
+| Rate Limiting | @fastify/rate-limit |
+
+---
+
+## Implementation Phases
+
+### Phase 1: Dependencies
+
+```bash
+pnpm add pg kysely zod @fastify/rate-limit @fastify/swagger @fastify/swagger-ui
+pnpm add @asteasolutions/zod-to-openapi fastify-type-provider-zod bcrypt
+pnpm add -D @types/pg @types/bcrypt
+```
+
+---
+
+### Phase 2: Docker & Database Setup
+
+**Files to create/modify:**
+
+| File | Action |
+|------|--------|
+| `docker-compose.dev.yml` | CREATE - Dev PostgreSQL (port 5432) + Test DB (port 5433) |
+| `deploy/docker-compose.yml` | MODIFY - Add PostgreSQL service |
+| `.env.example` | CREATE - Environment template |
+
+**Environment variables to add:**
+```
+DATABASE_URL=postgres://docora:password@localhost:5432/docora
+TEST_DATABASE_URL=postgres://docora_test:docora_test@localhost:5433/docora_test
+```
+
+---
+
+### Phase 3: Liquibase Schema
+
+**Files to create:**
+
+| File | Purpose |
+|------|---------|
+| `liquibase/liquibase.properties` | Liquibase config |
+| `liquibase/changelog/db.changelog-master.xml` | Master changelog |
+| `liquibase/changelog/001-create-apps-table.xml` | Apps table migration |
+
+**Apps table schema:**
+```sql
+CREATE TABLE apps (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    app_id VARCHAR(50) UNIQUE NOT NULL,
+    token_hash VARCHAR(255) NOT NULL,
+    app_name VARCHAR(100) NOT NULL,
+    base_url VARCHAR(2048) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    website VARCHAR(2048),
+    description VARCHAR(500),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_apps_app_id ON apps(app_id);
+CREATE INDEX idx_apps_token_hash ON apps(token_hash);
+```
+
+---
+
+### Phase 4: Database Layer (Kysely)
+
+**Files to create:**
+
+| File | Purpose |
+|------|---------|
+| `src/db/index.ts` | Connection pool, getDatabase(), closeDatabase() |
+| `src/db/types.ts` | Kysely Database interface & AppsTable type |
+
+---
+
+### Phase 5: Utilities
+
+**Files to create:**
+
+| File | Purpose |
+|------|---------|
+| `src/utils/token.ts` | generateAppId(), generateToken(), hashToken(), verifyToken() |
+| `src/utils/url-validator.ts` | isUrlSafe() - SSRF protection (block private IPs) |
+
+---
+
+### Phase 6: Zod Schemas + OpenAPI
+
+**Files to create:**
+
+| File | Purpose |
+|------|---------|
+| `src/schemas/apps.ts` | OnboardRequestSchema, OnboardResponseSchema with OpenAPI metadata |
+| `src/plugins/swagger.ts` | Swagger/OpenAPI configuration, serves `/docs` |
+
+---
+
+### Phase 7: Repository Layer
+
+**File to create:**
+
+| File | Purpose |
+|------|---------|
+| `src/repositories/apps.ts` | createApp() - inserts app, returns app_id + plain token |
+
+---
+
+### Phase 8: Route Implementation
+
+**Files to create:**
+
+| File | Purpose |
+|------|---------|
+| `src/routes/apps/index.ts` | Apps route aggregator |
+| `src/routes/apps/onboard.ts` | POST /api/apps/onboard handler |
+
+**File to modify:**
+
+| File | Change |
+|------|--------|
+| `src/routes/index.ts` | Import and register appsRoutes |
+
+---
+
+### Phase 9: Server Integration
+
+**File to modify:** `src/server.ts`
+
+- Add Zod type provider (validatorCompiler, serializerCompiler)
+- Register @fastify/swagger + @fastify/swagger-ui
+- Register @fastify/rate-limit
+- Initialize database connection
+
+**File to modify:** `src/index.ts`
+
+- Add graceful shutdown (closeDatabase on SIGINT/SIGTERM)
+
+---
+
+### Phase 10: Testing
+
+**Files to create:**
+
+| File | Purpose |
+|------|---------|
+| `tests/helpers/test-db.ts` | Test database utilities |
+| `tests/utils/token.test.ts` | Token generation tests |
+| `tests/utils/url-validator.test.ts` | SSRF protection tests |
+| `tests/routes/apps/onboard.test.ts` | Endpoint integration tests |
+
+---
+
+## File Structure
+
+```
+src/
+├── db/
+│   ├── index.ts          (NEW)
+│   └── types.ts          (NEW)
+├── plugins/
+│   └── swagger.ts        (NEW)
+├── repositories/
+│   └── apps.ts           (NEW)
+├── routes/
+│   ├── apps/
+│   │   ├── index.ts      (NEW)
+│   │   └── onboard.ts    (NEW)
+│   └── index.ts          (MODIFY)
+├── schemas/
+│   └── apps.ts           (NEW)
+├── utils/
+│   ├── token.ts          (NEW)
+│   └── url-validator.ts  (NEW)
+├── index.ts              (MODIFY)
+└── server.ts             (MODIFY)
+
+tests/
+├── helpers/
+│   └── test-db.ts        (NEW)
+├── routes/apps/
+│   └── onboard.test.ts   (NEW)
+└── utils/
+    ├── token.test.ts     (NEW)
+    └── url-validator.test.ts (NEW)
+
+liquibase/
+├── liquibase.properties  (NEW)
+└── changelog/
+    ├── db.changelog-master.xml   (NEW)
+    └── 001-create-apps-table.xml (NEW)
+
+docker-compose.dev.yml    (NEW)
+deploy/docker-compose.yml (MODIFY)
+.env.example              (NEW)
+package.json              (MODIFY)
+```
+
+---
+
+## Security Implementation
+
+- Tokens stored as bcrypt hashes (plain token returned only once)
+- HTTPS required for base_url
+- SSRF protection blocks private/internal IPs (10.x, 172.16.x, 192.168.x, 127.x, localhost)
+- Rate limiting: 10 requests/minute per IP on onboard endpoint
+
+---
+
+## Swagger UI
+
+Available at: `GET /docs`
