@@ -1,0 +1,133 @@
+name: CI/CD Pipeline
+
+on:
+push:
+    branches: [main]
+pull_request:
+    branches: [main]
+
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+    # ─────────────────────────────────────────────
+    # Build & Test
+    # ─────────────────────────────────────────────
+    build-test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            -   name: Setup pnpm
+                uses: pnpm/action-setup@v4
+                with:
+                    version: 9.15.0
+
+            -   name: Setup Node.js
+                uses: actions/setup-node@v4
+                with:
+                    node-version: 22
+                    cache: 'pnpm'
+
+            -   name: Install dependencies
+                run: pnpm install --frozen-lockfile
+
+            -   name: Type check
+                run: pnpm typecheck
+
+            -   name: Run tests
+                run: pnpm test
+
+    # ─────────────────────────────────────────────
+    # Auto-Release (only on main)
+    # ─────────────────────────────────────────────
+    release:
+        needs: build-test
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        runs-on: ubuntu-latest
+        outputs:
+            released: ${{ steps.release.outputs.release_created }}
+            version: ${{ steps.release.outputs.version }}
+            tag: ${{ steps.release.outputs.tag_name }}
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Release Please
+                id: release
+                uses: googleapis/release-please-action@v4
+                with:
+                    release-type: node
+                    target-branch: main
+
+    # ─────────────────────────────────────────────
+    # Build & Push Docker Image
+    # ─────────────────────────────────────────────
+    docker:
+        needs: release
+        if: needs.release.outputs.released == 'true'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Log in to Container Registry
+                uses: docker/login-action@v3
+                with:
+                    registry: ${{ env.REGISTRY }}
+                    username: ${{ github.actor }}
+                    password: ${{ secrets.GITHUB_TOKEN }}
+
+            -   name: Extract metadata
+                id: meta
+                uses: docker/metadata-action@v5
+                with:
+                    images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                    tags: |
+                        type=semver,pattern={{version}},value=${{ needs.release.outputs.version }}
+                        type=raw,value=latest
+
+            -   name: Build and push
+                uses: docker/build-push-action@v6
+                with:
+                    context: .
+                    push: true
+                    tags: ${{ steps.meta.outputs.tags }}
+                    labels: ${{ steps.meta.outputs.labels }}
+                    build-args: |
+                        BUILD_NUMBER=${{ github.run_number }}
+                        COMMIT_SHA=${{ github.sha }}
+                        BUILD_DATE=${{ github.event.head_commit.timestamp }}
+
+    # ─────────────────────────────────────────────
+    # Deploy to DigitalOcean
+    # ─────────────────────────────────────────────
+    deploy:
+        needs: [release, docker]
+        if: needs.release.outputs.released == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Copy files to server
+                uses: appleboy/scp-action@v0.1.7
+                with:
+                    host: ${{ secrets.DEPLOY_HOST }}
+                    username: ${{ secrets.DEPLOY_USER }}
+                    key: ${{ secrets.DEPLOY_SSH_KEY }}
+                    source: "deploy/docker-compose.yml,deploy/caddy/Caddyfile"
+                    target: "/opt/docora"
+                    strip_components: 1
+                    
+            -   name: Deploy via SSH
+                uses: appleboy/ssh-action@v1
+                with:
+                    host: ${{ secrets.DEPLOY_HOST }}
+                    username: ${{ secrets.DEPLOY_USER }}
+                    key: ${{ secrets.DEPLOY_SSH_KEY }}
+                    script: |
+                        cd /opt/docora
+                        git pull origin main
+                        docker compose -f deploy/docker-compose.yml pull
+                        docker compose -f deploy/docker-compose.yml up -d --remove-orphans
+                        docker image prune -f

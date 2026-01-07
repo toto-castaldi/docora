@@ -1,0 +1,11 @@
+{
+    "packages": {
+        ".": {
+            "release-type": "node",
+            "bump-minor-pre-major": true,
+            "bump-patch-for-minor-pre-major": true,
+            "versioned-files": ["src/version.ts", "package.json"],
+            "changelog-path": "CHANGELOG.md"
+        }
+    }
+}

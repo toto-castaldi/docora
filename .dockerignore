@@ -9,8 +9,11 @@ deploy
 .husky
 .vscode
 .claude
+.github
 
 .gitignore
+.release-please-manifest.json
+release-please-config.json
 .env
 .env.*
 .git

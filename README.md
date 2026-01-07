@@ -28,6 +28,18 @@ google-chrome coverage/index.html
 
 # PROD
 
-Environment variables needed in production:
+
+/opt/docora/.env:
+
+NODE_ENV=production
+PORT=3000
 DOMAIN=docora.toto-castaldi.com
 CADDY_EMAIL=[XYZ]@[DOMAIN] //Email for Let's Encrypt notifications
+
+# GITHUB ACTIONS
+
+| Secret         | Description                    | Example                                    |
+|----------------|--------------------------------|--------------------------------------------|
+| DEPLOY_HOST    | Server IP or hostname          | 164.90.xxx.xxx or docora.toto-castaldi.com |
+| DEPLOY_USER    | SSH username                   | root or deploy                             |
+| DEPLOY_SSH_KEY | Private SSH key (full content) | -----BEGIN OPENSSH PRIVATE KEY-----...     |
