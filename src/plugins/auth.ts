@@ -3,7 +3,12 @@ import fp from "fastify-plugin";
 import { getDatabase } from "../db/index.js";
 import { verifyToken } from "../utils/token.js";
 
-const PUBLIC_ROUTES = ["GET /health", "GET /version", "POST /api/apps/onboard"];
+const PUBLIC_ROUTES = [
+  "GET /health",
+  "GET /version", 
+  "POST /api/apps/onboard",
+  "GET /docs"
+];
 
 // Extend FastifyRequest to include appId
 declare module "fastify" {
