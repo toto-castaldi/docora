@@ -16,7 +16,7 @@ export async function versionRoutes(server: FastifyInstance): Promise<void> {
         version: getVersionString(),
         full: getFullVersionString(),
         details: BUILD_INFO,
-        fake: "2",
+        fake: "3",
       };
     }
   );
