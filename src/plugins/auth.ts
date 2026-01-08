@@ -2,13 +2,8 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import fp from "fastify-plugin";
 import { getDatabase } from "../db/index.js";
 import { verifyToken } from "../utils/token.js";
+import { PUBLIC_DOCS_ROUTE } from "../plugins/swagger.js"
 
-const PUBLIC_ROUTES = [
-  "GET /health",
-  "GET /version", 
-  "POST /api/apps/onboard",
-  "GET /docs"
-];
 
 // Extend FastifyRequest to include appId
 declare module "fastify" {
@@ -21,10 +16,18 @@ async function authPlugin(server: FastifyInstance): Promise<void> {
   server.addHook(
     "onRequest",
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const routeKey = `${request.method} ${request.url.split("?")[0]}`;
+      
+      const routeConfig = request.routeOptions?.config as { publicAccess?: boolean } | undefined;
 
-      if (PUBLIC_ROUTES.includes(routeKey)) {
+      const path = request.url.split("?")[0];
+      
+      //needed for plugins...
+      if (path.startsWith(PUBLIC_DOCS_ROUTE)) {
         return;
+      }
+
+      if (routeConfig?.publicAccess) {
+        return;  
       }
 
       const authHeader = request.headers.authorization;

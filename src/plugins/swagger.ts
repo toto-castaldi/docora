@@ -4,6 +4,8 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import { BUILD_INFO } from "../version.js";
 import { jsonSchemaTransform } from "fastify-type-provider-zod";
 
+export const PUBLIC_DOCS_ROUTE : string = "/docs";
+
 export async function registerSwagger(server: FastifyInstance): Promise<void> {
   await server.register(fastifySwagger, {
     openapi: {
@@ -18,6 +20,6 @@ export async function registerSwagger(server: FastifyInstance): Promise<void> {
   });
 
   await server.register(fastifySwaggerUi, {
-    routePrefix: "/docs",
+    routePrefix: PUBLIC_DOCS_ROUTE,
   });
 }

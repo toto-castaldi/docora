@@ -16,6 +16,7 @@ export async function onboardRoute(server: FastifyInstance): Promise<void> {
   server.post(
     "/api/apps/onboard",
     {
+      config: { publicAccess: true },
       schema: {
         body: OnboardRequestSchema,
         response: {
