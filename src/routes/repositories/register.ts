@@ -18,6 +18,7 @@ export async function registerRoute(server: FastifyInstance): Promise<void> {
     "/api/repositories",
     {
       schema: {
+        security : [{ bearerAuth : []}],
         body: RegisterRepositoryRequestSchema,
         response: {
           201: RegisterRepositoryResponseSchema,

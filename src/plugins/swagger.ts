@@ -15,6 +15,16 @@ export async function registerSwagger(server: FastifyInstance): Promise<void> {
         version: BUILD_INFO.version,
       },
       servers: [{ url: "/" }],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+            description: "Enter your app token from /api/apps/onboard",
+          },
+        },
+      },
     },
     transform: jsonSchemaTransform,
   });
