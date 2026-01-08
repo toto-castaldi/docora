@@ -1,0 +1,31 @@
+meta {
+    name: register-repo-not-found
+    type: http
+    seq: 8
+}
+
+post {
+    url: {{baseUrl}}/api/repositories
+    body: json
+    auth: bearer
+}
+
+auth:bearer {
+    token: {{appToken}}
+}
+
+body:json {
+    {
+      "github_url": "https://github.com/nonexistent-owner-xyz/nonexistent-repo-abc"
+    }
+  }
+
+tests {
+    test("should return 404 for non-existent repo", function() {
+      expect(res.status).to.equal(404);
+    });
+
+    test("should return not found error", function() {
+      expect(res.body.error).to.include("not found");
+    });
+}

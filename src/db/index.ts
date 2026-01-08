@@ -1,6 +1,6 @@
 import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
-import type { Database } from "./types.js";
+import type { Database } from "./types/index.js";
 
 let db: Kysely<Database> | null = null;
 

@@ -1,0 +1,31 @@
+meta {
+    name: register-duplicate
+    type: http
+    seq: 5
+}
+
+post {
+    url: {{baseUrl}}/api/repositories
+    body: json
+    auth: bearer
+}
+
+auth:bearer {
+    token: {{appToken}}
+}
+
+body:json {
+    {
+      "github_url": "https://github.com/octocat/Hello-World"
+    }
+}
+
+tests {
+    test("should return 409 for duplicate", function() {
+      expect(res.status).to.equal(409);
+    });
+
+    test("should return conflict error", function() {
+      expect(res.body.error).to.include("already registered");
+    });
+}

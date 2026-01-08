@@ -12,12 +12,6 @@ read CLAUDE.md, README.md, CHANGELOG.md and all the files in docs folder. Now yo
 
 # DEV
 
-launch main service
-
-```bash
-pnpm dev
-```
-
 test the code base
 
 ```bash
@@ -30,25 +24,31 @@ database
 
 ```bash
 mkdir docora_dev_data
-docker run -rm --name docora-postgres \
--e POSTGRES_USER=docora \
--e POSTGRES_PASSWORD=docora \
--e POSTGRES_DB=docora \
--p 5432:5432 \
--v docora_dev_data:/var/lib/postgresql/data \
-postgres:16-alpine
+docker run --rm --name docora-postgres \
+  -e POSTGRES_USER=docora \
+  -e POSTGRES_PASSWORD=docora \
+  -e POSTGRES_DB=docora \
+  -p 5432:5432 \
+  -v docora_dev_data:/var/lib/postgresql/data \
+  postgres:16-alpine
 ```
 
-liquibase
+liquibase UPDATE
 
 ```bash
-  docker run --rm \
-    --network host \
-    -v $(pwd)/deploy/liquibase:/liquibase/workspace \
-    -w /liquibase/workspace \
-    liquibase/liquibase:4.25 \
-    --defaults-file=liquibase.properties \
-    update
+docker run --rm \
+  --network host \
+  -v $(pwd)/deploy/liquibase:/liquibase/workspace \
+  -w /liquibase/workspace \
+  liquibase/liquibase:4.25 \
+  --defaults-file=liquibase.properties \
+  update
+```
+
+launch main service
+
+```bash
+pnpm dev
 ```
 
 sql query
@@ -59,13 +59,7 @@ docker exec -it docora-postgres psql -U docora -d docora -c "SELECT app_id, app_
 
 # PROD
 
-
-/opt/docora/.env:
-
-NODE_ENV=production
-PORT=3000
-DOMAIN=docora.toto-castaldi.com
-CADDY_EMAIL=[XYZ]@[DOMAIN] //Email for Let's Encrypt notifications
+/opt/docora/.env from .env.example
 
 # GITHUB ACTIONS
 
@@ -74,3 +68,12 @@ CADDY_EMAIL=[XYZ]@[DOMAIN] //Email for Let's Encrypt notifications
 | DEPLOY_HOST    | Server IP or hostname          | 164.90.xxx.xxx or docora.toto-castaldi.com |
 | DEPLOY_USER    | SSH username                   | root or deploy                             |
 | DEPLOY_SSH_KEY | Private SSH key (full content) | -----BEGIN OPENSSH PRIVATE KEY-----...     |
+
+
+# UTILS
+
+# Generate a key 
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```

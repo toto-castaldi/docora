@@ -1,0 +1,41 @@
+meta {
+    name: onboard
+    type: http
+    seq: 3
+}
+
+post {
+    url: {{baseUrl}}/api/apps/onboard
+    body: json
+    auth: none
+}
+
+body:json {
+    {
+        "base_url": "https://example.com/webhook",
+        "app_name": "Test App",
+        "email": "test@example.com"
+    }
+}
+
+script:post-response {
+    if (res.status === 201) {
+        bru.setEnvVar("appToken", res.body.token);
+        bru.setEnvVar("appId", res.body.app_id);
+    }
+}
+
+tests {
+    test("should return 201", function() {
+        expect(res.status).to.equal(201);
+    });
+
+    test("should return app_id", function() {
+        expect(res.body.app_id).to.be.a("string");
+    });
+
+    test("should return token", function() {
+        expect(res.body.token).to.be.a("string");
+        expect(res.body.token).to.match(/^docora_/);
+    });
+}

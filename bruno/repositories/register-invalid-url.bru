@@ -1,0 +1,31 @@
+meta {
+    name: register-invalid-url
+    type: http
+    seq: 6
+}
+
+post {
+    url: {{baseUrl}}/api/repositories
+    body: json
+    auth: bearer
+}
+
+auth:bearer {
+    token: {{appToken}}
+}
+
+body:json {
+    {
+      "github_url": "https://gitlab.com/owner/repo"
+    }
+}
+
+tests {
+    test("should return 400 for invalid URL", function() {
+      expect(res.status).to.equal(400);
+    });
+
+    test("should return error message", function() {
+      expect(res.body).to.have.property("message");
+    });
+}

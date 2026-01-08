@@ -1,0 +1,27 @@
+meta {
+    name: register-no-auth
+    type: http
+    seq: 7
+}
+
+post {
+    url: {{baseUrl}}/api/repositories
+    body: json
+    auth: none
+}
+
+body:json {
+    {
+      "github_url": "https://github.com/octocat/Hello-World"
+    }
+}
+
+tests {
+    test("should return 401 without token", function() {
+      expect(res.status).to.equal(401);
+    });
+
+    test("should return error message", function() {
+      expect(res.body.error).to.be.a("string");
+    });
+}
