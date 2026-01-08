@@ -20,16 +20,20 @@ pnpm test -- --coverage
 google-chrome coverage/index.html
 ```
 
+```bash
+mkdir -p docora_dev_data/postgresql
+mkdir -p docora_dev_data/repo
+```
+
 database 
 
 ```bash
-mkdir docora_dev_data
 docker run --rm --name docora-postgres \
   -e POSTGRES_USER=docora \
   -e POSTGRES_PASSWORD=docora \
   -e POSTGRES_DB=docora \
   -p 5432:5432 \
-  -v docora_dev_data:/var/lib/postgresql/data \
+  -v $(pwd)/docora_dev_data/postgresql:/var/lib/postgresql/data \
   postgres:16-alpine
 ```
 
@@ -43,6 +47,14 @@ docker run --rm \
   liquibase/liquibase:4.25 \
   --defaults-file=liquibase.properties \
   update
+```
+
+redis
+
+```bash
+docker run --rm --name docora-redis \
+    -p 6379:6379 \
+    redis:7-alpine
 ```
 
 launch main service

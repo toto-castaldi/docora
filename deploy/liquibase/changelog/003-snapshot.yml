@@ -1,0 +1,127 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-01-app-repositories-status-columns
+      author: docora
+      changes:
+        - addColumn:
+            tableName: app_repositories
+            columns:
+              - column:
+                  name: status
+                  type: varchar(50)
+                  defaultValue: pending_snapshot
+                  constraints:
+                    nullable: false
+              - column:
+                  name: retry_count
+                  type: integer
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_error
+                  type: text
+              - column:
+                  name: last_scanned_at
+                  type: timestamptz
+  - changeSet:
+      id: 003-02-create-repository-snapshots
+      author: docora
+      changes:
+        - createTable:
+            tableName: repository_snapshots
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: repository_id
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    references: repositories(repository_id)
+                    foreignKeyName: fk_snapshots_repository
+              - column:
+                  name: commit_sha
+                  type: varchar(40)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: branch
+                  type: varchar(255)
+                  defaultValue: main
+                  constraints:
+                    nullable: false
+              - column:
+                  name: scanned_at
+                  type: timestamptz
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: repository_snapshots
+            columnNames: repository_id
+            constraintName: uq_repository_snapshots_repository_id
+        - createIndex:
+            tableName: repository_snapshots
+            indexName: idx_repository_snapshots_repository_id
+            columns:
+              - column:
+                  name: repository_id
+  - changeSet:
+      id: 003-03-create-snapshot-files
+      author: docora
+      changes:
+        - createTable:
+            tableName: snapshot_files
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: snapshot_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    references: repository_snapshots(id)
+                    foreignKeyName: fk_snapshot_files_snapshot
+                    deleteCascade: true
+              - column:
+                  name: path
+                  type: varchar(2048)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sha
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: size
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: snapshot_files
+            indexName: idx_snapshot_files_snapshot_id
+            columns:
+              - column:
+                  name: snapshot_id
+        - createIndex:
+            tableName: snapshot_files
+            indexName: idx_snapshot_files_path
+            columns:
+              - column:
+                  name: path

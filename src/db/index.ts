@@ -26,3 +26,8 @@ export async function closeDatabase(): Promise<void> {
     db = null;
   }
 }
+
+export async function initDatabase(): Promise<void> {
+  const db = getDatabase();
+  await db.selectFrom("apps").select("app_id").limit(1).execute();
+}

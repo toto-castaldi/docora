@@ -36,3 +36,27 @@ In dev al needed service are executed by a single container.
 
 Potsgresql
 schema managed via Liquibase
+
+# docoraignore
+
+Example .docoraignore File
+
+```
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+```

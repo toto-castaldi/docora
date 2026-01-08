@@ -1,6 +1,7 @@
 import { getDatabase } from "../db/index.js";
 import { encryptToken } from "../utils/crypto.js";
 import { randomBytes } from "crypto";
+import type { AppRepositoryStatus } from "../db/types/index.js";
 
 export interface CreateRepositoryInput {
   githubUrl: string;
@@ -160,4 +161,119 @@ export async function findRepositoriesByAppId(
     .execute();
 
   return repos;
+}
+
+export async function findPendingSnapshots(): Promise<
+  Array<{
+    app_id: string;
+    repository_id: string;
+    github_token_encrypted: string | null;
+    base_url: string;
+    github_url: string;
+    owner: string;
+    name: string;
+  }>
+> {
+  const db = getDatabase();
+
+  const results = await db
+    .selectFrom("app_repositories")
+    .innerJoin("apps", "apps.app_id", "app_repositories.app_id")
+    .innerJoin(
+      "repositories",
+      "repositories.repository_id",
+      "app_repositories.repository_id"
+    )
+    .select([
+      "app_repositories.app_id",
+      "app_repositories.repository_id",
+      "app_repositories.github_token_encrypted",
+      "apps.base_url",
+      "repositories.github_url",
+      "repositories.owner",
+      "repositories.name",
+    ])
+    .where("app_repositories.status", "=", "pending_snapshot")
+    .execute();
+
+  return results;
+}
+
+/**
+ * Update status for an app-repository link
+ */
+export async function updateAppRepositoryStatus(
+  appId: string,
+  repositoryId: string,
+  status: AppRepositoryStatus,
+  lastError?: string
+): Promise<void> {
+  const db = getDatabase();
+
+  await db
+    .updateTable("app_repositories")
+    .set({
+      status,
+      last_error: lastError ?? null,
+      last_scanned_at: status === "synced" ? new Date() : undefined,
+    })
+    .where("app_id", "=", appId)
+    .where("repository_id", "=", repositoryId)
+    .execute();
+
+  console.log(`Updated status for ${appId}/${repositoryId}: ${status}`);
+}
+
+/**
+ * Increment retry count and update error
+ */
+export async function incrementRetryCount(
+  appId: string,
+  repositoryId: string,
+  error: string
+): Promise<number> {
+  const db = getDatabase();
+
+  // Get current count
+  const current = await db
+    .selectFrom("app_repositories")
+    .select("retry_count")
+    .where("app_id", "=", appId)
+    .where("repository_id", "=", repositoryId)
+    .executeTakeFirst();
+
+  const newCount = (current?.retry_count ?? 0) + 1;
+
+  await db
+    .updateTable("app_repositories")
+    .set({
+      retry_count: newCount,
+      last_error: error,
+    })
+    .where("app_id", "=", appId)
+    .where("repository_id", "=", repositoryId)
+    .execute();
+
+  console.log(`Retry count for ${appId}/${repositoryId}: ${newCount}`);
+  return newCount;
+}
+
+/**
+ * Reset retry count (after successful sync)
+ */
+export async function resetRetryCount(
+  appId: string,
+  repositoryId: string
+): Promise<void> {
+  const db = getDatabase();
+
+  await db
+    .updateTable("app_repositories")
+    .set({
+      retry_count: 0,
+      last_error: null,
+    })
+    .where("app_id", "=", appId)
+    .where("repository_id", "=", repositoryId)
+    .execute();
 }

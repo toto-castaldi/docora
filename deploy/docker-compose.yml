@@ -1,8 +1,24 @@
 services:
-  docora:
+  docora-api:
     image: ghcr.io/toto-castaldi/docora:latest
     container_name: docora-api
     restart: unless-stopped
+    environment:
+      - RUN_MODE=api
+    env_file:
+      - .env
+    networks:
+      - docora-network
+    depends_on:
+      liquibase:
+        condition: service_completed_successfully
+
+  docora-worker:
+    image: ghcr.io/toto-castaldi/docora:latest
+    container_name: docora-worker
+    restart: unless-stopped
+    environment:
+      - RUN_MODE=worker
     env_file:
       - .env
     networks:
@@ -62,6 +78,17 @@ services:
     networks:
       - docora-network
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   docora-network:
     driver: bridge
@@ -70,3 +97,4 @@ volumes:
   caddy_data:
   caddy_config:
   docora_pg_data:
+  redis_data:
