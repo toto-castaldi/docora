@@ -1,0 +1,118 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-repositories
+      author: docora
+      changes:
+        - createTable:
+            tableName: repositories
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: repository_id
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: github_url
+                  type: varchar(2048)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: owner
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_private
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: repositories
+            indexName: idx_repositories_repository_id
+            columns:
+              - column:
+                  name: repository_id
+        - createIndex:
+            tableName: repositories
+            indexName: idx_repositories_github_url
+            columns:
+              - column:
+                  name: github_url
+  - changeSet:
+      id: 002-app-repositories
+      author: docora
+      changes:
+        - createTable:
+            tableName: app_repositories
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: app_id
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_app_repositories_app
+                    references: apps(app_id)
+              - column:
+                  name: repository_id
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_app_repositories_repo
+                    references: repositories(repository_id)
+              - column:
+                  name: github_token_encrypted
+                  type: varchar(500)
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: app_repositories
+            columnNames: 'app_id, repository_id'
+            constraintName: uq_app_repositories_app_repo
+        - createIndex:
+            tableName: app_repositories
+            indexName: idx_app_repositories_app_id
+            columns:
+              - column:
+                  name: app_id
+        - createIndex:
+            tableName: app_repositories
+            indexName: idx_app_repositories_repository_id
+            columns:
+              - column:
+                  name: repository_id

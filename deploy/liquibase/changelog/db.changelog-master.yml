@@ -2,3 +2,6 @@ databaseChangeLog:
   - include:
       file: 001-create-apps-table.yml
       relativeToChangelogFile: true
+  - include:
+      file: 002-create-repositories-table.yml
+      relativeToChangelogFile: true

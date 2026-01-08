@@ -12,7 +12,3 @@ export interface AppsTable {
   created_at: Generated<Date>;
   updated_at: Generated<Date>;
 }
-
-export interface Database {
-  apps: AppsTable;
-}

@@ -9,6 +9,7 @@ import {
   validatorCompiler,
 } from "fastify-type-provider-zod";
 import { registerSwagger } from "./plugins/swagger.js";
+  import authPlugin from "./plugins/auth.js";
 
 export async function buildServer(): Promise<FastifyInstance> {
   //server with built-in logging
@@ -35,6 +36,8 @@ export async function buildServer(): Promise<FastifyInstance> {
       max: 100,
       timeWindow: '1 minute',
   });
+
+  await server.register(authPlugin);
 
   await registerRoutes(server);
 
