@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-01-add-client-auth-key
+      author: docora
+      changes:
+        - addColumn:
+            tableName: apps
+            columns:
+              - column:
+                  name: client_auth_key_encrypted
+                  type: varchar(500)
+                  constraints:
+                    nullable: false

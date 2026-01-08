@@ -8,3 +8,6 @@ databaseChangeLog:
     - include:
         file: 003-snapshot.yml
         relativeToChangelogFile: true
+    - include:
+        file: 004-app-auth-key.yml
+        relativeToChangelogFile: true

@@ -16,7 +16,7 @@ auth:bearer {
 
 body:json {
     {
-        "github_url": "https://github.com/octocat/Hello-World"
+        "github_url": "https://github.com/toto-castaldi/lumio-cards-bia"
     }
 }
 
@@ -37,12 +37,12 @@ tests {
     });
 
     test("should return github_url", function() {
-        expect(res.body.github_url).to.equal("https://github.com/octocat/Hello-World");
+        expect(res.body.github_url).to.equal("https://github.com/toto-castaldi/lumio-cards-bia");
     });
 
     test("should return owner and name", function() {
-        expect(res.body.owner).to.equal("octocat");
-        expect(res.body.name).to.equal("Hello-World");
+        expect(res.body.owner).to.equal("toto-castaldi");
+        expect(res.body.name).to.equal("lumio-cards-bia");
     });
 
     test("should return is_private", function() {

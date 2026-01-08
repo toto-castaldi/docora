@@ -1,4 +1,5 @@
 import { getDatabase } from "../db/index.js";
+import { encryptToken } from "../utils/crypto.js";
 import { generateAppId, generateToken, hashToken } from "../utils/token.js";
 import type { OnboardRequest, OnboardResponse } from "../schemas/apps.js";
 
@@ -10,6 +11,9 @@ export async function createApp(
   const token = generateToken();
   const tokenHash = await hashToken(token);
   const now = new Date();
+
+  // Encrypt the client auth key before storing
+  const clientAuthKeyEncrypted = encryptToken(data.client_auth_key);
 
   await db
     .insertInto("apps")
@@ -23,6 +27,7 @@ export async function createApp(
       description: data.description ?? null,
       created_at: now,
       updated_at: now,
+      client_auth_key_encrypted: clientAuthKeyEncrypted
     })
     .execute();
 

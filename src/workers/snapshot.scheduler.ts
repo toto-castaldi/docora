@@ -85,6 +85,7 @@ async function scanAndQueuePending(): Promise<void> {
         name: item.name,
         base_url: item.base_url,
         github_token_encrypted: item.github_token_encrypted,
+        client_auth_key_encrypted : item.client_auth_key_encrypted,
       };
 
       await queue.add("snapshot", jobData, { jobId });

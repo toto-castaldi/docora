@@ -57,10 +57,16 @@ docker run --rm --name docora-redis \
     redis:7-alpine
 ```
 
-launch main service
+API
 
 ```bash
-pnpm dev
+RUN_MODE=api pnpm dev
+```
+
+worker
+
+```bash
+RUN_MODE=worker pnpm dev
 ```
 
 sql query

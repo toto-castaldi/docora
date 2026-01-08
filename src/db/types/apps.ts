@@ -11,4 +11,5 @@ export interface AppsTable {
   description: string | null;
   created_at: Generated<Date>;
   updated_at: Generated<Date>;
+  client_auth_key_encrypted: string;
 }

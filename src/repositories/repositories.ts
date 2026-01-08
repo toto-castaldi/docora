@@ -172,6 +172,7 @@ export async function findPendingSnapshots(): Promise<
     github_url: string;
     owner: string;
     name: string;
+    client_auth_key_encrypted : string;
   }>
 > {
   const db = getDatabase();
@@ -189,6 +190,7 @@ export async function findPendingSnapshots(): Promise<
       "app_repositories.repository_id",
       "app_repositories.github_token_encrypted",
       "apps.base_url",
+      "apps.client_auth_key_encrypted",
       "repositories.github_url",
       "repositories.owner",
       "repositories.name",

@@ -22,14 +22,10 @@ export const OnboardRequestSchema = z
         description: "Name of the application",
         example: "Example App",
       }),
-    email: z
-      .string()
-      .email("Must be a valid email")
-      .max(255)
-      .openapi({
-        description: "Contact email",
-        example: "team@example-app.com",
-      }),
+    email: z.string().email("Must be a valid email").max(255).openapi({
+      description: "Contact email",
+      example: "team@example-app.com",
+    }),
     website: z
       .string()
       .url("Must be a valid URL")
@@ -46,6 +42,15 @@ export const OnboardRequestSchema = z
       .openapi({
         description: "Short description (optional)",
         example: "An app that tracks repository changes",
+      }),
+    client_auth_key: z
+      .string()
+      .min(16, "Auth key must be at least 16 characters")
+      .max(500, "Auth key must be at most 500 characters")
+      .openapi({
+        description:
+          "Secret key Docora will use to authenticate webhook calls to your app",
+        example: "your-secret-webhook-key-here",
       }),
   })
   .openapi("OnboardRequest");

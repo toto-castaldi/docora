@@ -23,6 +23,7 @@ export interface SnapshotJobData {
   name: string;
   base_url: string;
   github_token_encrypted: string | null;
+  client_auth_key_encrypted: string;
 }
 
 const MAX_RETRY_ATTEMPTS = parseInt(process.env.MAX_RETRY_ATTEMPTS || "5", 10);
@@ -39,6 +40,7 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     name,
     base_url,
     github_token_encrypted,
+    client_auth_key_encrypted
   } = job.data;
 
   console.log(`Processing snapshot job: ${app_id}/${repository_id}`);
@@ -82,7 +84,10 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       processedFiles
     );
 
-    const result = await sendSnapshot(base_url, payload);
+    // Decrypt client auth key for notification
+    const clientAuthKey = decryptToken(client_auth_key_encrypted);
+
+    const result = await sendSnapshot(base_url, payload, clientAuthKey);
 
     if (!result.success) {
       throw new Error(result.error || "Failed to send snapshot");

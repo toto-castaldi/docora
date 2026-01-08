@@ -45,12 +45,14 @@ export interface NotificationResult {
  */
 export async function sendSnapshot(
   baseUrl: string,
-  payload: SnapshotPayload
+  payload: SnapshotPayload,
+  clientAuthKey: string
 ): Promise<NotificationResult> {
   try {
     const response = await axios.post(baseUrl, payload, {
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${clientAuthKey}`
       },
       timeout: 30000, // 30 second timeout
       validateStatus: () => true, // Don't throw on any status
