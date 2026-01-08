@@ -12,12 +12,6 @@ read CLAUDE.md, README.md, CHANGELOG.md and all the files in docs folder. Now yo
 
 # DEV
 
-launch main service
-
-```bash
-pnpm dev
-```
-
 test the code base
 
 ```bash
@@ -49,6 +43,12 @@ docker run --rm \
   liquibase/liquibase:4.25 \
   --defaults-file=liquibase.properties \
   update
+```
+
+launch main service
+
+```bash
+pnpm dev
 ```
 
 sql query
