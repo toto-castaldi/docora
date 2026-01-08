@@ -3,10 +3,10 @@ services:
     image: ghcr.io/toto-castaldi/docora:latest
     container_name: docora-api
     restart: unless-stopped
-    environment:
-      - RUN_MODE=api
     env_file:
       - .env
+    environment:
+      - RUN_MODE=api
     networks:
       - docora-network
     depends_on:
@@ -17,10 +17,10 @@ services:
     image: ghcr.io/toto-castaldi/docora:latest
     container_name: docora-worker
     restart: unless-stopped
-    environment:
-      - RUN_MODE=worker
     env_file:
       - .env
+    environment:
+      - RUN_MODE=worker
     networks:
       - docora-network
     depends_on:
