@@ -1,6 +1,8 @@
 Repository Registration & API Authentication
 ============================================
 
+> **STATUS: COMPLETED** - Implemented in v0.3.0
+
 # Summary
 
 This milestone introduces repository registration for onboarded apps and secures all API endpoints with Bearer token authentication. Apps can register GitHub repositories they want Docora to monitor.

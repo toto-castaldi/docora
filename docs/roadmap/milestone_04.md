@@ -1,6 +1,8 @@
 Initial Snapshot (Async)
 ========================
 
+> **STATUS: COMPLETED** - Implemented in v0.4.0
+
 # Summary
 
 This milestone introduces the asynchronous repository scanning system. When an app registers a repository, Docora queues it for processing. A background scheduler clones the repository locally, reads all files, applies `.docoraignore` exclusions, and pushes the complete snapshot to the app's registered endpoint.

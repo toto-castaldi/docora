@@ -1,6 +1,8 @@
 Infrastructure Setup
 ====================
 
+> **STATUS: COMPLETED** - Implemented in v1.0.0
+
 # Goal
 
 Establish a production-ready foundation: a cloud-hosted TypeScript REST API with automated CI/CD, returning "hello world".

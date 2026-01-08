@@ -15,18 +15,56 @@ pnpm start        # Run compiled production build
 pnpm test         # Run tests once
 pnpm test:watch   # Run tests in watch mode
 pnpm typecheck    # Type check without emitting
+pnpm worker       # Start worker with hot reload
+pnpm worker:start # Run compiled worker
 ```
 
 ## Architecture
 
-**Entry Flow:**
-- `src/index.ts` - Application entry point, loads dotenv, starts server
-- `src/server.ts` - Fastify server builder with CORS/Helmet middleware
-- `src/routes/index.ts` - Route aggregator that registers all route modules
+**Entry Points:**
+- `src/index.ts` - Application entry point, loads dotenv, starts server and/or worker based on `RUN_MODE`
+- `src/worker.ts` - Worker entry point for background job processing
+- `src/server.ts` - Fastify server builder with CORS/Helmet/Swagger middleware
 
 **Routes:**
+- `src/routes/index.ts` - Route aggregator that registers all route modules
 - `src/routes/health.ts` - GET `/health` endpoint (timestamp, uptime)
 - `src/routes/version.ts` - GET `/version` endpoint (version info, build details)
+- `src/routes/apps/onboard.ts` - POST `/api/apps/onboard` (app registration)
+- `src/routes/repositories/register.ts` - POST `/api/repositories` (repo registration)
+
+**Database Layer:**
+- `src/db/index.ts` - Kysely connection pool, getDatabase(), closeDatabase()
+- `src/db/types/` - TypeScript interfaces for database tables
+
+**Repositories (Data Access):**
+- `src/repositories/apps.ts` - App CRUD operations
+- `src/repositories/repositories.ts` - Repository CRUD operations
+- `src/repositories/snapshots.ts` - Snapshot storage and retrieval
+
+**Services:**
+- `src/services/git.ts` - Clone/pull repositories, get commit SHA
+- `src/services/scanner.ts` - Walk filesystem, compute file hashes
+- `src/services/notifier.ts` - POST snapshots to app endpoints
+
+**Workers (BullMQ):**
+- `src/workers/snapshot.scheduler.ts` - Schedules pending snapshot jobs
+- `src/workers/snapshot.worker.ts` - Processes snapshot jobs
+
+**Plugins:**
+- `src/plugins/auth.ts` - Bearer token authentication middleware
+- `src/plugins/swagger.ts` - OpenAPI/Swagger configuration
+- `src/plugins/pipeline.ts` - Plugin pipeline interface (hook for transformations)
+
+**Utilities:**
+- `src/utils/token.ts` - Generate app IDs and tokens
+- `src/utils/crypto.ts` - AES-256 encryption for GitHub tokens
+- `src/utils/github.ts` - Parse GitHub URLs, validate repos via API
+- `src/utils/url-validator.ts` - SSRF protection
+- `src/utils/docoraignore.ts` - Parse .docoraignore patterns
+
+**Queue:**
+- `src/queue/connection.ts` - Redis/ioredis connection for BullMQ
 
 **Version Management:**
 - `src/version.ts` - Single source of truth for version. Updated automatically by CI auto-release - do not edit manually.

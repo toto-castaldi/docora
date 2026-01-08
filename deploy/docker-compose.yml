@@ -26,6 +26,8 @@ services:
     depends_on:
       liquibase:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
 
   caddy:
     image: caddy:2-alpine
@@ -81,6 +83,8 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    networks:
+      - docora-network
     volumes:
       - redis_data:/data
     healthcheck:

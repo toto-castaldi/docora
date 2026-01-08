@@ -1,6 +1,8 @@
 Third‑Party App Onboarding & Token Issuance
 ===========================================
 
+> **STATUS: COMPLETED** - Implemented in v0.2.0
+
 # Summary
 
 This milestone introduces the onboarding flow that allows third‑party applications to register with Docora and receive repository updates. It defines the onboarding API, required metadata, token issuance, and validation rules.
