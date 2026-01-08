@@ -7,9 +7,20 @@ export const OnboardRequestSchema = z
   .object({
     base_url: z
       .string()
-      .url("Must be a valid URL")
-      .startsWith("https://", "Must use HTTPS")
       .max(2048)
+      .url("Must be a valid URL")
+      .refine(
+        (url) => {
+          const isDev = process.env.NODE_ENV === "dev";
+          if (isDev) {
+            return url.startsWith("http://") || url.startsWith("https://");
+          }
+          return url.startsWith("https://");
+        },
+        process.env.NODE_ENV === "dev"
+          ? "Must use HTTP or HTTPS"
+          : "Must use HTTPS"
+      )
       .openapi({
         description: "Webhook URL for receiving updates",
         example: "https://example-app.com/webhooks",

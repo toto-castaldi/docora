@@ -9,26 +9,37 @@ const PRIVATE_IP_PATTERNS = [
 
 const BLOCKED_HOSTNAMES = ["localhost", "::1", "0.0.0.0"];
 
+function isDev(): boolean {
+  return process.env.NODE_ENV === "dev";
+}
+
 export function isUrlSafe(urlString: string): {
   safe: boolean;
   reason?: string;
 } {
   const url = new URL(urlString);
 
-  // Must be HTTPS
-  if (url.protocol !== "https:") {
+  // Must be HTTPS (in production only)
+  if (!isDev() && url.protocol !== "https:") {
     return { safe: false, reason: "URL must use HTTPS" };
   }
 
-  // Check blocked hostnames
-  if (BLOCKED_HOSTNAMES.includes(url.hostname.toLowerCase())) {
+  // In dev, allow http:// and https://
+  if (isDev() && url.protocol !== "http:" && url.protocol !== "https:") {
+    return { safe: false, reason: "URL must use HTTP or HTTPS" };
+  }
+
+  // Check blocked hostnames (skip in dev mode)
+  if (!isDev() && BLOCKED_HOSTNAMES.includes(url.hostname.toLowerCase())) {
     return { safe: false, reason: "Localhost URLs are not allowed" };
   }
 
-  // Check private IP patterns
-  for (const pattern of PRIVATE_IP_PATTERNS) {
-    if (pattern.test(url.hostname)) {
-      return { safe: false, reason: "Private IP addresses are not allowed" };
+  // Check private IP patterns (skip in dev mode)
+  if (!isDev()) {
+    for (const pattern of PRIVATE_IP_PATTERNS) {
+      if (pattern.test(url.hostname)) {
+        return { safe: false, reason: "Private IP addresses are not allowed" };
+      }
     }
   }
 

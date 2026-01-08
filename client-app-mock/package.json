@@ -1,0 +1,25 @@
+{
+  "name": "docora-client-mock",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Mock client application to receive Docora updates",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "fastify": "^5.6.2",
+    "dotenv": "^17.2.3",
+    "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
