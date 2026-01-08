@@ -87,6 +87,11 @@ docker exec -it docora-postgres psql -U docora -d docora -c "SELECT app_id, app_
 | DEPLOY_USER    | SSH username                   | root or deploy                             |
 | DEPLOY_SSH_KEY | Private SSH key (full content) | -----BEGIN OPENSSH PRIVATE KEY-----...     |
 
+# DB
+
+```bash
+docker exec -it docora-postgres-1 psql -U docora -d docora -c "SELECT * FROM apps;"
+```
 
 # UTILS
 

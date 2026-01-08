@@ -42,7 +42,7 @@ services:
     networks:
       - docora-network
     depends_on:
-      - docora
+      - docora-api
   
   postgres:
     image: postgres:16-alpine

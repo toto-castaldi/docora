@@ -3,7 +3,7 @@
 }
 
 {$DOMAIN} {
-    reverse_proxy docora:3000
+    reverse_proxy docora-api:3000
 
     header {
         -Server
