@@ -1,10 +1,31 @@
+/**
+  1. Clone/pull repo
+  2. Scan files
+  3. Get previous hashes from DB
+  4. Detect changes (delete/create/update)
+  5. For each change (in order):
+     └─► POST /{base_url}/delete|create|update
+  6. Save new snapshot to DB
+  7. Mark as synced
+ */
+
 import { Worker, Job } from "bullmq";
 import { cloneOrPull } from "../services/git.js";
 import { parseDocoraignore } from "../utils/docoraignore.js";
 import { scanRepository } from "../services/scanner.js";
 import { defaultPipeline } from "../plugins/pipeline.js";
-import { sendSnapshot, buildSnapshotPayload } from "../services/notifier.js";
-import { saveSnapshot } from "../repositories/snapshots.js";
+import {
+  sendFileNotification,
+  buildCreatePayload,
+  buildUpdatePayload,
+  buildDeletePayload,
+  type RepositoryInfo,
+  type NotificationResult,
+} from "../services/notifier.js";
+import {
+  saveSnapshot,
+  getSnapshotFileHashes,
+} from "../repositories/snapshots.js";
 import {
   updateAppRepositoryStatus,
   incrementRetryCount,
@@ -12,6 +33,11 @@ import {
 } from "../repositories/repositories.js";
 import { decryptToken } from "../utils/crypto.js";
 import { getRedisUrl, getRedisOptions } from "../queue/connection.js";
+import {
+  detectAndSortChanges,
+  isInitialSnapshot,
+  type FileChange,
+} from "../services/change-detector.js";
 
 export const SNAPSHOT_QUEUE_NAME = "snapshot-queue";
 
@@ -29,7 +55,58 @@ export interface SnapshotJobData {
 const MAX_RETRY_ATTEMPTS = parseInt(process.env.MAX_RETRY_ATTEMPTS || "5", 10);
 
 /**
- * Process a snapshot job
+ * Send notification for a single file change
+ */
+async function sendChangeNotification(
+  change: FileChange,
+  repositoryInfo: RepositoryInfo,
+  commitSha: string,
+  baseUrl: string,
+  appId: string,
+  clientAuthKey: string
+): Promise<NotificationResult> {
+  switch (change.type) {
+    case "created":
+      return sendFileNotification(
+        baseUrl,
+        "create",
+        buildCreatePayload(repositoryInfo, change.currentFile!, commitSha),
+        appId,
+        clientAuthKey
+      );
+
+    case "updated":
+      return sendFileNotification(
+        baseUrl,
+        "update",
+        buildUpdatePayload(
+          repositoryInfo,
+          change.currentFile!,
+          change.previousSha!,
+          commitSha
+        ),
+        appId,
+        clientAuthKey
+      );
+
+    case "deleted":
+      return sendFileNotification(
+        baseUrl,
+        "delete",
+        buildDeletePayload(
+          repositoryInfo,
+          change.path,
+          change.previousSha!,
+          commitSha
+        ),
+        appId,
+        clientAuthKey
+      );
+  }
+}
+
+/**
+ * Process a snapshot job with granular file notifications
  */
 async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
   const {
@@ -40,7 +117,7 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     name,
     base_url,
     github_token_encrypted,
-    client_auth_key_encrypted
+    client_auth_key_encrypted,
   } = job.data;
 
   console.log(`Processing snapshot job: ${app_id}/${repository_id}`);
@@ -49,10 +126,11 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
   await updateAppRepositoryStatus(app_id, repository_id, "scanning");
 
   try {
-    // 1. Decrypt GitHub token if present
+    // 1. Decrypt tokens
     const githubToken = github_token_encrypted
       ? decryptToken(github_token_encrypted)
       : undefined;
+    const clientAuthKey = decryptToken(client_auth_key_encrypted);
 
     // 2. Clone or pull repository
     const { localPath, commitSha, branch } = await cloneOrPull(
@@ -71,36 +149,80 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     // 5. Apply plugin pipeline (passthrough for now)
     const processedFiles = await defaultPipeline.execute(scannedFiles);
 
-    // 6. Build and send snapshot to app
-    const payload = buildSnapshotPayload(
-      {
-        repository_id,
-        github_url,
-        owner,
-        name,
-      },
-      commitSha,
-      branch,
-      processedFiles
-    );
+    // 6. Get previous snapshot file hashes for change detection
+    const previousFileHashes = await getSnapshotFileHashes(repository_id);
 
-    // Decrypt client auth key for notification
-    const clientAuthKey = decryptToken(client_auth_key_encrypted);
+    // 7. Detect changes (sorted: delete → create → update)
+    const changes = detectAndSortChanges(processedFiles, previousFileHashes);
 
-    const result = await sendSnapshot(base_url, payload, clientAuthKey);
+    const repositoryInfo: RepositoryInfo = {
+      repository_id,
+      github_url,
+      owner,
+      name,
+    };
 
-    if (!result.success) {
-      throw new Error(result.error || "Failed to send snapshot");
+    // 8. Log change summary
+    if (isInitialSnapshot(previousFileHashes)) {
+      console.log(
+        `Initial snapshot for ${repository_id}: ${processedFiles.length} files to create`
+      );
+    } else {
+      const created = changes.filter((c) => c.type === "created").length;
+      const updated = changes.filter((c) => c.type === "updated").length;
+      const deleted = changes.filter((c) => c.type === "deleted").length;
+      console.log(
+        `Changes detected for ${repository_id}: ${created} created, ${updated} updated, ${deleted} deleted`
+      );
     }
 
-    // 7. Save snapshot to database
+    // 9. Send notifications for each change
+    let failedCount = 0;
+    for (const change of changes) {
+      const result = await sendChangeNotification(
+        change,
+        repositoryInfo,
+        commitSha,
+        base_url,
+        app_id,
+        clientAuthKey
+      );
+
+      if (!result.success) {
+        failedCount++;
+        // Log but continue with other files
+        console.error(
+          `Failed to notify ${change.type} for ${change.path}: ${result.error}`
+        );
+
+        // If it's a client error (4xx), don't retry the whole job
+        if (!result.shouldRetry) {
+          console.warn(
+            `Client error for ${change.path}, skipping (won't retry)`
+          );
+          continue;
+        }
+
+        // For server errors, we might want to fail the whole job
+        // depending on your retry strategy
+        if (result.shouldRetry) {
+          throw new Error(
+            `Failed to send ${change.type} notification for ${change.path}: ${result.error}`
+          );
+        }
+      }
+    }
+
+    // 10. Save snapshot to database (only if all notifications succeeded)
     await saveSnapshot(repository_id, commitSha, branch, processedFiles);
 
-    // 8. Update status to synced
+    // 11. Update status to synced
     await updateAppRepositoryStatus(app_id, repository_id, "synced");
     await resetRetryCount(app_id, repository_id);
 
-    console.log(`Snapshot job completed: ${app_id}/${repository_id}`);
+    console.log(
+      `Snapshot job completed: ${app_id}/${repository_id} (${changes.length} changes)`
+    );
   } catch (err) {
     const error = err as Error;
     console.error(

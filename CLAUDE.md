@@ -45,7 +45,8 @@ pnpm worker:start # Run compiled worker
 **Services:**
 - `src/services/git.ts` - Clone/pull repositories, get commit SHA
 - `src/services/scanner.ts` - Walk filesystem, compute file hashes
-- `src/services/notifier.ts` - POST snapshots to app endpoints
+- `src/services/notifier.ts` - Send granular file notifications (create/update/delete) with HMAC authentication
+- `src/services/change-detector.ts` - Detect file changes by comparing current scan with previous snapshot
 
 **Workers (BullMQ):**
 - `src/workers/snapshot.scheduler.ts` - Schedules pending snapshot jobs
@@ -62,6 +63,7 @@ pnpm worker:start # Run compiled worker
 - `src/utils/github.ts` - Parse GitHub URLs, validate repos via API
 - `src/utils/url-validator.ts` - SSRF protection
 - `src/utils/docoraignore.ts` - Parse .docoraignore patterns
+- `src/utils/signature.ts` - HMAC signature generation for webhook authentication
 
 **Queue:**
 - `src/queue/connection.ts` - Redis/ioredis connection for BullMQ
@@ -85,7 +87,9 @@ Husky + commitlint enforce this on commit.
 
 ## Rules
 
+- **our names** Refer to me as "Toto", I call you "Claude"
 - **Do not do any git command** Git operations are made by de developer. You can't do any of those.
-- **The human does the stuff** In this project all the implementation will be made by the human, not you. You are the perfect guide telling me how to do things, help me to understande solutions and technologies. Your plan mode is always welcome to decide what to do and in which sequence.
+- **The human does the stuff except for documentation** In this project all the implementation will be made by the human, not you. You are the perfect guide telling me how to do things, help me to understande solutions and technologies. Your plan mode is always welcome to decide what to do and in which sequence.
+Manipulation of the documentation (create and update) are allowed to you.
 - **sql migration as yml liquibase** Database migrations must be provided as a yml file (not sql or xml...)
 - **documentation in sync** take the documentation always updated

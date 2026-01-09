@@ -1,0 +1,131 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Docora: PostgreSQL",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "--name",
+        "docora-postgres",
+        "-e",
+        "POSTGRES_USER=docora",
+        "-e",
+        "POSTGRES_PASSWORD=docora",
+        "-e",
+        "POSTGRES_DB=docora",
+        "-p",
+        "5432:5432",
+        "-v",
+        "${workspaceFolder}/docora_dev_data/postgresql:/var/lib/postgresql/data",
+        "postgres:16-alpine"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Docora: Liquibase Update",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "--network",
+        "host",
+        "-v",
+        "${workspaceFolder}/deploy/liquibase:/liquibase/workspace",
+        "-w",
+        "/liquibase/workspace",
+        "liquibase/liquibase:4.25",
+        "--defaults-file=liquibase.properties",
+        "update"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "Docora: Redis",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "--name",
+        "docora-redis",
+        "-p",
+        "6379:6379",
+        "redis:7-alpine"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Docora: api",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["dev"],
+      "options": {
+        "env": {
+          "RUN_MODE": "api"
+        }
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Docora: worker",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["dev"],
+      "options": {
+        "env": {
+          "RUN_MODE": "worker"
+        }
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Docora: client-app-mock",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["dev"],
+      "options": {
+        "cwd": "${workspaceFolder}/client-app-mock"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "isBackground": true
+    }
+  ]
+}

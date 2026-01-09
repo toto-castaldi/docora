@@ -1,36 +1,30 @@
 /**
-  ┌───────────────┬─────────────────────────────────────────┐
-  │    Status     │                 Action                  │
-  ├───────────────┼─────────────────────────────────────────┤
-  │ 2xx           │ Success, mark as synced                 │
-  ├───────────────┼─────────────────────────────────────────┤
-  │ 4xx           │ Client error, mark as failed (no retry) │
-  ├───────────────┼─────────────────────────────────────────┤
-  │ 5xx           │ Server error, retry with backoff        │
-  ├───────────────┼─────────────────────────────────────────┤
-  │ Network error │ Retry with backoff                      │
-  └───────────────┴─────────────────────────────────────────┘
- */
+    ┌───────────────┬─────────────────────────────────────────┐
+    │    Status     │                 Action                  │
+    ├───────────────┼─────────────────────────────────────────┤
+    │ 2xx           │ Success, mark as synced                 │
+    ├───────────────┼─────────────────────────────────────────┤
+    │ 4xx           │ Client error, mark as failed (no retry) │
+    ├───────────────┼─────────────────────────────────────────┤
+    │ 5xx           │ Server error, retry with backoff        │
+    ├───────────────┼─────────────────────────────────────────┤
+    │ Network error │ Retry with backoff                      │
+    └───────────────┴─────────────────────────────────────────┘
+   */
 
 import axios, { AxiosError } from "axios";
 import type { ScannedFile } from "./scanner.js";
+import { generateSignedHeaders } from "../utils/signature.js";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export interface RepositoryInfo {
   repository_id: string;
   github_url: string;
   owner: string;
   name: string;
-}
-
-export interface SnapshotPayload {
-  event: "initial_snapshot" | "update";
-  repository: RepositoryInfo;
-  snapshot: {
-    commit_sha: string;
-    branch: string;
-    scanned_at: string;
-    files: ScannedFile[];
-  };
 }
 
 export interface NotificationResult {
@@ -40,34 +34,61 @@ export interface NotificationResult {
   shouldRetry: boolean;
 }
 
+/** Endpoint types for granular notifications */
+export type NotificationEndpoint = "create" | "update" | "delete";
+
+/** Payload for file create/update notifications */
+export interface FileNotificationPayload {
+  repository: RepositoryInfo;
+  file: {
+    path: string;
+    sha: string;
+    size?: number;
+    content?: string;
+  };
+  previous_sha?: string; // Only for updates
+  commit_sha: string;
+  timestamp: string;
+}
+
+// ============================================================================
+// Granular File Notifications (NEW)
+// ============================================================================
+
 /**
- * Send a snapshot to the app's endpoint
+ * Send a file notification to a specific endpoint (create/update/delete)
+ * Uses HMAC signature authentication (no Bearer token)
  */
-export async function sendSnapshot(
+export async function sendFileNotification(
   baseUrl: string,
-  payload: SnapshotPayload,
+  endpoint: NotificationEndpoint,
+  payload: FileNotificationPayload,
+  appId: string,
   clientAuthKey: string
 ): Promise<NotificationResult> {
+  const url = `${baseUrl}/${endpoint}`;
+
   try {
-    const response = await axios.post(baseUrl, payload, {
+    const headers = generateSignedHeaders(appId, payload, clientAuthKey);
+
+    const response = await axios.post(url, payload, {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${clientAuthKey}`
+        ...headers,
       },
-      timeout: 30000, // 30 second timeout
-      validateStatus: () => true, // Don't throw on any status
+      timeout: 30000,
+      validateStatus: () => true,
     });
 
     const statusCode = response.status;
 
     if (statusCode >= 200 && statusCode < 300) {
-      console.log(`Snapshot sent successfully to ${baseUrl}`);
+      console.log(`File notification sent successfully to ${url}`);
       return { success: true, statusCode, shouldRetry: false };
     }
 
     if (statusCode >= 400 && statusCode < 500) {
-      // Client error - don't retry
-      console.error(`Client error from ${baseUrl}: ${statusCode}`);
+      console.error(`Client error from ${url}: ${statusCode}`);
       return {
         success: false,
         statusCode,
@@ -76,8 +97,7 @@ export async function sendSnapshot(
       };
     }
 
-    // 5xx - Server error, should retry
-    console.error(`Server error from ${baseUrl}: ${statusCode}`);
+    console.error(`Server error from ${url}: ${statusCode}`);
     return {
       success: false,
       statusCode,
@@ -88,9 +108,8 @@ export async function sendSnapshot(
     const error = err as AxiosError;
     const message = error.message || "Unknown error";
 
-    console.error(`Failed to send snapshot to ${baseUrl}: ${message}`);
+    console.error(`Failed to send notification to ${url}: ${message}`);
 
-    // Network errors should retry
     return {
       success: false,
       error: message,
@@ -100,22 +119,65 @@ export async function sendSnapshot(
 }
 
 /**
- * Build the snapshot payload
+ * Build payload for create notification
  */
-export function buildSnapshotPayload(
+export function buildCreatePayload(
   repository: RepositoryInfo,
-  commitSha: string,
-  branch: string,
-  files: ScannedFile[]
-): SnapshotPayload {
+  file: ScannedFile,
+  commitSha: string
+): FileNotificationPayload {
   return {
-    event: "initial_snapshot",
     repository,
-    snapshot: {
-      commit_sha: commitSha,
-      branch,
-      scanned_at: new Date().toISOString(),
-      files,
+    file: {
+      path: file.path,
+      sha: file.sha,
+      size: file.size,
+      content: file.content,
     },
+    commit_sha: commitSha,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+/**
+ * Build payload for update notification
+ */
+export function buildUpdatePayload(
+  repository: RepositoryInfo,
+  file: ScannedFile,
+  previousSha: string,
+  commitSha: string
+): FileNotificationPayload {
+  return {
+    repository,
+    file: {
+      path: file.path,
+      sha: file.sha,
+      size: file.size,
+      content: file.content,
+    },
+    previous_sha: previousSha,
+    commit_sha: commitSha,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+/**
+ * Build payload for delete notification
+ */
+export function buildDeletePayload(
+  repository: RepositoryInfo,
+  path: string,
+  previousSha: string,
+  commitSha: string
+): FileNotificationPayload {
+  return {
+    repository,
+    file: {
+      path,
+      sha: previousSha,
+    },
+    commit_sha: commitSha,
+    timestamp: new Date().toISOString(),
   };
 }

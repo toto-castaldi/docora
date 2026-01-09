@@ -156,3 +156,43 @@ export async function deleteSnapshot(repositoryId: string): Promise<void> {
 
   console.log(`Deleted snapshot for ${repositoryId}`);
 }
+
+/**
+ * Get file hashes from the latest snapshot for a repository
+ * Returns a Map<path, sha> for efficient change detection
+ *
+ * @param repositoryId - The repository ID
+ * @returns Map of file paths to their SHA hashes, empty Map if no snapshot exists
+ */
+export async function getSnapshotFileHashes(
+  repositoryId: string
+): Promise<Map<string, string>> {
+  const db = getDatabase();
+
+  // First get the snapshot ID
+  const snapshot = await db
+    .selectFrom("repository_snapshots")
+    .select("id")
+    .where("repository_id", "=", repositoryId)
+    .executeTakeFirst();
+
+  if (!snapshot) {
+    // No previous snapshot - return empty map (initial snapshot case)
+    return new Map();
+  }
+
+  // Get all files for this snapshot
+  const files = await db
+    .selectFrom("snapshot_files")
+    .select(["path", "sha"])
+    .where("snapshot_id", "=", snapshot.id)
+    .execute();
+
+  // Convert to Map for O(1) lookups in change detection
+  const fileMap = new Map<string, string>();
+  for (const file of files) {
+    fileMap.set(file.path, file.sha);
+  }
+
+  return fileMap;
+}
