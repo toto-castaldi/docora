@@ -85,7 +85,9 @@ Husky + commitlint enforce this on commit.
 
 ## Rules
 
+- **our names** Refer to me as "Toto", I call you "Claude"
 - **Do not do any git command** Git operations are made by de developer. You can't do any of those.
-- **The human does the stuff** In this project all the implementation will be made by the human, not you. You are the perfect guide telling me how to do things, help me to understande solutions and technologies. Your plan mode is always welcome to decide what to do and in which sequence.
+- **The human does the stuff except for documentation** In this project all the implementation will be made by the human, not you. You are the perfect guide telling me how to do things, help me to understande solutions and technologies. Your plan mode is always welcome to decide what to do and in which sequence.
+Manipulation of the documentation (create and update) are allowed to you.
 - **sql migration as yml liquibase** Database migrations must be provided as a yml file (not sql or xml...)
 - **documentation in sync** take the documentation always updated
