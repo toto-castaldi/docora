@@ -45,7 +45,8 @@ pnpm worker:start # Run compiled worker
 **Services:**
 - `src/services/git.ts` - Clone/pull repositories, get commit SHA
 - `src/services/scanner.ts` - Walk filesystem, compute file hashes
-- `src/services/notifier.ts` - POST snapshots to app endpoints
+- `src/services/notifier.ts` - Send granular file notifications (create/update/delete) with HMAC authentication
+- `src/services/change-detector.ts` - Detect file changes by comparing current scan with previous snapshot
 
 **Workers (BullMQ):**
 - `src/workers/snapshot.scheduler.ts` - Schedules pending snapshot jobs
@@ -62,6 +63,7 @@ pnpm worker:start # Run compiled worker
 - `src/utils/github.ts` - Parse GitHub URLs, validate repos via API
 - `src/utils/url-validator.ts` - SSRF protection
 - `src/utils/docoraignore.ts` - Parse .docoraignore patterns
+- `src/utils/signature.ts` - HMAC signature generation for webhook authentication
 
 **Queue:**
 - `src/queue/connection.ts` - Redis/ioredis connection for BullMQ

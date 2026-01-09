@@ -11,9 +11,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
-    "commit": "czg",
-    "worker": "tsx watch src/worker.ts",
-    "worker:start": "node dist/worker.js"
+    "commit": "czg"
   },
   "author": "toto-castaldi",
   "engines": {

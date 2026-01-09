@@ -1,7 +1,7 @@
 Change Detection & Granular Notifications
 ==========================================
 
-> **STATUS: IN PROGRESS**
+> **STATUS: COMPLETED**
 
 # Summary
 
