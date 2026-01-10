@@ -1,10 +1,10 @@
 import type { Generated } from "kysely";
 
 export type AppRepositoryStatus =
-    | 'pending_snapshot'
-    | 'scanning'
-    | 'synced'
-    | 'failed';
+  | "pending_snapshot"
+  | "scanning"
+  | "synced"
+  | "failed";
 
 export interface RepositoriesTable {
   id: Generated<string>;
@@ -44,4 +44,18 @@ export interface SnapshotFilesTable {
   sha: string;
   size: number;
   created_at: Generated<Date>;
+}
+
+export interface RepositoriesTable {
+  id: Generated<string>;
+  repository_id: string;
+  github_url: string;
+  owner: string;
+  name: string;
+  is_private: boolean;
+  created_at: Generated<Date>;
+  updated_at: Generated<Date>;
+  // Circuit breaker fields
+  consecutive_failures: Generated<number>; // default: 0
+  circuit_open_until: Date | null;
 }

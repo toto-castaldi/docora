@@ -22,6 +22,7 @@ import {
   type RepositoryInfo,
   type NotificationResult,
 } from "../services/notifier.js";
+
 import {
   saveSnapshot,
   getSnapshotFileHashes,
@@ -30,6 +31,8 @@ import {
   updateAppRepositoryStatus,
   incrementRetryCount,
   resetRetryCount,
+  recordGitFailure,
+  resetGitFailures,
 } from "../repositories/repositories.js";
 import { decryptToken } from "../utils/crypto.js";
 import { getRedisUrl, getRedisOptions } from "../queue/connection.js";
@@ -50,6 +53,7 @@ export interface SnapshotJobData {
   base_url: string;
   github_token_encrypted: string | null;
   client_auth_key_encrypted: string;
+  isRescan: boolean;
 }
 
 const MAX_RETRY_ATTEMPTS = parseInt(process.env.MAX_RETRY_ATTEMPTS || "5", 10);
@@ -118,9 +122,12 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     base_url,
     github_token_encrypted,
     client_auth_key_encrypted,
+    isRescan,
   } = job.data;
 
-  console.log(`Processing snapshot job: ${app_id}/${repository_id}`);
+  console.log(
+    `Processing ${isRescan ? "rescan" : "initial"} job: ${app_id}/${repository_id}`
+  );
 
   // Mark as scanning
   await updateAppRepositoryStatus(app_id, repository_id, "scanning");
@@ -132,13 +139,34 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       : undefined;
     const clientAuthKey = decryptToken(client_auth_key_encrypted);
 
-    // 2. Clone or pull repository
-    const { localPath, commitSha, branch } = await cloneOrPull(
-      github_url,
-      owner,
-      name,
-      githubToken
-    );
+    // 2. Clone or pull repository (with circuit breaker)
+    let localPath: string;
+    let commitSha: string;
+    let branch: string;
+
+    try {
+      const result = await cloneOrPull(
+        github_url,
+        owner,
+        name,
+        githubToken
+      );
+      localPath = result.localPath;
+      commitSha = result.commitSha;
+      branch = result.branch;
+
+      // Git succeeded - reset circuit breaker
+      await resetGitFailures(repository_id);
+    } catch (gitError) {
+      // Git failure - record for circuit breaker
+      const { circuitOpened } = await recordGitFailure(repository_id);
+      if (circuitOpened) {
+        console.error(
+          `Circuit breaker OPENED for ${repository_id} - pausing scans`
+        );
+      }
+      throw gitError; // Re-throw to trigger normal error handling
+    }
 
     // 3. Parse .docoraignore
     const ig = parseDocoraignore(localPath);
@@ -291,3 +319,4 @@ export function createSnapshotWorker(): Worker<SnapshotJobData> {
   console.log("Snapshot worker started");
   return worker;
 }
+

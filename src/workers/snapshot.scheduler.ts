@@ -14,12 +14,17 @@
 */
 import { Queue } from "bullmq";
 import { getRedisUrl, getRedisOptions } from "../queue/connection.js";
-import { findPendingSnapshots } from "../repositories/repositories.js";
+import { findRepositoriesForRescan } from "../repositories/repositories.js";
 import { SNAPSHOT_QUEUE_NAME, SnapshotJobData } from "./snapshot.worker.js";
 
 const SCAN_INTERVAL_MS = parseInt(process.env.SCAN_INTERVAL_MS || "60000", 10);
 const RETRY_BASE_DELAY_MS = parseInt(
   process.env.RETRY_BASE_DELAY_MS || "1000",
+  10
+);
+
+const RESCAN_INTERVAL_MS = parseInt(
+  process.env.RESCAN_INTERVAL_MS || "300000",
   10
 );
 
@@ -51,52 +56,6 @@ function getSnapshotQueue(): Queue<SnapshotJobData> {
 }
 
 /**
- * Scan for pending repositories and queue jobs
- */
-async function scanAndQueuePending(): Promise<void> {
-  console.log("Scanning for pending snapshots...");
-
-  try {
-    const pending = await findPendingSnapshots();
-
-    if (pending.length === 0) {
-      console.log("No pending snapshots found");
-      return;
-    }
-
-    console.log(`Found ${pending.length} pending snapshots`);
-    const queue = getSnapshotQueue();
-
-    for (const item of pending) {
-      const jobId = `${item.app_id}-${item.repository_id}`;
-
-      // Check if job already exists
-      const existingJob = await queue.getJob(jobId);
-      if (existingJob) {
-        console.log(`Job ${jobId} already queued, skipping`);
-        continue;
-      }
-
-      const jobData: SnapshotJobData = {
-        app_id: item.app_id,
-        repository_id: item.repository_id,
-        github_url: item.github_url,
-        owner: item.owner,
-        name: item.name,
-        base_url: item.base_url,
-        github_token_encrypted: item.github_token_encrypted,
-        client_auth_key_encrypted : item.client_auth_key_encrypted,
-      };
-
-      await queue.add("snapshot", jobData, { jobId });
-      console.log(`Queued snapshot job: ${jobId}`);
-    }
-  } catch (err) {
-    console.error("Error scanning for pending snapshots:", err);
-  }
-}
-
-/**
  * Start the scheduler
  */
 export function startScheduler(): void {
@@ -124,4 +83,67 @@ export async function stopScheduler(): Promise<void> {
   }
 
   console.log("Scheduler stopped");
+}
+
+/**
+ * Scan for repositories needing snapshot (initial or rescan) and queue jobs
+ */
+async function scanAndQueuePending(): Promise<void> {
+  console.log("Scanning for repositories needing snapshot...");
+
+  try {
+    const pending = await findRepositoriesForRescan(RESCAN_INTERVAL_MS);
+
+    if (pending.length === 0) {
+      console.log("No repositories need scanning");
+      return;
+    }
+
+    const initialCount = pending.filter((p) => !p.isRescan).length;
+    const rescanCount = pending.filter((p) => p.isRescan).length;
+    console.log(
+      `Found ${pending.length} repositories (${initialCount} initial, ${rescanCount} rescan)`
+    );
+
+    const queue = getSnapshotQueue();
+
+    for (const item of pending) {
+      const jobId = `${item.app_id}-${item.repository_id}`;
+
+      // Check if job already exists and is still active
+      const existingJob = await queue.getJob(jobId);
+      if (existingJob) {
+        const state = await existingJob.getState();
+
+        // Only skip if job is actively being processed or waiting
+        if (state === "waiting" || state === "active" || state === "delayed") {
+          console.log(`Job ${jobId} is ${state}, skipping`);
+          continue;
+        }
+
+        // Remove stale completed/failed jobs to allow re-queuing
+        console.log(`Removing stale ${state} job ${jobId}`);
+        await existingJob.remove();
+      }
+
+      const jobData: SnapshotJobData = {
+        app_id: item.app_id,
+        repository_id: item.repository_id,
+        github_url: item.github_url,
+        owner: item.owner,
+        name: item.name,
+        base_url: item.base_url,
+        github_token_encrypted: item.github_token_encrypted,
+        client_auth_key_encrypted: item.client_auth_key_encrypted,
+        isRescan: item.isRescan,
+      };
+
+      await queue.add("snapshot", jobData, { jobId });
+      console.log(
+        `Queued ${item.isRescan ? "rescan" : "initial"} job: ${jobId}`
+      );
+    }
+  } catch (err) {
+    console.error("Error scanning for repositories:", err);
+  }
 }

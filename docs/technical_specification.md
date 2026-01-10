@@ -83,6 +83,8 @@ The worker handles:
 - File scanning with `.docoraignore` support
 - Snapshot notifications to registered apps
 - Retry with exponential backoff
+- Periodic re-scanning of synced repositories
+- Circuit breaker for git failures
 
 # docoraignore
 
@@ -112,13 +114,20 @@ build/
 
 See `.env.example` for all configuration options:
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `REDIS_URL` | Redis connection string |
-| `ENCRYPTION_KEY` | AES-256 key for token encryption |
-| `REPOS_BASE_PATH` | Local path for cloned repositories |
-| `RUN_MODE` | `api`, `worker`, or `all` |
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DATABASE_URL` | - | PostgreSQL connection string |
+| `REDIS_URL` | `redis://localhost:6379` | Redis connection string |
+| `ENCRYPTION_KEY` | - | AES-256 key for token encryption |
+| `REPOS_BASE_PATH` | `/data/repos` | Local path for cloned repositories |
+| `RUN_MODE` | `all` | `api`, `worker`, or `all` |
+| `SCAN_INTERVAL_MS` | `60000` | Scheduler polling interval (ms) |
+| `SCAN_CONCURRENCY` | `5` | Max concurrent workers |
+| `MAX_RETRY_ATTEMPTS` | `5` | Per-job BullMQ retries |
+| `RETRY_BASE_DELAY_MS` | `1000` | Backoff base delay (ms) |
+| `RESCAN_INTERVAL_MS` | `300000` | How often to rescan synced repos (ms) |
+| `CIRCUIT_BREAKER_THRESHOLD` | `5` | Consecutive git failures before opening circuit |
+| `CIRCUIT_BREAKER_COOLDOWN_MS` | `1800000` | How long circuit stays open (ms) |
 
 # Authentication Flow
 

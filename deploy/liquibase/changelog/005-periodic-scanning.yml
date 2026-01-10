@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-01-add-circuit-breaker-columns
+      author: docora
+      changes:
+        - addColumn:
+            tableName: repositories
+            columns:
+              - column:
+                  name: consecutive_failures
+                  type: integer
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: circuit_open_until
+                  type: timestamptz
+        - createIndex:
+            tableName: repositories
+            indexName: idx_repositories_circuit
+            columns:
+              - column:
+                  name: circuit_open_until

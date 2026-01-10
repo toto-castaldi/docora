@@ -11,3 +11,6 @@ databaseChangeLog:
     - include:
         file: 004-app-auth-key.yml
         relativeToChangelogFile: true
+    - include:
+        file: 005-periodic-scanning.yml
+        relativeToChangelogFile: true
