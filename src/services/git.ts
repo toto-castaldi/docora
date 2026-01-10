@@ -77,7 +77,8 @@ export async function cloneOrPull(
 
     // Update remote URL in case token changed
     await git.remote(["set-url", "origin", authenticatedUrl]);
-    await git.fetch("origin", "main");
+    // Use --depth 1 for shallow clone compatibility
+    await git.fetch(["--depth", "1", "origin", "main"]);
     await git.reset(["--hard", "origin/main"]);
   } else {
     // Clone fresh
@@ -95,6 +96,8 @@ export async function cloneOrPull(
 
   const commitSha = await getCurrentCommitSha(localPath);
   const branch = await getCurrentBranch(localPath);
+
+  console.log(`Git sync complete: ${owner}/${name} at commit ${commitSha.substring(0, 7)}`);
 
   return { localPath, commitSha, branch };
 }

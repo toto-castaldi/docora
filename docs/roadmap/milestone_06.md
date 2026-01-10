@@ -106,8 +106,9 @@ New columns on `repositories` table:
 | `deploy/liquibase/changelog/005-periodic-scanning.yml` | New migration |
 | `src/db/types/repositories.ts` | Add circuit breaker types |
 | `src/repositories/repositories.ts` | Add `findRepositoriesForRescan`, `recordGitFailure`, `resetGitFailures` |
-| `src/workers/snapshot.scheduler.ts` | Use new rescan query |
+| `src/workers/snapshot.scheduler.ts` | Use new rescan query, handle stale jobs |
 | `src/workers/snapshot.worker.ts` | Add circuit breaker handling |
+| `src/services/git.ts` | Fix shallow clone fetch, add commit logging |
 | `.env.example` | Add new environment variables |
 
 ## Key Functions
@@ -143,6 +144,40 @@ Called when git clone/pull succeeds:
 - [x] Circuit breaker auto-closes after `CIRCUIT_BREAKER_COOLDOWN_MS` and successful scan
 - [x] Logging distinguishes initial vs rescan jobs
 - [x] Environment variables are documented in `.env.example`
+- [x] Failed repos (notification failures) are retried on next rescan cycle
+- [x] Stale jobs don't block new rescans from being queued
+
+---
+
+# Bugfixes During Testing
+
+The following issues were discovered and fixed during live testing:
+
+## 1. NULL `last_scanned_at` Handling
+
+**Problem**: Repos synced before this feature had `last_scanned_at = NULL`. The query `last_scanned_at < threshold` returns NULL (not true) for NULL values, so these repos were never picked up for rescan.
+
+**Fix**: Added `OR last_scanned_at IS NULL` to the query condition.
+
+## 2. Failed Repos Not Retrying (Notification Failures)
+
+**Problem**: Repos with `status = 'failed'` (due to notification failures) were never retried. Only `synced` repos were considered for rescan.
+
+**Fix**: Added condition to include `status = 'failed'` repos WHERE `circuit_open_until IS NULL`. This distinguishes notification failures (should retry) from git failures (circuit breaker handles).
+
+## 3. Stale Jobs Blocking Queue
+
+**Problem**: BullMQ keeps completed/failed jobs (configured: `removeOnComplete: 100`, `removeOnFail: 200`). The scheduler checked if a job *exists* but not its *state*, so stale jobs blocked new ones from being queued.
+
+**Fix**: Scheduler now checks job state:
+- `waiting`, `active`, `delayed` → skip (job is processing)
+- `completed`, `failed` → remove stale job, queue new one
+
+## 4. Shallow Clone Fetch Issue
+
+**Problem**: Initial clone uses `--depth 1` (shallow). The fetch command didn't include `--depth 1`, which can cause issues fetching new commits on shallow clones.
+
+**Fix**: Added `--depth 1` to git fetch: `git.fetch(["--depth", "1", "origin", "main"])`
 
 ---
 
