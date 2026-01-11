@@ -2,13 +2,10 @@
     ┌───────────────┬─────────────────────────────────────────┐
     │    Status     │                 Action                  │
     ├───────────────┼─────────────────────────────────────────┤
-    │ 2xx           │ Success, mark as synced                 │
+    │ 2xx           │ Success, continue to next file          │
     ├───────────────┼─────────────────────────────────────────┤
-    │ 4xx           │ Client error, mark as failed (no retry) │
-    ├───────────────┼─────────────────────────────────────────┤
-    │ 5xx           │ Server error, retry with backoff        │
-    ├───────────────┼─────────────────────────────────────────┤
-    │ Network error │ Retry with backoff                      │
+    │ Any error     │ Stop immediately, retry entire job      │
+    │ (4xx/5xx/net) │ with backoff until MAX_RETRY_ATTEMPTS   │
     └───────────────┴─────────────────────────────────────────┘
    */
 
@@ -93,21 +90,12 @@ export async function sendFileNotification(
       return { success: true, statusCode, shouldRetry: false };
     }
 
-    if (statusCode >= 400 && statusCode < 500) {
-      console.error(`Client error from ${url}: ${statusCode}`);
-      return {
-        success: false,
-        statusCode,
-        error: `Client error: ${statusCode}`,
-        shouldRetry: false,
-      };
-    }
-
-    console.error(`Server error from ${url}: ${statusCode}`);
+    // All non-2xx errors are treated the same: retry the entire job
+    console.error(`Notification failed to ${url}: HTTP ${statusCode}`);
     return {
       success: false,
       statusCode,
-      error: `Server error: ${statusCode}`,
+      error: `HTTP ${statusCode}`,
       shouldRetry: true,
     };
   } catch (err) {

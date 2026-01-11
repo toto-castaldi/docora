@@ -81,8 +81,10 @@ Docora runs in two modes controlled by `RUN_MODE` environment variable:
 The worker handles:
 - Repository cloning/pulling
 - File scanning with `.docoraignore` support
-- Snapshot notifications to registered apps
-- Retry with exponential backoff
+- Binary file detection and Base64 encoding
+- Snapshot notifications to registered apps (with chunking for large files)
+- Unified error handling: any non-2xx response triggers job retry
+- Retry with exponential backoff until `MAX_RETRY_ATTEMPTS`
 - Periodic re-scanning of synced repositories
 - Circuit breaker for git failures
 
@@ -237,3 +239,25 @@ Clients must reassemble chunked files:
 2. When all chunks received, concatenate `content` strings
 3. Decode concatenated Base64 to binary
 4. Recommended timeout for incomplete transfers: 5 minutes
+
+# Notification Error Handling
+
+Docora uses a unified error handling strategy for webhook notifications:
+
+```
+┌───────────────┬─────────────────────────────────────────┐
+│    Status     │                 Action                  │
+├───────────────┼─────────────────────────────────────────┤
+│ 2xx           │ Success, continue to next file          │
+├───────────────┼─────────────────────────────────────────┤
+│ Any error     │ Stop immediately, retry entire job      │
+│ (4xx/5xx/net) │ with backoff until MAX_RETRY_ATTEMPTS   │
+└───────────────┴─────────────────────────────────────────┘
+```
+
+**Behavior:**
+- Any non-2xx response (including 4xx client errors) triggers job retry
+- On failure, the entire job is retried from the beginning
+- Files may be re-sent on retry (clients must be idempotent)
+- `retry_count` resets only when the entire job completes successfully
+- After `MAX_RETRY_ATTEMPTS`, the repository status is marked as `failed`

@@ -103,18 +103,25 @@ Each chunk is sent as a separate HTTP request to the same endpoint (`/create` or
 
 ## Delivery Behavior
 
+### Unified Error Handling
+
+All notifications (chunked or not) use simplified error handling:
+- Any non-2xx response stops immediately and triggers job retry
+- No distinction between 4xx and 5xx errors
+- Entire job retries from the beginning
+- Clients must be idempotent (may receive same file multiple times)
+
 ### Non-Chunked Files
 
 - Single HTTP request per file
-- Existing retry logic applies
+- On any error: job fails and retries
 
 ### Chunked Files
 
 1. Chunks sent sequentially: index 0, 1, 2, ...
 2. Wait for 2xx response before sending next chunk
-3. On failure: retry current chunk with exponential backoff
-4. After max retries: mark notification as failed, stop sending remaining chunks
-5. All chunks use the same `chunk.id` for correlation
+3. On any failure: entire job fails and retries from the beginning
+4. All chunks use the same `chunk.id` for correlation
 
 ---
 

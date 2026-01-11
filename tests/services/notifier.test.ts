@@ -34,6 +34,8 @@ const mockFile: ScannedFile = {
   sha: "abc123def456",
   size: 1234,
   content: "const x = 1;",
+  isBinary: false,
+  contentEncoding: "plain",
 };
 
 describe("notifier", () => {
@@ -85,11 +87,12 @@ describe("notifier", () => {
       expect(result.shouldRetry).toBe(false);
     });
 
-    it("should return failure with shouldRetry=false for 4xx responses", async () => {
+    it("should return failure with shouldRetry=true for any non-2xx response", async () => {
+      // Test 4xx - now retries (unified error handling)
       mockedAxios.post.mockResolvedValueOnce({ status: 400 });
 
       const payload = buildCreatePayload(mockRepository, mockFile, "commit123");
-      const result = await sendFileNotification(
+      let result = await sendFileNotification(
         "https://app.example.com/webhook",
         "create",
         payload,
@@ -98,15 +101,13 @@ describe("notifier", () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.shouldRetry).toBe(false);
+      expect(result.shouldRetry).toBe(true);
       expect(result.statusCode).toBe(400);
-    });
 
-    it("should return failure with shouldRetry=true for 5xx responses", async () => {
+      // Test 5xx - also retries
       mockedAxios.post.mockResolvedValueOnce({ status: 500 });
 
-      const payload = buildCreatePayload(mockRepository, mockFile, "commit123");
-      const result = await sendFileNotification(
+      result = await sendFileNotification(
         "https://app.example.com/webhook",
         "create",
         payload,

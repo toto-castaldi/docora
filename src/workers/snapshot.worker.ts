@@ -237,7 +237,7 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     }
 
     // 9. Send notifications for each change
-    let failedCount = 0;
+    // Any failure stops immediately and triggers job retry
     for (const change of changes) {
       const result = await sendChangeNotification(
         change,
@@ -249,27 +249,9 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       );
 
       if (!result.success) {
-        failedCount++;
-        // Log but continue with other files
-        console.error(
-          `Failed to notify ${change.type} for ${change.path}: ${result.error}`
+        throw new Error(
+          `Notification failed for ${change.type} ${change.path}: ${result.error}`
         );
-
-        // If it's a client error (4xx), don't retry the whole job
-        if (!result.shouldRetry) {
-          console.warn(
-            `Client error for ${change.path}, skipping (won't retry)`
-          );
-          continue;
-        }
-
-        // For server errors, we might want to fail the whole job
-        // depending on your retry strategy
-        if (result.shouldRetry) {
-          throw new Error(
-            `Failed to send ${change.type} notification for ${change.path}: ${result.error}`
-          );
-        }
       }
     }
 

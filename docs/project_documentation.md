@@ -214,6 +214,14 @@ Binary files (images, PDFs, videos, etc.) are supported:
 - Large files are chunked with `chunk` metadata (id, index, total)
 - Clients must reassemble chunks using the chunk id
 
+### Error Handling
+
+Docora uses unified error handling for notifications:
+- Any non-2xx response triggers job retry (including 4xx errors)
+- Entire job is retried from the beginning on failure
+- Clients must be idempotent (may receive same file multiple times)
+- Retry with exponential backoff until `MAX_RETRY_ATTEMPTS` (default: 5)
+
 ---
 
 ## Monitoring & Observability
