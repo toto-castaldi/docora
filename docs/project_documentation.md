@@ -222,6 +222,14 @@ Docora uses unified error handling for notifications:
 - Clients must be idempotent (may receive same file multiple times)
 - Retry with exponential backoff until `MAX_RETRY_ATTEMPTS` (default: 5)
 
+### Multi-App Support
+
+Multiple apps can monitor the same repository independently. Each app maintains its own delivery state:
+- Delivery tracking is per app-repository pair
+- If one app fails, other apps continue receiving notifications
+- On retry, each app receives only what it missed
+- Apps always converge to the current repository state
+
 ---
 
 ## Monitoring & Observability

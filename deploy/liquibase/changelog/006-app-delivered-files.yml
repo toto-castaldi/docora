@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-01-create-app-delivered-files
+      author: docora
+      changes:
+        - createTable:
+            tableName: app_delivered_files
+            columns:
+              - column:
+                  name: app_id
+                  type: varchar(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: repository_id
+                  type: varchar(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_path
+                  type: varchar(1024)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_sha
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: delivered_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: app_delivered_files
+            columnNames: app_id, repository_id, file_path
+            constraintName: pk_app_delivered_files
+        - addForeignKeyConstraint:
+            baseTableName: app_delivered_files
+            baseColumnNames: app_id
+            referencedTableName: apps
+            referencedColumnNames: app_id
+            constraintName: fk_app_delivered_files_app
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: app_delivered_files
+            baseColumnNames: repository_id
+            referencedTableName: repositories
+            referencedColumnNames: repository_id
+            constraintName: fk_app_delivered_files_repo
+            onDelete: CASCADE
+        - createIndex:
+            tableName: app_delivered_files
+            indexName: idx_app_delivered_files_lookup
+            columns:
+              - column:
+                  name: app_id
+              - column:
+                  name: repository_id

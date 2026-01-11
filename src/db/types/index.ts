@@ -1,5 +1,6 @@
 export * from "./apps.js";
 export * from "./repositories.js";
+export * from "./deliveries.js";
 
 import type { AppsTable } from "./apps.js";
 import type {
@@ -8,6 +9,7 @@ import type {
   RepositorySnapshotsTable,
   SnapshotFilesTable,
 } from "./repositories.js";
+import type { AppDeliveredFilesTable } from "./deliveries.js";
 
 export interface Database {
   apps: AppsTable;
@@ -15,4 +17,5 @@ export interface Database {
   app_repositories: AppRepositoriesTable;
   repository_snapshots: RepositorySnapshotsTable;
   snapshot_files: SnapshotFilesTable;
+  app_delivered_files: AppDeliveredFilesTable;
 }

@@ -1,11 +1,12 @@
 /**
   1. Clone/pull repo
   2. Scan files
-  3. Get previous hashes from DB
+  3. Get delivered files for this app (per-app tracking)
   4. Detect changes (delete/create/update)
   5. For each change (in order):
      └─► POST /{base_url}/delete|create|update
-  6. Save new snapshot to DB
+     └─► Record delivery in app_delivered_files
+  6. Save new snapshot to DB (repository state)
   7. Mark as synced
  */
 
@@ -21,10 +22,12 @@ import {
 } from "../services/notifier.js";
 import { sendFileWithChunking } from "../services/chunked-notifier.js";
 
+import { saveSnapshot } from "../repositories/snapshots.js";
 import {
-  saveSnapshot,
-  getSnapshotFileHashes,
-} from "../repositories/snapshots.js";
+  getDeliveredFiles,
+  recordDelivery,
+  removeDelivery,
+} from "../repositories/deliveries.js";
 import {
   updateAppRepositoryStatus,
   incrementRetryCount,
@@ -183,11 +186,11 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     // 5. Apply plugin pipeline (passthrough for now)
     const processedFiles = await defaultPipeline.execute(scannedFiles);
 
-    // 6. Get previous snapshot file hashes for change detection
-    const previousFileHashes = await getSnapshotFileHashes(repository_id);
+    // 6. Get delivered files for this app (per-app tracking)
+    const deliveredFiles = await getDeliveredFiles(app_id, repository_id);
 
     // 7. Detect changes (sorted: delete → create → update)
-    const changes = detectAndSortChanges(processedFiles, previousFileHashes);
+    const changes = detectAndSortChanges(processedFiles, deliveredFiles);
 
     const repositoryInfo: RepositoryInfo = {
       repository_id,
@@ -199,7 +202,7 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     // 8. Log change summary
     const repoLabel = `${repository_id} (${owner}/${name})`;
 
-    if (isInitialSnapshot(previousFileHashes)) {
+    if (isInitialSnapshot(deliveredFiles)) {
       console.log(`\n📦 Initial snapshot for ${repoLabel}`);
       console.log(`   ${processedFiles.length} files to create:`);
       for (const file of processedFiles) {
@@ -238,6 +241,7 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
 
     // 9. Send notifications for each change
     // Any failure stops immediately and triggers job retry
+    // Record delivery after each successful notification
     for (const change of changes) {
       const result = await sendChangeNotification(
         change,
@@ -253,9 +257,21 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
           `Notification failed for ${change.type} ${change.path}: ${result.error}`
         );
       }
+
+      // Record successful delivery
+      if (change.type === "deleted") {
+        await removeDelivery(app_id, repository_id, change.path);
+      } else {
+        await recordDelivery(
+          app_id,
+          repository_id,
+          change.path,
+          change.currentFile!.sha
+        );
+      }
     }
 
-    // 10. Save snapshot to database (only if all notifications succeeded)
+    // 10. Save snapshot to database (repository state tracking)
     await saveSnapshot(repository_id, commitSha, branch, processedFiles);
 
     // 11. Update status to synced

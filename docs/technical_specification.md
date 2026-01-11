@@ -67,6 +67,7 @@ Schema managed via Liquibase (YAML format)
 - `app_repositories` - Junction table (apps ↔ repositories)
 - `repository_snapshots` - Last known state of repositories
 - `snapshot_files` - File metadata for change detection
+- `app_delivered_files` - Per-app delivery tracking for multi-app consistency
 
 # Worker
 
@@ -261,3 +262,38 @@ Docora uses a unified error handling strategy for webhook notifications:
 - Files may be re-sent on retry (clients must be idempotent)
 - `retry_count` resets only when the entire job completes successfully
 - After `MAX_RETRY_ATTEMPTS`, the repository status is marked as `failed`
+
+# Per-App Delivery Tracking
+
+When multiple apps monitor the same repository, each app maintains its own delivery state. This ensures that if one app fails to receive notifications, it doesn't affect other apps.
+
+## How It Works
+
+1. Each successful file delivery is recorded in `app_delivered_files` table
+2. Change detection compares current repo state against what each app has received
+3. Operations (CREATE/UPDATE/DELETE) are determined from the app's perspective
+
+## Multi-App Scenario
+
+```
+Repository X → App A (receives all files)
+            → App B (fails mid-delivery)
+
+App A: knows about file1.txt, file2.txt, file3.txt
+App B: knows about file1.txt only (file2 failed)
+
+On retry:
+- App A: detects only new changes since last sync
+- App B: receives file2.txt, file3.txt (what it missed)
+```
+
+## Design Philosophy
+
+**"Current state wins"**: Apps receive the latest file content, not historical versions.
+
+| App knows | Repo has | Operation |
+|-----------|----------|-----------|
+| (nothing) | file.txt: sha_v2 | CREATE |
+| file.txt: sha_v1 | file.txt: sha_v2 | UPDATE |
+| file.txt: sha_v1 | (deleted) | DELETE |
+| file.txt: sha_v1 | file.txt: sha_v1 | (none) |

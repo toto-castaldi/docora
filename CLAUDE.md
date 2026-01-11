@@ -41,6 +41,7 @@ pnpm worker:start # Run compiled worker
 - `src/repositories/apps.ts` - App CRUD operations
 - `src/repositories/repositories.ts` - Repository CRUD operations
 - `src/repositories/snapshots.ts` - Snapshot storage and retrieval
+- `src/repositories/deliveries.ts` - Per-app file delivery tracking
 
 **Services:**
 - `src/services/git.ts` - Clone/pull repositories, get commit SHA
