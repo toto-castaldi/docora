@@ -197,17 +197,43 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     };
 
     // 8. Log change summary
+    const repoLabel = `${repository_id} (${owner}/${name})`;
+
     if (isInitialSnapshot(previousFileHashes)) {
-      console.log(
-        `Initial snapshot for ${repository_id}: ${processedFiles.length} files to create`
-      );
+      console.log(`\n📦 Initial snapshot for ${repoLabel}`);
+      console.log(`   ${processedFiles.length} files to create:`);
+      for (const file of processedFiles) {
+        const typeIcon = file.isBinary ? "🖼️ " : "📄";
+        console.log(`     ${typeIcon} ${file.path}`);
+      }
     } else {
-      const created = changes.filter((c) => c.type === "created").length;
-      const updated = changes.filter((c) => c.type === "updated").length;
-      const deleted = changes.filter((c) => c.type === "deleted").length;
+      const createdFiles = changes.filter((c) => c.type === "created");
+      const updatedFiles = changes.filter((c) => c.type === "updated");
+      const deletedFiles = changes.filter((c) => c.type === "deleted");
+
+      console.log(`\n🔄 Changes detected for ${repoLabel}`);
       console.log(
-        `Changes detected for ${repository_id}: ${created} created, ${updated} updated, ${deleted} deleted`
+        `   ${createdFiles.length} created, ${updatedFiles.length} updated, ${deletedFiles.length} deleted`
       );
+
+      if (deletedFiles.length > 0) {
+        console.log("   🗑️  Deleted:");
+        for (const c of deletedFiles) console.log(`       - ${c.path}`);
+      }
+      if (createdFiles.length > 0) {
+        console.log("   ✨ Created:");
+        for (const c of createdFiles) {
+          const icon = c.currentFile?.isBinary ? "🖼️ " : "";
+          console.log(`       + ${icon}${c.path}`);
+        }
+      }
+      if (updatedFiles.length > 0) {
+        console.log("   ✏️  Updated:");
+        for (const c of updatedFiles) {
+          const icon = c.currentFile?.isBinary ? "🖼️ " : "";
+          console.log(`       ~ ${icon}${c.path}`);
+        }
+      }
     }
 
     // 9. Send notifications for each change

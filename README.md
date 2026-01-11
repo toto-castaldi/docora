@@ -75,6 +75,18 @@ sql query
 docker exec -it docora-postgres psql -U docora -d docora -c "SELECT app_id, app_name, email FROM apps;"
 ```
 
+truncate all tables 
+
+```bash
+docker exec -it docora-postgres psql -U docora -d docora -c "
+    TRUNCATE snapshot_files CASCADE;
+    TRUNCATE repository_snapshots CASCADE;
+    TRUNCATE app_repositories CASCADE;
+    TRUNCATE repositories CASCADE;
+    TRUNCATE apps CASCADE;
+  "
+```
+
 # PROD
 
 /opt/docora/.env from .env.example
