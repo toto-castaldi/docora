@@ -152,7 +152,7 @@ jobs:
                         type=semver,pattern={{version}},value=${{ needs.release.outputs.version }}
                         type=raw,value=latest
 
-            -   name: Build and push
+            -   name: Build and push API image
                 uses: docker/build-push-action@v6
                 with:
                     context: .
@@ -163,6 +163,23 @@ jobs:
                         BUILD_NUMBER=${{ github.run_number }}
                         COMMIT_SHA=${{ github.sha }}
                         BUILD_DATE=${{ github.event.head_commit.timestamp }}
+
+            -   name: Extract metadata for docs image
+                id: meta-docs
+                uses: docker/metadata-action@v5
+                with:
+                    images: ${{ env.REGISTRY }}/${{ github.repository }}-docs
+                    tags: |
+                        type=semver,pattern={{version}},value=${{ needs.release.outputs.version }}
+                        type=raw,value=latest
+
+            -   name: Build and push docs image
+                uses: docker/build-push-action@v6
+                with:
+                    context: ./docs-site
+                    push: true
+                    tags: ${{ steps.meta-docs.outputs.tags }}
+                    labels: ${{ steps.meta-docs.outputs.labels }}
 
     # ─────────────────────────────────────────────
     # Deploy to DigitalOcean
