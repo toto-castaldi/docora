@@ -314,6 +314,15 @@ body {
   text-align: center;
 }
 
+.footer .version {
+  background: var(--color-violet);
+  color: var(--color-white);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+}
+
 /* Intro section */
 .intro {
   background: linear-gradient(135deg, var(--color-violet) 0%, #7B4BB9 100%);

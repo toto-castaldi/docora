@@ -180,6 +180,8 @@ jobs:
                     push: true
                     tags: ${{ steps.meta-docs.outputs.tags }}
                     labels: ${{ steps.meta-docs.outputs.labels }}
+                    build-args: |
+                        VERSION=${{ needs.release.outputs.version }}
 
     # ─────────────────────────────────────────────
     # Deploy to DigitalOcean

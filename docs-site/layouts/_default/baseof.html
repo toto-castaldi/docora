@@ -16,7 +16,7 @@
         <span>Docora</span>
       </a>
       <nav class="nav">
-        <a href="https://api.docora.toto-castaldi.com" target="_blank">API</a>
+        <a href="https://api.docora.toto-castaldi.com/docs" target="_blank">API</a>
         <a href="https://github.com/toto-castaldi/docora" target="_blank">GitHub</a>
       </nav>
     </div>
@@ -30,7 +30,7 @@
 
   <footer class="footer">
     <div class="container">
-      <p>&copy; {{ now.Year }} Docora</p>
+      <p>&copy; {{ now.Year }} Docora <span class="version">v{{ .Site.Data.build.version }}</span></p>
     </div>
   </footer>
 </body>

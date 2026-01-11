@@ -1,10 +1,15 @@
 # Stage 1: Build with Hugo
 FROM hugomods/hugo:latest AS builder
 
+ARG VERSION=dev
+
 WORKDIR /src
 
 # Copy Hugo site files
 COPY . .
+
+# Write version to data file for Hugo
+RUN echo "{\"version\": \"${VERSION}\"}" > data/build.json
 
 # Build the site
 RUN hugo --minify
