@@ -2,7 +2,24 @@
     email {$CADDY_EMAIL}
 }
 
+# Documentation - docora.toto-castaldi.com
 {$DOMAIN} {
+    reverse_proxy docora-docs:80
+
+    header {
+        -Server
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+    }
+
+    log {
+        output stdout
+    }
+}
+
+# API - api.docora.toto-castaldi.com
+{$API_DOMAIN} {
     reverse_proxy docora-api:3000
 
     header {

@@ -5,3 +5,6 @@ coverage
 docora_dev_data
 .env
 dist
+
+# Hugo generated
+docs-site/public

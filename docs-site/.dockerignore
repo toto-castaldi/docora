@@ -1,0 +1,8 @@
+public/
+resources/
+.git/
+.gitignore
+*.md
+!content/**/*.md
+Dockerfile
+.dockerignore

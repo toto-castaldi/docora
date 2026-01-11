@@ -75,6 +75,11 @@ pnpm worker:start # Run compiled worker
 **Version Management:**
 - `src/version.ts` - Single source of truth for version. Updated automatically by CI auto-release - do not edit manually.
 
+**Documentation Site:**
+- `docs-site/` - Hugo-based public documentation site (webhook API docs)
+- `docs-site/content/_index.md` - Main documentation content
+- `docs-site/Dockerfile` - Multi-stage build (Hugo → nginx)
+
 ## Conventions
 
 **ES Modules with TypeScript:** Imports require `.js` extension even for `.ts` source files (e.g., `import { foo } from "./bar.js"`). TypeScript compiles to ESM output.

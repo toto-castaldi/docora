@@ -1,4 +1,11 @@
 services:
+  docora-docs:
+    image: ghcr.io/toto-castaldi/docora-docs:latest
+    container_name: docora-docs
+    restart: unless-stopped
+    networks:
+      - docora-network
+
   docora-api:
     image: ghcr.io/toto-castaldi/docora:latest
     container_name: docora-api

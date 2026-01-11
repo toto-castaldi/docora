@@ -1,0 +1,17 @@
+baseURL = "https://docora.toto-castaldi.com/"
+languageCode = "en-us"
+title = "Docora API Documentation"
+
+[params]
+  description = "Webhook API documentation for Docora"
+  author = "Docora"
+
+[markup]
+  [markup.highlight]
+    style = "monokai"
+    lineNos = false
+    codeFences = true
+    guessSyntax = true
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
