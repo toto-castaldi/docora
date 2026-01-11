@@ -1,14 +1,8 @@
 import "dotenv/config";
 import Fastify from "fastify";
+import { createHash } from "crypto";
 
 // Types matching Docora's payload structure
-interface SnapshotFile {
-  path: string;
-  sha: string;
-  size: number;
-  content: string;
-}
-
 interface Repository {
   repository_id: string;
   github_url: string;
@@ -16,26 +10,20 @@ interface Repository {
   name: string;
 }
 
-interface Snapshot {
-  commit_sha: string;
-  branch: string;
-  scanned_at: string;
-  files: SnapshotFile[];
+// Milestone 07: Binary file support
+interface ChunkInfo {
+  id: string;
+  index: number;
+  total: number;
 }
 
-// Legacy bulk payload (deprecated)
-interface DocoraPayload {
-  event: "initial_snapshot" | "update";
-  repository: Repository;
-  snapshot: Snapshot;
-}
-
-// Milestone 05: Granular notification payloads
 interface FileInfo {
   path: string;
   sha: string;
   size?: number;
   content?: string;
+  content_encoding?: "plain" | "base64";
+  chunk?: ChunkInfo;
 }
 
 interface CreatePayload {
@@ -60,6 +48,20 @@ interface DeletePayload {
   timestamp: string;
 }
 
+// Chunk storage for reassembly
+interface ChunkTransfer {
+  chunks: (string | undefined)[];
+  received: number;
+  total: number;
+  path: string;
+  sha: string;
+  size: number;
+  startTime: number;
+}
+
+const chunkTransfers = new Map<string, ChunkTransfer>();
+const CHUNK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
 const PORT = parseInt(process.env.PORT || "4000", 10);
 const HOST = process.env.HOST || "0.0.0.0";
 
@@ -68,13 +70,21 @@ const fastify = Fastify({
     level: "info",
     transport: {
       target: "pino-pretty",
-      options: {
-        translateTime: "HH:MM:ss Z",
-        ignore: "pid,hostname",
-      },
+      options: { translateTime: "HH:MM:ss Z", ignore: "pid,hostname" },
     },
   },
 });
+
+// Cleanup expired transfers periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, transfer] of chunkTransfers.entries()) {
+    if (now - transfer.startTime > CHUNK_TIMEOUT_MS) {
+      console.log(`⚠️  Chunk transfer ${id} expired (${transfer.path})`);
+      chunkTransfers.delete(id);
+    }
+  }
+}, 60000);
 
 // Health check
 fastify.get("/health", async () => {
@@ -89,14 +99,80 @@ function logHmacHeaders(request: { headers: Record<string, unknown> }) {
   console.log(`    X-Docora-Timestamp: ${request.headers["x-docora-timestamp"]}`);
 }
 
-// Milestone 05: Granular notification endpoints
+// Helper to log file info
+function logFileInfo(file: FileInfo, isBinary: boolean) {
+  console.log(`  File: ${file.path}`);
+  console.log(`  SHA: ${file.sha}`);
+  console.log(`  Size: ${file.size} bytes`);
+
+  if (isBinary) {
+    console.log(`  Encoding: ${file.content_encoding} (BINARY)`);
+    if (file.content) {
+      console.log(`  Base64 length: ${file.content.length} chars`);
+    }
+  } else if (file.content) {
+    const preview = file.content.length > 100
+      ? file.content.substring(0, 100) + "..."
+      : file.content;
+    console.log(`  Content: ${preview.replace(/\n/g, "\\n")}`);
+  }
+}
+
+// Handle chunk reception and reassembly
+function handleChunk(file: FileInfo): { complete: boolean; fullContent?: Buffer } {
+  const chunk = file.chunk!;
+
+  if (!chunkTransfers.has(chunk.id)) {
+    chunkTransfers.set(chunk.id, {
+      chunks: new Array(chunk.total),
+      received: 0,
+      total: chunk.total,
+      path: file.path,
+      sha: file.sha,
+      size: file.size || 0,
+      startTime: Date.now(),
+    });
+  }
+
+  const transfer = chunkTransfers.get(chunk.id)!;
+  transfer.chunks[chunk.index] = file.content;
+  transfer.received++;
+
+  console.log(`  📦 Chunk ${chunk.index + 1}/${chunk.total} (ID: ${chunk.id.slice(0, 8)}...)`);
+
+  if (transfer.received === transfer.total) {
+    // All chunks received - reassemble
+    const fullBase64 = transfer.chunks.join("");
+    const fullContent = Buffer.from(fullBase64, "base64");
+
+    // Verify SHA
+    const computedSha = createHash("sha256").update(fullContent).digest("hex");
+    const shaMatch = computedSha === file.sha;
+
+    console.log("  ✅ All chunks received - reassembling...");
+    console.log(`  📊 Total size: ${fullContent.length} bytes`);
+    console.log(`  🔐 SHA verification: ${shaMatch ? "PASS ✓" : "FAIL ✗"}`);
+
+    if (!shaMatch) {
+      console.log(`     Expected: ${file.sha}`);
+      console.log(`     Got:      ${computedSha}`);
+    }
+
+    chunkTransfers.delete(chunk.id);
+    return { complete: true, fullContent };
+  }
+
+  return { complete: false };
+}
 
 // POST /create - New file detected
 fastify.post<{ Body: CreatePayload }>("/create", async (request) => {
   const { repository, file, commit_sha, timestamp } = request.body;
+  const isBinary = file.content_encoding === "base64";
+  const isChunked = !!file.chunk;
 
   console.log("\n" + "=".repeat(60));
-  console.log("📄 CREATE - New file detected");
+  console.log(`📄 CREATE - New file detected ${isBinary ? "🖼️ BINARY" : ""} ${isChunked ? "📦 CHUNKED" : ""}`);
   console.log("=".repeat(60));
   logHmacHeaders(request);
   console.log("-".repeat(60));
@@ -104,26 +180,28 @@ fastify.post<{ Body: CreatePayload }>("/create", async (request) => {
   console.log(`  Commit: ${commit_sha}`);
   console.log(`  Timestamp: ${timestamp}`);
   console.log("-".repeat(60));
-  console.log(`  File: ${file.path}`);
-  console.log(`  SHA: ${file.sha}`);
-  console.log(`  Size: ${file.size} bytes`);
-  if (file.content) {
-    const preview = file.content.length > 100
-      ? file.content.substring(0, 100) + "..."
-      : file.content;
-    console.log(`  Content: ${preview.replace(/\n/g, "\\n")}`);
-  }
-  console.log("=".repeat(60) + "\n");
 
+  if (isChunked) {
+    const result = handleChunk(file);
+    if (result.complete) {
+      console.log("  🎉 Binary file completely received!");
+    }
+  } else {
+    logFileInfo(file, isBinary);
+  }
+
+  console.log("=".repeat(60) + "\n");
   return { received: true, event: "create", timestamp: new Date().toISOString() };
 });
 
 // POST /update - File modified
 fastify.post<{ Body: UpdatePayload }>("/update", async (request) => {
   const { repository, file, previous_sha, commit_sha, timestamp } = request.body;
+  const isBinary = file.content_encoding === "base64";
+  const isChunked = !!file.chunk;
 
   console.log("\n" + "=".repeat(60));
-  console.log("✏️  UPDATE - File modified");
+  console.log(`✏️  UPDATE - File modified ${isBinary ? "🖼️ BINARY" : ""} ${isChunked ? "📦 CHUNKED" : ""}`);
   console.log("=".repeat(60));
   logHmacHeaders(request);
   console.log("-".repeat(60));
@@ -131,18 +209,18 @@ fastify.post<{ Body: UpdatePayload }>("/update", async (request) => {
   console.log(`  Commit: ${commit_sha}`);
   console.log(`  Timestamp: ${timestamp}`);
   console.log("-".repeat(60));
-  console.log(`  File: ${file.path}`);
   console.log(`  Previous SHA: ${previous_sha}`);
-  console.log(`  New SHA: ${file.sha}`);
-  console.log(`  Size: ${file.size} bytes`);
-  if (file.content) {
-    const preview = file.content.length > 100
-      ? file.content.substring(0, 100) + "..."
-      : file.content;
-    console.log(`  Content: ${preview.replace(/\n/g, "\\n")}`);
-  }
-  console.log("=".repeat(60) + "\n");
 
+  if (isChunked) {
+    const result = handleChunk(file);
+    if (result.complete) {
+      console.log("  🎉 Binary file completely received!");
+    }
+  } else {
+    logFileInfo(file, isBinary);
+  }
+
+  console.log("=".repeat(60) + "\n");
   return { received: true, event: "update", timestamp: new Date().toISOString() };
 });
 
@@ -166,7 +244,7 @@ fastify.post<{ Body: DeletePayload }>("/delete", async (request) => {
   return { received: true, event: "delete", timestamp: new Date().toISOString() };
 });
 
-// Alias: /webhooks/* endpoints (when base_url includes /webhooks)
+// Aliases for /webhooks/* paths
 fastify.post<{ Body: CreatePayload }>("/webhooks/create", async (request) => {
   return fastify.inject({ method: "POST", url: "/create", payload: request.body, headers: request.headers as Record<string, string> })
     .then((res) => JSON.parse(res.payload));
@@ -182,71 +260,25 @@ fastify.post<{ Body: DeletePayload }>("/webhooks/delete", async (request) => {
     .then((res) => JSON.parse(res.payload));
 });
 
-// Legacy: Main webhook endpoint - receives Docora bulk updates (deprecated)
-fastify.post<{ Body: DocoraPayload }>("/", async (request, reply) => {
-  const payload = request.body;
-
-  console.log("\n" + "=".repeat(60));
-  console.log(`RECEIVED: ${payload.event}`);
-  console.log("=".repeat(60));
-  console.log(`Repository: ${payload.repository.github_url}`);
-  console.log(`Repository ID: ${payload.repository.repository_id}`);
-  console.log(`Owner: ${payload.repository.owner}`);
-  console.log(`Name: ${payload.repository.name}`);
-  console.log("-".repeat(60));
-  console.log(`Commit SHA: ${payload.snapshot.commit_sha}`);
-  console.log(`Branch: ${payload.snapshot.branch}`);
-  console.log(`Scanned at: ${payload.snapshot.scanned_at}`);
-  console.log(`Files count: ${payload.snapshot.files.length}`);
-  console.log("-".repeat(60));
-
-  // Log each file (truncate content for readability)
-  for (const file of payload.snapshot.files) {
-    const contentPreview =
-      file.content.length > 100
-        ? file.content.substring(0, 100) + "..."
-        : file.content;
-    console.log(`  ${file.path}`);
-    console.log(`    SHA: ${file.sha}`);
-    console.log(`    Size: ${file.size} bytes`);
-    console.log(`    Content: ${contentPreview.replace(/\n/g, "\\n")}`);
-  }
-
-  console.log("=".repeat(60) + "\n");
-
-  return { received: true, event: payload.event, timestamp: new Date().toISOString() };
-});
-
-// Alternative webhook path
-fastify.post<{ Body: DocoraPayload }>("/webhooks", async (request, reply) => {
-  // Delegate to main handler
-  return fastify.inject({
-    method: "POST",
-    url: "/",
-    payload: request.body,
-  }).then((res) => {
-    reply.status(res.statusCode);
-    return JSON.parse(res.payload);
-  });
-});
-
 // Start server
 const start = async () => {
   try {
     await fastify.listen({ port: PORT, host: HOST });
     console.log("\n" + "=".repeat(60));
-    console.log("  DOCORA CLIENT MOCK");
+    console.log("  DOCORA CLIENT MOCK (Milestone 07)");
     console.log("=".repeat(60));
     console.log(`  Listening on: http://${HOST}:${PORT}`);
     console.log("-".repeat(60));
-    console.log("  Granular endpoints (Milestone 05):");
-    console.log(`    POST /create           POST /webhooks/create`);
-    console.log(`    POST /update           POST /webhooks/update`);
-    console.log(`    POST /delete           POST /webhooks/delete`);
+    console.log("  Endpoints:");
+    console.log(`    POST /create     POST /webhooks/create`);
+    console.log(`    POST /update     POST /webhooks/update`);
+    console.log(`    POST /delete     POST /webhooks/delete`);
     console.log("-".repeat(60));
-    console.log("  Legacy endpoints (deprecated):");
-    console.log(`    POST /        - Bulk snapshot`);
-    console.log(`    POST /webhooks`);
+    console.log("  Features:");
+    console.log("    ✓ Text files (plain content)");
+    console.log("    ✓ Binary files (Base64 encoded)");
+    console.log("    ✓ Chunked transfer (auto-reassembly)");
+    console.log("    ✓ SHA verification on reassembly");
     console.log("-".repeat(60));
     console.log(`  Health: GET /health`);
     console.log("=".repeat(60));

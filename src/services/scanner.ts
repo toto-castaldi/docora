@@ -4,13 +4,13 @@
   ├──────────────────┼───────────────────────────────────┤
   │ Hash algorithm   │ SHA-256 (64 char hex)             │
   ├──────────────────┼───────────────────────────────────┤
-  │ Binary detection │ Check for null bytes in first 8KB │
+  │ Binary detection │ isbinaryfile package              │
   ├──────────────────┼───────────────────────────────────┤
   │ Ignored files    │ Filtered during directory walk    │
   ├──────────────────┼───────────────────────────────────┤
   │ Symlinks         │ Skipped (only regular files)      │
   ├──────────────────┼───────────────────────────────────┤
-  │ Encoding         │ UTF-8 for text files              │
+  │ Encoding         │ UTF-8 for text, Base64 for binary │
   └──────────────────┴───────────────────────────────────┘
  */
 
@@ -18,33 +18,24 @@ import { createHash } from "crypto";
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join, relative } from "path";
 import type { Ignore } from "ignore";
+import { isBinaryBuffer } from "../utils/binary.js";
+
+export type ContentEncoding = "plain" | "base64";
 
 export interface ScannedFile {
-  path: string; 
-  sha: string; 
-  size: number; 
-  content: string; // File content (text)
+  path: string;
+  sha: string;
+  size: number;
+  content: string;
+  isBinary: boolean;
+  contentEncoding: ContentEncoding;
 }
 
 /**
- * Compute SHA-256 hash of content
+ * Compute SHA-256 hash of buffer content
  */
-function computeSha(content: string): string {
-  return createHash("sha256").update(content, "utf-8").digest("hex");
-}
-
-/**
- * Check if a file is likely binary
- */
-function isBinaryFile(buffer: Buffer): boolean {
-  // Check for null bytes in first 8KB (common binary indicator)
-  const sampleSize = Math.min(buffer.length, 8192);
-  for (let i = 0; i < sampleSize; i++) {
-    if (buffer[i] === 0) {
-      return true;
-    }
-  }
-  return false;
+function computeSha(buffer: Buffer): string {
+  return createHash("sha256").update(buffer).digest("hex");
 }
 
 /**
@@ -83,7 +74,8 @@ function walkDirectory(
 }
 
 /**
- * Scan a repository and return all non-ignored files with content
+ * Scan a repository and return all non-ignored files with content.
+ * Text files are stored as UTF-8, binary files as Base64.
  */
 export async function scanRepository(
   repoPath: string,
@@ -97,27 +89,33 @@ export async function scanRepository(
       const relativePath = relative(repoPath, fullPath);
       const stats = statSync(fullPath);
       const buffer = readFileSync(fullPath);
+      const sha = computeSha(buffer);
+      const isBinary = await isBinaryBuffer(buffer, stats.size);
 
-      // Skip binary files
-      if (isBinaryFile(buffer)) {
-        console.log(`Skipping binary file: ${relativePath}`);
-        continue;
-      }
+      const content = isBinary
+        ? buffer.toString("base64")
+        : buffer.toString("utf-8");
 
-      const content = buffer.toString("utf-8");
-      const sha = computeSha(content);
+      const contentEncoding: ContentEncoding = isBinary ? "base64" : "plain";
 
       scannedFiles.push({
         path: relativePath,
         sha,
         size: stats.size,
         content,
+        isBinary,
+        contentEncoding,
       });
     } catch (err) {
       console.warn(`Failed to read file ${fullPath}: ${err}`);
     }
   }
 
-  console.log(`Scanned ${scannedFiles.length} files from ${repoPath}`);
+  const textCount = scannedFiles.filter((f) => !f.isBinary).length;
+  const binaryCount = scannedFiles.filter((f) => f.isBinary).length;
+  console.log(
+    `Scanned ${scannedFiles.length} files (${textCount} text, ${binaryCount} binary) from ${repoPath}`
+  );
+
   return scannedFiles;
 }

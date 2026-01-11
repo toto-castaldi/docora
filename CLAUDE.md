@@ -44,8 +44,9 @@ pnpm worker:start # Run compiled worker
 
 **Services:**
 - `src/services/git.ts` - Clone/pull repositories, get commit SHA
-- `src/services/scanner.ts` - Walk filesystem, compute file hashes
+- `src/services/scanner.ts` - Walk filesystem, compute file hashes, detect binary files
 - `src/services/notifier.ts` - Send granular file notifications (create/update/delete) with HMAC authentication
+- `src/services/chunked-notifier.ts` - Handle chunked delivery for large binary files
 - `src/services/change-detector.ts` - Detect file changes by comparing current scan with previous snapshot
 
 **Workers (BullMQ):**
@@ -64,6 +65,8 @@ pnpm worker:start # Run compiled worker
 - `src/utils/url-validator.ts` - SSRF protection
 - `src/utils/docoraignore.ts` - Parse .docoraignore patterns
 - `src/utils/signature.ts` - HMAC signature generation for webhook authentication
+- `src/utils/binary.ts` - Binary file detection using isbinaryfile
+- `src/utils/chunking.ts` - Split large files into chunks for transmission
 
 **Queue:**
 - `src/queue/connection.ts` - Redis/ioredis connection for BullMQ
@@ -89,7 +92,15 @@ Husky + commitlint enforce this on commit.
 
 - **our names** Refer to me as "Toto", I call you "Claude"
 - **Do not do any git command** Git operations are made by de developer. You can't do any of those.
-- **The human does the stuff except for documentation** In this project all the implementation will be made by the human, not you. You are the perfect guide telling me how to do things, help me to understande solutions and technologies. Your plan mode is always welcome to decide what to do and in which sequence.
-Manipulation of the documentation (create and update) are allowed to you.
 - **sql migration as yml liquibase** Database migrations must be provided as a yml file (not sql or xml...)
 - **documentation in sync** take the documentation always updated
+- **language** : we can speak in Italian ora English as well, but all the project files (doc and code must be written in English)
+- **planning** : when I propose a new feature, there are two important steps to take before implementing it: thinking about possible alternatives, a technological proposal, and creating a plan. For these two steps, use ultrathink and ask me all the necessary questions.
+- **code file size** : code files should be no longer than 150 lines. Try to split them if necessary. If this isn't possible, you can ignore this rule.
+- **code quality** : code must follow solid principles like.
+    -short functions with a single responsibility (Single Responsibility Principle)
+    -DRY
+    -KISS
+    -Separation of Concerns
+    -Dependency Injection:
+    -Fail fast

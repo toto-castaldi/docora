@@ -206,6 +206,14 @@ Each notification includes:
 - Timestamp
 - Previous SHA (for updates only)
 
+### Binary Files
+
+Binary files (images, PDFs, videos, etc.) are supported:
+- Automatically detected and encoded as Base64
+- `content_encoding: "base64"` field indicates binary encoding
+- Large files are chunked with `chunk` metadata (id, index, total)
+- Clients must reassemble chunks using the chunk id
+
 ---
 
 ## Monitoring & Observability

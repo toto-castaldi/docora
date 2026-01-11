@@ -16,12 +16,10 @@ import { scanRepository } from "../services/scanner.js";
 import { defaultPipeline } from "../plugins/pipeline.js";
 import {
   sendFileNotification,
-  buildCreatePayload,
-  buildUpdatePayload,
   buildDeletePayload,
   type RepositoryInfo,
-  type NotificationResult,
 } from "../services/notifier.js";
+import { sendFileWithChunking } from "../services/chunked-notifier.js";
 
 import {
   saveSnapshot,
@@ -58,8 +56,16 @@ export interface SnapshotJobData {
 
 const MAX_RETRY_ATTEMPTS = parseInt(process.env.MAX_RETRY_ATTEMPTS || "5", 10);
 
+/** Common result type for change notifications */
+interface ChangeNotificationResult {
+  success: boolean;
+  error?: string;
+  shouldRetry: boolean;
+}
+
 /**
- * Send notification for a single file change
+ * Send notification for a single file change.
+ * Uses chunked delivery for large binary files.
  */
 async function sendChangeNotification(
   change: FileChange,
@@ -68,29 +74,29 @@ async function sendChangeNotification(
   baseUrl: string,
   appId: string,
   clientAuthKey: string
-): Promise<NotificationResult> {
+): Promise<ChangeNotificationResult> {
   switch (change.type) {
     case "created":
-      return sendFileNotification(
+      return sendFileWithChunking(
         baseUrl,
         "create",
-        buildCreatePayload(repositoryInfo, change.currentFile!, commitSha),
+        repositoryInfo,
+        change.currentFile!,
+        commitSha,
         appId,
         clientAuthKey
       );
 
     case "updated":
-      return sendFileNotification(
+      return sendFileWithChunking(
         baseUrl,
         "update",
-        buildUpdatePayload(
-          repositoryInfo,
-          change.currentFile!,
-          change.previousSha!,
-          commitSha
-        ),
+        repositoryInfo,
+        change.currentFile!,
+        commitSha,
         appId,
-        clientAuthKey
+        clientAuthKey,
+        change.previousSha
       );
 
     case "deleted":

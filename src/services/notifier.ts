@@ -13,8 +13,9 @@
    */
 
 import axios, { AxiosError } from "axios";
-import type { ScannedFile } from "./scanner.js";
+import type { ScannedFile, ContentEncoding } from "./scanner.js";
 import { generateSignedHeaders } from "../utils/signature.js";
+import type { ChunkInfo } from "../utils/chunking.js";
 
 // ============================================================================
 // Types
@@ -37,15 +38,20 @@ export interface NotificationResult {
 /** Endpoint types for granular notifications */
 export type NotificationEndpoint = "create" | "update" | "delete";
 
+/** File data in notification payload */
+export interface FilePayloadData {
+  path: string;
+  sha: string;
+  size?: number;
+  content?: string;
+  content_encoding?: ContentEncoding;
+  chunk?: ChunkInfo;
+}
+
 /** Payload for file create/update notifications */
 export interface FileNotificationPayload {
   repository: RepositoryInfo;
-  file: {
-    path: string;
-    sha: string;
-    size?: number;
-    content?: string;
-  };
+  file: FilePayloadData;
   previous_sha?: string; // Only for updates
   commit_sha: string;
   timestamp: string;
@@ -119,6 +125,25 @@ export async function sendFileNotification(
 }
 
 /**
+ * Build file data object with encoding info
+ */
+function buildFileData(file: ScannedFile): FilePayloadData {
+  const data: FilePayloadData = {
+    path: file.path,
+    sha: file.sha,
+    size: file.size,
+    content: file.content,
+  };
+
+  // Only include content_encoding for binary files (backward compatible)
+  if (file.isBinary) {
+    data.content_encoding = file.contentEncoding;
+  }
+
+  return data;
+}
+
+/**
  * Build payload for create notification
  */
 export function buildCreatePayload(
@@ -128,12 +153,7 @@ export function buildCreatePayload(
 ): FileNotificationPayload {
   return {
     repository,
-    file: {
-      path: file.path,
-      sha: file.sha,
-      size: file.size,
-      content: file.content,
-    },
+    file: buildFileData(file),
     commit_sha: commitSha,
     timestamp: new Date().toISOString(),
   };
@@ -150,12 +170,7 @@ export function buildUpdatePayload(
 ): FileNotificationPayload {
   return {
     repository,
-    file: {
-      path: file.path,
-      sha: file.sha,
-      size: file.size,
-      content: file.content,
-    },
+    file: buildFileData(file),
     previous_sha: previousSha,
     commit_sha: commitSha,
     timestamp: new Date().toISOString(),

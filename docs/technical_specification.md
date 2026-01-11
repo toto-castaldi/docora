@@ -128,6 +128,8 @@ See `.env.example` for all configuration options:
 | `RESCAN_INTERVAL_MS` | `300000` | How often to rescan synced repos (ms) |
 | `CIRCUIT_BREAKER_THRESHOLD` | `5` | Consecutive git failures before opening circuit |
 | `CIRCUIT_BREAKER_COOLDOWN_MS` | `1800000` | How long circuit stays open (ms) |
+| `BINARY_CHUNK_THRESHOLD_BYTES` | `1048576` | Files above this size are chunked (1MB) |
+| `BINARY_CHUNK_SIZE_BYTES` | `524288` | Size of each chunk (512KB) |
 
 # Authentication Flow
 
@@ -183,3 +185,55 @@ signature = HMAC-SHA256(payload, client_auth_key)
 2. Verify `X-Docora-Timestamp` is within 5 minutes of current time
 3. Recompute signature using stored `client_auth_key`
 4. Compare signatures using constant-time comparison
+
+# Binary File Support
+
+Docora supports binary files (images, PDFs, videos, etc.) in webhook notifications.
+
+## Detection
+
+Binary files are automatically detected using the `isbinaryfile` package.
+
+## Encoding
+
+- **Text files**: Content sent as plain UTF-8 string (backward compatible)
+- **Binary files**: Content encoded as Base64, with `content_encoding: "base64"`
+
+## Chunking
+
+Large binary files are split into chunks to handle memory and payload limits:
+
+- Files above `BINARY_CHUNK_THRESHOLD_BYTES` (default 1MB) are chunked
+- Each chunk is `BINARY_CHUNK_SIZE_BYTES` (default 512KB)
+- Chunks are sent sequentially, waiting for 2xx before next chunk
+
+## Payload Example (Binary with Chunking)
+
+```json
+{
+  "repository": { ... },
+  "file": {
+    "path": "assets/video.mp4",
+    "sha": "abc123...",
+    "size": 5242880,
+    "content": "<base64 chunk>",
+    "content_encoding": "base64",
+    "chunk": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "index": 0,
+      "total": 10
+    }
+  },
+  "commit_sha": "...",
+  "timestamp": "..."
+}
+```
+
+## Client Reassembly
+
+Clients must reassemble chunked files:
+
+1. Buffer chunks by `chunk.id`
+2. When all chunks received, concatenate `content` strings
+3. Decode concatenated Base64 to binary
+4. Recommended timeout for incomplete transfers: 5 minutes
