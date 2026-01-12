@@ -57,6 +57,32 @@ Follows the strategy defined in `versioning.md`:
 In prod Docora is running with a Docker Compose stack.
 In dev all needed services are executed by a single container.
 
+## Production Image
+
+The Dockerfile uses a multi-stage build:
+
+1. **Builder stage**: Compiles TypeScript
+2. **Production stage**:
+   - Base: `node:22-alpine`
+   - Installs `git` for repository cloning
+   - Creates `/data/repos` with `node:node` ownership
+   - Runs as non-root `node` user
+
+## Volumes
+
+The worker container requires a persistent volume for cloned repositories:
+
+```yaml
+docora-worker:
+  volumes:
+    - repos_data:/data/repos
+```
+
+**Important:** If the worker fails with `EACCES: permission denied`, fix with:
+```bash
+docker exec -u root docora-worker chown -R node:node /data
+```
+
 # Database
 
 PostgreSQL 16
@@ -88,7 +114,7 @@ The worker handles:
 - Unified error handling: any non-2xx response triggers job retry
 - Retry with exponential backoff until `MAX_RETRY_ATTEMPTS`
 - Periodic re-scanning of synced repositories
-- Circuit breaker for git failures
+- Circuit breaker for git failures (auto-reset on repository re-registration)
 
 # docoraignore
 
@@ -123,7 +149,7 @@ See `.env.example` for all configuration options:
 | `DATABASE_URL` | - | PostgreSQL connection string |
 | `REDIS_URL` | `redis://localhost:6379` | Redis connection string |
 | `ENCRYPTION_KEY` | - | AES-256 key for token encryption |
-| `REPOS_BASE_PATH` | `/data/repos` | Local path for cloned repositories |
+| `REPOS_BASE_PATH` | `/data/repos` | Local path for cloned repositories (**must be absolute path**) |
 | `RUN_MODE` | `all` | `api`, `worker`, or `all` |
 | `SCAN_INTERVAL_MS` | `60000` | Scheduler polling interval (ms) |
 | `SCAN_CONCURRENCY` | `5` | Max concurrent workers |

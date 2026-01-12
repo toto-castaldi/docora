@@ -34,6 +34,14 @@ As an onboarded app, I want my registered repositories to be periodically re-sca
 - Manual circuit breaker reset API
 - Webhook for circuit breaker state changes
 
+## Circuit Breaker Auto-Reset
+
+When a repository is re-registered (via `POST /api/repositories`), the circuit breaker is automatically reset:
+- `consecutive_failures` set to 0
+- `circuit_open_until` cleared
+
+This ensures a fresh start when an app re-registers a previously failed repository.
+
 ---
 
 # Architecture

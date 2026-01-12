@@ -80,6 +80,20 @@ pnpm worker:start # Run compiled worker
 - `docs-site/content/_index.md` - Main documentation content
 - `docs-site/Dockerfile` - Multi-stage build (Hugo → nginx)
 
+## Docker Configuration
+
+The production Docker image (`Dockerfile`) includes:
+- `node:22-alpine` as base image
+- `git` installed for repository cloning
+- `/data/repos` directory with `node:node` ownership for repository storage
+- Runs as non-root `node` user for security
+
+The `docker-compose.yml` includes:
+- `repos_data` volume mounted to `/data/repos` on the worker
+- Worker depends on Redis and Liquibase migrations
+
+**Important:** `REPOS_BASE_PATH` must be an absolute path (`/data/repos`), not relative.
+
 ## Conventions
 
 **ES Modules with TypeScript:** Imports require `.js` extension even for `.ts` source files (e.g., `import { foo } from "./bar.js"`). TypeScript compiles to ESM output.

@@ -89,7 +89,41 @@ docker exec -it docora-postgres psql -U docora -d docora -c "
 
 # PROD
 
-/opt/docora/.env from .env.example
+## Setup
+
+1. Copy `.env.example` to `/opt/docora/.env`
+2. **IMPORTANT:** Set `REPOS_BASE_PATH=/data/repos` (must be absolute path)
+
+## Troubleshooting
+
+### Reset circuit breaker and retry failed jobs
+
+```bash
+docker exec -it docora-postgres-1 psql -U docora -d docora -c "
+UPDATE repositories SET consecutive_failures = 0, circuit_open_until = NULL;
+UPDATE app_repositories SET status = 'pending_snapshot', retry_count = 0, last_error = NULL;
+"
+```
+
+### Fix volume permissions (if worker fails with EACCES)
+
+```bash
+docker exec -u root docora-worker chown -R node:node /data
+```
+
+### Check worker status
+
+```bash
+docker logs -f --tail 50 docora-worker
+```
+
+### Update app base_url
+
+```bash
+docker exec -it docora-postgres-1 psql -U docora -d docora -c "
+UPDATE apps SET base_url = 'https://your-url.com/webhook' WHERE app_id = 'app_xxx';
+"
+```
 
 # GITHUB ACTIONS
 
