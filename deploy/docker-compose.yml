@@ -28,6 +28,8 @@ services:
       - .env
     environment:
       - RUN_MODE=worker
+    volumes:
+      - repos_data:/data/repos
     networks:
       - docora-network
     depends_on:
@@ -109,3 +111,4 @@ volumes:
   caddy_config:
   docora_pg_data:
   redis_data:
+  repos_data:
