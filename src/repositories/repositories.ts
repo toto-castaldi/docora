@@ -437,3 +437,80 @@ export async function resetGitFailures(repositoryId: string): Promise<void> {
     }
   }
 }
+
+/**
+ * Unlink an app from a repository.
+ * Returns the repository info if unlinked, null if link didn't exist.
+ */
+export async function unlinkAppFromRepository(
+  appId: string,
+  repositoryId: string
+): Promise<{ owner: string; name: string } | null> {
+  const db = getDatabase();
+
+  // Get repository info before deleting
+  const repo = await db
+    .selectFrom("app_repositories")
+    .innerJoin(
+      "repositories",
+      "repositories.repository_id",
+      "app_repositories.repository_id"
+    )
+    .select(["repositories.owner", "repositories.name"])
+    .where("app_repositories.app_id", "=", appId)
+    .where("app_repositories.repository_id", "=", repositoryId)
+    .executeTakeFirst();
+
+  if (!repo) {
+    return null;
+  }
+
+  // Delete the app-repository link
+  await db
+    .deleteFrom("app_repositories")
+    .where("app_id", "=", appId)
+    .where("repository_id", "=", repositoryId)
+    .execute();
+
+  console.log(`Unlinked app ${appId} from repository ${repositoryId}`);
+  return { owner: repo.owner, name: repo.name };
+}
+
+/**
+ * Check if a repository is orphan (no apps watching it)
+ */
+export async function isRepositoryOrphan(
+  repositoryId: string
+): Promise<boolean> {
+  const db = getDatabase();
+
+  const result = await db
+    .selectFrom("app_repositories")
+    .select(db.fn.count<number>("id").as("count"))
+    .where("repository_id", "=", repositoryId)
+    .executeTakeFirst();
+
+  return (result?.count ?? 0) === 0;
+}
+
+/**
+ * Delete a repository and its snapshots from the database.
+ * Should only be called after verifying the repository is orphan.
+ */
+export async function deleteRepository(repositoryId: string): Promise<void> {
+  const db = getDatabase();
+
+  // Delete snapshot (cascade will delete snapshot_files)
+  await db
+    .deleteFrom("repository_snapshots")
+    .where("repository_id", "=", repositoryId)
+    .execute();
+
+  // Delete repository
+  await db
+    .deleteFrom("repositories")
+    .where("repository_id", "=", repositoryId)
+    .execute();
+
+  console.log(`Deleted orphan repository ${repositoryId}`);
+}

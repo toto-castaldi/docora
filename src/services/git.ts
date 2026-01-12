@@ -14,8 +14,8 @@
  * 
  */
 
-import { simpleGit,  SimpleGit } from "simple-git";
-import { existsSync, mkdirSync } from "fs";
+import { simpleGit, SimpleGit } from "simple-git";
+import { existsSync, mkdirSync, rmSync } from "fs";
 import { join } from "path";
 
 const REPOS_BASE_PATH = process.env.REPOS_BASE_PATH || "/data/repos";
@@ -123,4 +123,20 @@ export async function getCurrentBranch(repoPath: string): Promise<string> {
   const git = simpleGit(repoPath);
   const branchSummary = await git.branch();
   return branchSummary.current;
+}
+
+/**
+ * Delete the local clone of a repository
+ */
+export function deleteLocalRepository(owner: string, name: string): boolean {
+  const localPath = getLocalRepoPath(owner, name);
+
+  if (!existsSync(localPath)) {
+    console.log(`Local repo ${owner}/${name} not found, nothing to delete`);
+    return false;
+  }
+
+  rmSync(localPath, { recursive: true, force: true });
+  console.log(`Deleted local repo: ${localPath}`);
+  return true;
 }

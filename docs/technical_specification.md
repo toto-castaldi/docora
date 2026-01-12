@@ -19,6 +19,7 @@ v22.20.0
 | GET | `/version` | Version info | No | `{ "version": "v0.0.0", "full": "...", "details": {...} }` |
 | POST | `/api/apps/onboard` | Register third-party app | No | `{ "app_id": "...", "token": "...", "created_at": "..." }` |
 | POST | `/api/repositories` | Register GitHub repository | Bearer | `{ "repository_id": "...", "github_url": "...", ... }` |
+| DELETE | `/api/repositories/{repository_id}` | Unwatch repository | Bearer | `204 No Content` |
 | GET | `/docs` | Swagger UI | No | OpenAPI documentation |
 
 # Technology Stack

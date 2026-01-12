@@ -113,6 +113,35 @@ Repositories are isolated per client.
 
 ---
 
+## Repository Unwatch
+
+Clients may stop watching a repository at any time.
+
+### Unwatch Request
+
+```
+DELETE /api/repositories/{repository_id}
+Authorization: Bearer {token}
+```
+
+### Response
+
+`204 No Content` on success.
+
+### Behavior
+
+When a client unwatches a repository:
+
+1. The app-repository link is removed
+2. All delivery records for this app-repository pair are deleted
+3. If no other apps are watching the repository:
+   - The repository record is deleted from the database
+   - The local clone is deleted from disk
+
+If the client re-registers the same repository later, it will receive all files from scratch as a new initial snapshot.
+
+---
+
 ## Initial Snapshot
 
 When a repository is registered:

@@ -55,6 +55,18 @@ export const ErrorResponseSchema = z
   })
   .openapi("ErrorResponse");
 
+export const RepositoryParamsSchema = z
+  .object({
+    repository_id: z
+      .string()
+      .regex(/^repo_[a-f0-9]{24}$/, "Invalid repository ID format")
+      .openapi({
+        description: "Repository ID",
+        example: "repo_abc123def456abc123def456",
+      }),
+  })
+  .openapi("RepositoryParams");
+
 export type RegisterRepositoryRequest = z.infer<
   typeof RegisterRepositoryRequestSchema
 >;
@@ -62,3 +74,4 @@ export type RegisterRepositoryResponse = z.infer<
   typeof RegisterRepositoryResponseSchema
 >;
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
+export type RepositoryParams = z.infer<typeof RepositoryParamsSchema>;
