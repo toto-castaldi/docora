@@ -17,6 +17,9 @@ RUN pnpm build
 # Production stage
 FROM node:22-alpine AS production
 
+# Install git for repository cloning
+RUN apk add --no-cache git
+
 # Enable pnpm
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
@@ -29,6 +32,9 @@ RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
+
+# Create repos directory with correct permissions before switching user
+RUN mkdir -p /data/repos && chown -R node:node /data
 
 # Non-root user for security
 USER node
