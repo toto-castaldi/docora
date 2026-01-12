@@ -67,6 +67,11 @@ export const RepositoryParamsSchema = z
   })
   .openapi("RepositoryParams");
 
+// Schema for 204 No Content responses
+export const NoContentSchema = z.undefined().openapi({
+  description: "No Content - Successfully processed",
+});
+
 export type RegisterRepositoryRequest = z.infer<
   typeof RegisterRepositoryRequestSchema
 >;

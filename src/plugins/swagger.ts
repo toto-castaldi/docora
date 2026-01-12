@@ -4,7 +4,8 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import { BUILD_INFO } from "../version.js";
 import { jsonSchemaTransform } from "fastify-type-provider-zod";
 
-export const PUBLIC_DOCS_ROUTE : string = "/docs";
+export const PUBLIC_DOCS_ROUTE: string = "/docs";
+export const PUBLIC_OPENAPI_ROUTE: string = "/openapi.json";
 
 export async function registerSwagger(server: FastifyInstance): Promise<void> {
   await server.register(fastifySwagger, {
@@ -31,5 +32,13 @@ export async function registerSwagger(server: FastifyInstance): Promise<void> {
 
   await server.register(fastifySwaggerUi, {
     routePrefix: PUBLIC_DOCS_ROUTE,
+  });
+
+  // Expose OpenAPI spec at /openapi.json (public route)
+  server.get(PUBLIC_OPENAPI_ROUTE, {
+    config: { publicAccess: true },
+    schema: { hide: true },
+  }, async (_request, reply) => {
+    return reply.send(server.swagger());
   });
 }

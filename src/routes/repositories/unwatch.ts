@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import {
   RepositoryParamsSchema,
   ErrorResponseSchema,
+  NoContentSchema,
   type RepositoryParams,
 } from "../../schemas/repositories.js";
 import {
@@ -17,10 +18,11 @@ export async function unwatchRoute(server: FastifyInstance): Promise<void> {
     "/api/repositories/:repository_id",
     {
       schema: {
+        description: "Stop watching a repository",
         security: [{ bearerAuth: [] }],
         params: RepositoryParamsSchema,
         response: {
-          204: { type: "null", description: "Successfully unwatched" },
+          204: NoContentSchema,
           401: ErrorResponseSchema,
           404: ErrorResponseSchema,
           500: ErrorResponseSchema,
