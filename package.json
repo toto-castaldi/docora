@@ -1,6 +1,6 @@
 {
   "name": "docora",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
