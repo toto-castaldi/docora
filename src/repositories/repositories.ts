@@ -30,7 +30,8 @@ function generateRepositoryId(): string {
 }
 
 /**
- * Find a repository by GitHub URL, or create it if it doesn't exist
+ * Find a repository by GitHub URL, or create it if it doesn't exist.
+ * If found, reset circuit breaker for fresh start.
  */
 export async function findOrCreateRepository(
   input: CreateRepositoryInput
@@ -45,6 +46,16 @@ export async function findOrCreateRepository(
     .executeTakeFirst();
 
   if (existing) {
+    // Reset circuit breaker for fresh start when re-registering
+    await db
+      .updateTable("repositories")
+      .set({
+        consecutive_failures: 0,
+        circuit_open_until: null,
+      })
+      .where("repository_id", "=", existing.repository_id)
+      .execute();
+
     return { repositoryId: existing.repository_id, created: false };
   }
 
