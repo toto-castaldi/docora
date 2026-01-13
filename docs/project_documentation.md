@@ -111,6 +111,17 @@ Each registration includes:
 
 Repositories are isolated per client.
 
+### Re-registration Behavior
+
+If a client registers the same repository twice, Docora automatically:
+1. Unwatches the existing registration (cleanup: delivery records, orphan check)
+2. Creates a fresh registration
+
+This means the client will receive all files as a new initial snapshot. Re-registration is useful to:
+- Reset delivery state
+- Update GitHub token for private repos
+- Force a fresh sync
+
 ---
 
 ## Repository Unwatch

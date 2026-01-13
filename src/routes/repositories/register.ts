@@ -12,6 +12,7 @@ import {
   linkAppToRepository,
   getRepositoryById,
 } from "../../repositories/repositories.js";
+import { unwatchRepository } from "../../services/repository-management.js";
 
 export async function registerRoute(server: FastifyInstance): Promise<void> {
   server.post(
@@ -24,7 +25,6 @@ export async function registerRoute(server: FastifyInstance): Promise<void> {
           201: RegisterRepositoryResponseSchema,
           401: ErrorResponseSchema,
           404: ErrorResponseSchema,
-          409: ErrorResponseSchema,
           422: ErrorResponseSchema,
           500: ErrorResponseSchema,
         },
@@ -66,12 +66,10 @@ export async function registerRoute(server: FastifyInstance): Promise<void> {
         isPrivate: validation.isPrivate ?? false,
       });
 
-      // Check if app already linked to this repo
+      // If app already linked, unwatch first (re-registration = unwatch + register)
       const alreadyLinked = await isAppLinkedToRepository(appId, repositoryId);
       if (alreadyLinked) {
-        return reply
-          .status(409)
-          .send({ error: "Repository already registered for this app" });
+        await unwatchRepository(appId, repositoryId);
       }
 
       // Link app to repository

@@ -88,8 +88,9 @@ Response (201 Created)
 | 401 Unauthorized | Missing or invalid Bearer token |
 | 400 Bad Request | Missing required fields |
 | 404 Not Found | GitHub repository doesn't exist |
-| 409 Conflict | App already watching this repository |
 | 422 Unprocessable Entity | Invalid URL format, invalid GitHub token |
+
+**Note:** Re-registering the same repository is allowed. Docora will automatically unwatch the existing registration (cleanup) and create a fresh one. The client will receive all files as a new initial snapshot.
 
 # Technology Additions
 
@@ -242,7 +243,7 @@ CREATE INDEX idx_app_repositories_repository_id ON app_repositories(repository_i
 1. Check if repo exists in `repositories` table (by `github_url`)
 2. If not, create new entry in `repositories`
 3. Check if app already linked to this repo in `app_repositories`
-4. If already linked, return 409 Conflict
+4. If already linked, unwatch first (cleanup deliveries, check orphan)
 5. Create entry in `app_repositories` (with encrypted GitHub token if provided)
 
 ---
@@ -356,7 +357,7 @@ ENCRYPTION_KEY=<32-byte-hex-key-for-aes-256>
 - Repository registration validates GitHub URL format
 - Repository registration validates repo exists via GitHub API
 - Private repo tokens are encrypted before storage
-- Same repo cannot be registered twice by the same app (409 Conflict)
+- Same repo can be re-registered by the same app (automatic unwatch + fresh registration)
 - Multiple apps can register the same repository (shared monitoring)
 - All tests pass
 
@@ -371,5 +372,5 @@ ENCRYPTION_KEY=<32-byte-hex-key-for-aes-256>
    - Onboard App B: `POST /api/apps/onboard` (get token B)
    - Try registering repo without token → 401
    - App A registers repo with valid token → 201
-   - App A registers same repo again → 409 Conflict
+   - App A registers same repo again → 201 (re-registration: unwatch + fresh register)
    - App B registers same repo → 201 (different app, allowed)

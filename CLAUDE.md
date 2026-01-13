@@ -49,6 +49,7 @@ pnpm worker:start # Run compiled worker
 - `src/services/notifier.ts` - Send granular file notifications (create/update/delete) with HMAC authentication
 - `src/services/chunked-notifier.ts` - Handle chunked delivery for large binary files
 - `src/services/change-detector.ts` - Detect file changes by comparing current scan with previous snapshot
+- `src/services/repository-management.ts` - Orchestrates repository unwatch logic (used by both unwatch and re-registration)
 
 **Workers (BullMQ):**
 - `src/workers/snapshot.scheduler.ts` - Schedules pending snapshot jobs
