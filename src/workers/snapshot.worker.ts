@@ -209,6 +209,8 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
         const typeIcon = file.isBinary ? "🖼️ " : "📄";
         console.log(`     ${typeIcon} ${file.path}`);
       }
+    } else if (changes.length === 0) {
+      console.log(`\n✅ No changes for ${repoLabel}`);
     } else {
       const createdFiles = changes.filter((c) => c.type === "created");
       const updatedFiles = changes.filter((c) => c.type === "updated");
