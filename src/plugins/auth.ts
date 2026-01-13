@@ -39,18 +39,24 @@ async function authPlugin(server: FastifyInstance): Promise<void> {
 
       const token = authHeader.slice(7); // Remove "Bearer " prefix
 
+      console.debug(`[AUTH] Token received: length=${token.length}, prefix=${token.slice(0, 12)}...`);
+
       const db = getDatabase();
       const apps = await db.selectFrom("apps").selectAll().execute();
 
+      console.debug(`[AUTH] Found ${apps.length} apps in database`);
+
       for (const app of apps) {
         const isValid = await verifyToken(token, app.token_hash);
+        console.log(`[AUTH] Checking app=${app.app_id}: valid=${isValid}`);
         if (isValid) {
           request.appId = app.app_id;
+          console.debug(`[AUTH] Authenticated as ${app.app_id}`);
           return; // Authenticated!
         }
       }
 
-      // No matching token found
+      console.debug(`[AUTH] No matching token found, returning 401`);
       return reply.status(401).send({ error: "Invalid token" });
     }
   );
