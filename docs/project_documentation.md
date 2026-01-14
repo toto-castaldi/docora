@@ -35,7 +35,7 @@ Docora does **not** interpret or validate file semantics. It treats repositories
 
 - **Snapshot Engine**
   - Builds full repository state
-  - Applies `.docoraignore`
+  - Sends all files (only `.git/` excluded)
 
 - **Plugin Pipeline**
   - Applies ordered, parametric transformations
@@ -57,17 +57,7 @@ Docora does **not** interpret or validate file semantics. It treats repositories
 ### Scope
 - Provider: GitHub
 - Branch: `main`
-- Files monitored: all
-
-### Ignoring Files
-
-Docora supports a `.docoraignore` file at repository root.
-
-- Syntax inspired by `.gitignore`
-- Excludes files and directories from:
-  - snapshots
-  - scans
-  - notifications
+- Files monitored: all (only `.git/` folder is excluded)
 
 ---
 
@@ -158,10 +148,9 @@ If the client re-registers the same repository later, it will receive all files 
 When a repository is registered:
 
 1. Docora clones the repository locally
-2. Applies `.docoraignore` exclusions
-3. Scans all files, computing SHA-256 hashes
-4. Applies plugins (if configured)
-5. Sends `POST /create` for each file to the client
+2. Scans all files (except `.git/`), computing SHA-256 hashes
+3. Applies plugins (if configured)
+4. Sends `POST /create` for each file to the client
 
 This snapshot is stored in the database and becomes the **source of truth** for subsequent change detection.
 

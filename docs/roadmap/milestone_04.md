@@ -4,6 +4,8 @@ Initial Snapshot (Async)
 > **STATUS: COMPLETED** - Implemented in v0.4.0
 >
 > **Note:** The notification model described in this milestone (bulk snapshots) was superseded by **Milestone 05** which introduces granular notifications (`/create`, `/update`, `/delete` endpoints) with HMAC authentication.
+>
+> **Note:** The `.docoraignore` feature described in this milestone has been **removed**. Docora now sends all files to apps (except `.git/`). Apps decide what to do with received files - Docora doesn't filter.
 
 # Summary
 

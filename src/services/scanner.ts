@@ -6,7 +6,7 @@
   ├──────────────────┼───────────────────────────────────┤
   │ Binary detection │ isbinaryfile package              │
   ├──────────────────┼───────────────────────────────────┤
-  │ Ignored files    │ Filtered during directory walk    │
+  │ Excluded         │ Only .git folder                  │
   ├──────────────────┼───────────────────────────────────┤
   │ Symlinks         │ Skipped (only regular files)      │
   ├──────────────────┼───────────────────────────────────┤
@@ -17,8 +17,10 @@
 import { createHash } from "crypto";
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join, relative } from "path";
-import type { Ignore } from "ignore";
 import { isBinaryBuffer } from "../utils/binary.js";
+
+/** Only .git folder is excluded - everything else is sent to apps */
+const EXCLUDED_DIRS = [".git"];
 
 export type ContentEncoding = "plain" | "base64";
 
@@ -39,31 +41,23 @@ function computeSha(buffer: Buffer): string {
 }
 
 /**
- * Recursively walk directory and collect file paths
+ * Recursively walk directory and collect file paths.
+ * Only .git folder is excluded.
  */
-function walkDirectory(
-  dirPath: string,
-  basePath: string,
-  ig: Ignore
-): string[] {
+function walkDirectory(dirPath: string, basePath: string): string[] {
   const files: string[] = [];
   const entries = readdirSync(dirPath, { withFileTypes: true });
 
   for (const entry of entries) {
-    const fullPath = join(dirPath, entry.name);
-    const relativePath = relative(basePath, fullPath);
-
-    // Check if ignored
-    if (ig.ignores(relativePath)) {
+    // Skip excluded directories (.git)
+    if (entry.isDirectory() && EXCLUDED_DIRS.includes(entry.name)) {
       continue;
     }
 
+    const fullPath = join(dirPath, entry.name);
+
     if (entry.isDirectory()) {
-      // Also check directory with trailing slash
-      if (ig.ignores(relativePath + "/")) {
-        continue;
-      }
-      files.push(...walkDirectory(fullPath, basePath, ig));
+      files.push(...walkDirectory(fullPath, basePath));
     } else if (entry.isFile()) {
       files.push(fullPath);
     }
@@ -74,14 +68,12 @@ function walkDirectory(
 }
 
 /**
- * Scan a repository and return all non-ignored files with content.
+ * Scan a repository and return all files with content.
+ * Only .git folder is excluded - everything else is sent to apps.
  * Text files are stored as UTF-8, binary files as Base64.
  */
-export async function scanRepository(
-  repoPath: string,
-  ig: Ignore
-): Promise<ScannedFile[]> {
-  const filePaths = walkDirectory(repoPath, repoPath, ig);
+export async function scanRepository(repoPath: string): Promise<ScannedFile[]> {
+  const filePaths = walkDirectory(repoPath, repoPath);
   const scannedFiles: ScannedFile[] = [];
 
   for (const fullPath of filePaths) {

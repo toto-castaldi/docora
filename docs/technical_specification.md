@@ -108,37 +108,13 @@ Docora runs in two modes controlled by `RUN_MODE` environment variable:
 
 The worker handles:
 - Repository cloning/pulling
-- File scanning with `.docoraignore` support
+- File scanning (all files except `.git/` are sent)
 - Binary file detection and Base64 encoding
 - Snapshot notifications to registered apps (with chunking for large files)
 - Unified error handling: any non-2xx response triggers job retry
 - Retry with exponential backoff until `MAX_RETRY_ATTEMPTS`
 - Periodic re-scanning of synced repositories
 - Circuit breaker for git failures (auto-reset on repository re-registration)
-
-# docoraignore
-
-Example .docoraignore File
-
-```
-# Dependencies
-node_modules/
-
-# Build output
-dist/
-build/
-
-# Environment files
-.env
-.env.*
-
-# Logs
-*.log
-
-# IDE
-.vscode/
-.idea/
-```
 
 # Environment Variables
 

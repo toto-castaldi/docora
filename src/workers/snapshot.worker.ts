@@ -12,7 +12,6 @@
 
 import { Worker, Job } from "bullmq";
 import { cloneOrPull } from "../services/git.js";
-import { parseDocoraignore } from "../utils/docoraignore.js";
 import { scanRepository } from "../services/scanner.js";
 import { defaultPipeline } from "../plugins/pipeline.js";
 import {
@@ -177,19 +176,16 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       throw gitError; // Re-throw to trigger normal error handling
     }
 
-    // 3. Parse .docoraignore
-    const ig = parseDocoraignore(localPath);
+    // 2. Scan repository files (all files except .git)
+    const scannedFiles = await scanRepository(localPath);
 
-    // 4. Scan repository files
-    const scannedFiles = await scanRepository(localPath, ig);
-
-    // 5. Apply plugin pipeline (passthrough for now)
+    // Apply plugin pipeline (passthrough for now)
     const processedFiles = await defaultPipeline.execute(scannedFiles);
 
-    // 6. Get delivered files for this app (per-app tracking)
+    // 3. Get delivered files for this app (per-app tracking)
     const deliveredFiles = await getDeliveredFiles(app_id, repository_id);
 
-    // 7. Detect changes (sorted: delete → create → update)
+    // 4. Detect changes (sorted: delete → create → update)
     const changes = detectAndSortChanges(processedFiles, deliveredFiles);
 
     const repositoryInfo: RepositoryInfo = {
@@ -199,7 +195,7 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       name,
     };
 
-    // 8. Log change summary
+    // Log change summary
     const repoLabel = `${repository_id} (${owner}/${name})`;
 
     if (isInitialSnapshot(deliveredFiles)) {
@@ -241,7 +237,7 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       }
     }
 
-    // 9. Send notifications for each change
+    // 5. Send notifications for each change
     // Any failure stops immediately and triggers job retry
     // Record delivery after each successful notification
     for (const change of changes) {
@@ -273,10 +269,10 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       }
     }
 
-    // 10. Save snapshot to database (repository state tracking)
+    // 6. Save snapshot to database (repository state tracking)
     await saveSnapshot(repository_id, commitSha, branch, processedFiles);
 
-    // 11. Update status to synced
+    // 7. Update status to synced
     await updateAppRepositoryStatus(app_id, repository_id, "synced");
     await resetRetryCount(app_id, repository_id);
 
