@@ -133,8 +133,10 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     isRescan,
   } = job.data;
 
+  const logPrefix = `[${app_id}]`;
+
   console.log(
-    `Processing ${isRescan ? "rescan" : "initial"} job: ${app_id}/${repository_id}`
+    `${logPrefix} Processing ${isRescan ? "rescan" : "initial"} job: ${repository_id}`
   );
 
   // Mark as scanning
@@ -170,7 +172,7 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       const { circuitOpened } = await recordGitFailure(repository_id);
       if (circuitOpened) {
         console.error(
-          `Circuit breaker OPENED for ${repository_id} - pausing scans`
+          `${logPrefix} Circuit breaker OPENED for ${repository_id} - pausing scans`
         );
       }
       throw gitError; // Re-throw to trigger normal error handling
@@ -199,40 +201,40 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     const repoLabel = `${repository_id} (${owner}/${name})`;
 
     if (isInitialSnapshot(deliveredFiles)) {
-      console.log(`\n📦 Initial snapshot for ${repoLabel}`);
-      console.log(`   ${processedFiles.length} files to create:`);
+      console.log(`${logPrefix} 📦 Initial snapshot for ${repoLabel}`);
+      console.log(`${logPrefix}    ${processedFiles.length} files to create:`);
       for (const file of processedFiles) {
         const typeIcon = file.isBinary ? "🖼️ " : "📄";
-        console.log(`     ${typeIcon} ${file.path}`);
+        console.log(`${logPrefix}      ${typeIcon} ${file.path}`);
       }
     } else if (changes.length === 0) {
-      console.log(`\n✅ No changes for ${repoLabel}`);
+      console.log(`${logPrefix} ✅ No changes for ${repoLabel}`);
     } else {
       const createdFiles = changes.filter((c) => c.type === "created");
       const updatedFiles = changes.filter((c) => c.type === "updated");
       const deletedFiles = changes.filter((c) => c.type === "deleted");
 
-      console.log(`\n🔄 Changes detected for ${repoLabel}`);
+      console.log(`${logPrefix} 🔄 Changes detected for ${repoLabel}`);
       console.log(
-        `   ${createdFiles.length} created, ${updatedFiles.length} updated, ${deletedFiles.length} deleted`
+        `${logPrefix}    ${createdFiles.length} created, ${updatedFiles.length} updated, ${deletedFiles.length} deleted`
       );
 
       if (deletedFiles.length > 0) {
-        console.log("   🗑️  Deleted:");
-        for (const c of deletedFiles) console.log(`       - ${c.path}`);
+        console.log(`${logPrefix}    🗑️  Deleted:`);
+        for (const c of deletedFiles) console.log(`${logPrefix}        - ${c.path}`);
       }
       if (createdFiles.length > 0) {
-        console.log("   ✨ Created:");
+        console.log(`${logPrefix}    ✨ Created:`);
         for (const c of createdFiles) {
           const icon = c.currentFile?.isBinary ? "🖼️ " : "";
-          console.log(`       + ${icon}${c.path}`);
+          console.log(`${logPrefix}        + ${icon}${c.path}`);
         }
       }
       if (updatedFiles.length > 0) {
-        console.log("   ✏️  Updated:");
+        console.log(`${logPrefix}    ✏️  Updated:`);
         for (const c of updatedFiles) {
           const icon = c.currentFile?.isBinary ? "🖼️ " : "";
-          console.log(`       ~ ${icon}${c.path}`);
+          console.log(`${logPrefix}        ~ ${icon}${c.path}`);
         }
       }
     }
@@ -277,12 +279,12 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     await resetRetryCount(app_id, repository_id);
 
     console.log(
-      `Snapshot job completed: ${app_id}/${repository_id} (${changes.length} changes)`
+      `${logPrefix} Snapshot job completed: ${repository_id} (${changes.length} changes)`
     );
   } catch (err) {
     const error = err as Error;
     console.error(
-      `Snapshot job failed: ${app_id}/${repository_id}`,
+      `${logPrefix} Snapshot job failed: ${repository_id}`,
       error.message
     );
 
@@ -301,7 +303,7 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
         "failed",
         error.message
       );
-      console.error(`Max retries exceeded for ${app_id}/${repository_id}`);
+      console.error(`${logPrefix} Max retries exceeded for ${repository_id}`);
     } else {
       // Reset to pending for retry
       await updateAppRepositoryStatus(

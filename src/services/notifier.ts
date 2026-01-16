@@ -85,19 +85,20 @@ export async function sendFileNotification(
 
     const statusCode = response.status;
 
+    const logPrefix = `[${appId}]`;
     const repoName = `${payload.repository.owner}/${payload.repository.name}`;
     const filePath = payload.file.path;
 
     if (statusCode >= 200 && statusCode < 300) {
       console.log(
-        `File notification sent successfully: ${repoName} - ${filePath} -> ${url}`
+        `${logPrefix} File notification sent successfully: ${repoName} - ${filePath} -> ${url}`
       );
       return { success: true, statusCode, shouldRetry: false };
     }
 
     // All non-2xx errors are treated the same: retry the entire job
     console.error(
-      `Notification failed: ${repoName} - ${filePath} -> ${url}: HTTP ${statusCode}`
+      `${logPrefix} Notification failed: ${repoName} - ${filePath} -> ${url}: HTTP ${statusCode}`
     );
     return {
       success: false,
@@ -108,11 +109,12 @@ export async function sendFileNotification(
   } catch (err) {
     const error = err as AxiosError;
     const message = error.message || "Unknown error";
+    const logPrefix = `[${appId}]`;
     const repoName = `${payload.repository.owner}/${payload.repository.name}`;
     const filePath = payload.file.path;
 
     console.error(
-      `Failed to send notification: ${repoName} - ${filePath} -> ${url}: ${message}`
+      `${logPrefix} Failed to send notification: ${repoName} - ${filePath} -> ${url}: ${message}`
     );
 
     return {

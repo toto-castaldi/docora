@@ -84,9 +84,10 @@ async function sendChunkedPayload(
   const content = basePayload.file.content || "";
   const chunks = createChunks(content);
   const totalChunks = chunks.length;
+  const logPrefix = `[${appId}]`;
 
   console.log(
-    `Sending ${basePayload.file.path} in ${totalChunks} chunks`
+    `${logPrefix} Sending ${basePayload.file.path} in ${totalChunks} chunks`
   );
 
   for (let i = 0; i < chunks.length; i++) {
@@ -111,7 +112,7 @@ async function sendChunkedPayload(
 
     if (!result.success) {
       console.error(
-        `Chunk ${i + 1}/${totalChunks} failed for ${basePayload.file.path}`
+        `${logPrefix} Chunk ${i + 1}/${totalChunks} failed for ${basePayload.file.path}`
       );
 
       return {
@@ -124,11 +125,11 @@ async function sendChunkedPayload(
     }
 
     console.log(
-      `Chunk ${i + 1}/${totalChunks} sent for ${basePayload.file.path}`
+      `${logPrefix} Chunk ${i + 1}/${totalChunks} sent for ${basePayload.file.path}`
     );
   }
 
-  console.log(`All ${totalChunks} chunks sent for ${basePayload.file.path}`);
+  console.log(`${logPrefix} All ${totalChunks} chunks sent for ${basePayload.file.path}`);
 
   return {
     success: true,
