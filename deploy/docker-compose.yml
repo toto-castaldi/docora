@@ -24,6 +24,7 @@ services:
     image: ghcr.io/toto-castaldi/docora:latest
     container_name: docora-worker
     restart: unless-stopped
+    init: true
     env_file:
       - .env
     environment:
