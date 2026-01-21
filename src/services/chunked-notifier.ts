@@ -34,7 +34,8 @@ export async function sendFileWithChunking(
   commitSha: string,
   appId: string,
   clientAuthKey: string,
-  previousSha?: string
+  previousSha?: string,
+  appName?: string
 ): Promise<ChunkedNotificationResult> {
   // Build the base payload
   const payload =
@@ -49,7 +50,8 @@ export async function sendFileWithChunking(
       endpoint,
       payload,
       appId,
-      clientAuthKey
+      clientAuthKey,
+      appName
     );
 
     return {
@@ -67,7 +69,8 @@ export async function sendFileWithChunking(
     endpoint,
     payload,
     appId,
-    clientAuthKey
+    clientAuthKey,
+    appName
   );
 }
 
@@ -79,12 +82,13 @@ async function sendChunkedPayload(
   endpoint: NotificationEndpoint,
   basePayload: FileNotificationPayload,
   appId: string,
-  clientAuthKey: string
+  clientAuthKey: string,
+  appName?: string
 ): Promise<ChunkedNotificationResult> {
   const content = basePayload.file.content || "";
   const chunks = createChunks(content);
   const totalChunks = chunks.length;
-  const logPrefix = `[${appId}]`;
+  const logPrefix = appName ? `[${appName}-${appId}]` : `[${appId}]`;
 
   console.log(
     `${logPrefix} Sending ${basePayload.file.path} in ${totalChunks} chunks`
@@ -107,7 +111,8 @@ async function sendChunkedPayload(
       endpoint,
       chunkPayload,
       appId,
-      clientAuthKey
+      clientAuthKey,
+      appName
     );
 
     if (!result.success) {

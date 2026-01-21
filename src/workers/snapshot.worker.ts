@@ -46,6 +46,7 @@ export const SNAPSHOT_QUEUE_NAME = "snapshot-queue";
 
 export interface SnapshotJobData {
   app_id: string;
+  app_name: string;
   repository_id: string;
   github_url: string;
   owner: string;
@@ -75,7 +76,8 @@ async function sendChangeNotification(
   commitSha: string,
   baseUrl: string,
   appId: string,
-  clientAuthKey: string
+  clientAuthKey: string,
+  appName: string
 ): Promise<ChangeNotificationResult> {
   switch (change.type) {
     case "created":
@@ -86,7 +88,9 @@ async function sendChangeNotification(
         change.currentFile!,
         commitSha,
         appId,
-        clientAuthKey
+        clientAuthKey,
+        undefined,
+        appName
       );
 
     case "updated":
@@ -98,7 +102,8 @@ async function sendChangeNotification(
         commitSha,
         appId,
         clientAuthKey,
-        change.previousSha
+        change.previousSha,
+        appName
       );
 
     case "deleted":
@@ -112,7 +117,8 @@ async function sendChangeNotification(
           commitSha
         ),
         appId,
-        clientAuthKey
+        clientAuthKey,
+        appName
       );
   }
 }
@@ -123,6 +129,7 @@ async function sendChangeNotification(
 async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
   const {
     app_id,
+    app_name,
     repository_id,
     github_url,
     owner,
@@ -133,7 +140,7 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     isRescan,
   } = job.data;
 
-  const logPrefix = `[${app_id}]`;
+  const logPrefix = `[${app_name}-${app_id}]`;
 
   console.log(
     `${logPrefix} Processing ${isRescan ? "rescan" : "initial"} job: ${repository_id}`
@@ -249,7 +256,8 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
         commitSha,
         base_url,
         app_id,
-        clientAuthKey
+        clientAuthKey,
+        app_name
       );
 
       if (!result.success) {

@@ -67,7 +67,8 @@ export async function sendFileNotification(
   endpoint: NotificationEndpoint,
   payload: FileNotificationPayload,
   appId: string,
-  clientAuthKey: string
+  clientAuthKey: string,
+  appName?: string
 ): Promise<NotificationResult> {
   const url = `${baseUrl}/${endpoint}`;
 
@@ -85,7 +86,7 @@ export async function sendFileNotification(
 
     const statusCode = response.status;
 
-    const logPrefix = `[${appId}]`;
+    const logPrefix = appName ? `[${appName}-${appId}]` : `[${appId}]`;
     const repoName = `${payload.repository.owner}/${payload.repository.name}`;
     const filePath = payload.file.path;
 
@@ -109,7 +110,7 @@ export async function sendFileNotification(
   } catch (err) {
     const error = err as AxiosError;
     const message = error.message || "Unknown error";
-    const logPrefix = `[${appId}]`;
+    const logPrefix = appName ? `[${appName}-${appId}]` : `[${appId}]`;
     const repoName = `${payload.repository.owner}/${payload.repository.name}`;
     const filePath = payload.file.path;
 

@@ -312,6 +312,7 @@ export async function findRepositoriesForRescan(
 ): Promise<
   Array<{
     app_id: string;
+    app_name: string;
     repository_id: string;
     github_token_encrypted: string | null;
     base_url: string;
@@ -339,6 +340,7 @@ export async function findRepositoriesForRescan(
       "app_repositories.repository_id",
       "app_repositories.github_token_encrypted",
       "app_repositories.status",
+      "apps.app_name",
       "apps.base_url",
       "apps.client_auth_key_encrypted",
       "repositories.github_url",

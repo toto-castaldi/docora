@@ -128,6 +128,7 @@ async function scanAndQueuePending(): Promise<void> {
 
       const jobData: SnapshotJobData = {
         app_id: item.app_id,
+        app_name: item.app_name,
         repository_id: item.repository_id,
         github_url: item.github_url,
         owner: item.owner,
