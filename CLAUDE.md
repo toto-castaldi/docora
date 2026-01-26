@@ -112,7 +112,7 @@ Husky + commitlint enforce this on commit.
 ## Rules
 
 - **our names** Refer to me as "Toto", I call you "Claude"
-- **Do not do any git command** Git operations are made by de developer. You can't do any of those.
+- **Git: commit yes, push no** Claude can stage and commit changes, but never push. Toto controls when to update production.
 - **sql migration as yml liquibase** Database migrations must be provided as a yml file (not sql or xml...)
 - **documentation in sync** take the documentation always updated
 - **language** : we can speak in Italian ora English as well, but all the project files (doc and code must be written in English)
