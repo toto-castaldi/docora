@@ -27,16 +27,18 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 
 ### Active
 
-<!-- Dashboard features to build -->
+<!-- Dashboard features to build — see REQUIREMENTS.md for full details -->
 
-- [ ] Admin can log in with username/password
-- [ ] Admin can view failed notifications with error details
-- [ ] Admin can retry failed notifications
-- [ ] Admin can view job queue status (pending count, running count)
-- [ ] Admin can view list of registered apps
-- [ ] Admin can view repositories monitored by each app
-- [ ] Admin can view history of sent updates
-- [ ] Dashboard is protected behind authentication
+- [ ] DASH-01: Admin can log in with username/password
+- [ ] DASH-02: Admin can view failed notifications with error details
+- [ ] DASH-03: Admin can retry failed notifications
+- [ ] DASH-04: Admin can view job queue status (pending count, running count)
+- [ ] DASH-05: Admin can view list of registered apps
+- [ ] DASH-06: Admin can view repositories monitored by each app
+- [ ] DASH-07: Admin can view history of sent updates
+- [ ] DASH-08: Dashboard is protected behind authentication
+
+See `.planning/REQUIREMENTS.md` for detailed requirement specifications and traceability.
 
 ### Out of Scope
 
@@ -73,10 +75,11 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| React frontend | Developer knows React | — Pending |
-| Monorepo structure | Simpler deployment, shared types | — Pending |
-| Simple admin auth | Only one admin needed, no complexity | — Pending |
-| Polling over WebSocket | Simpler for v1, can add later | — Pending |
+| React frontend | Developer knows React | Approved (2026-01-26) |
+| Monorepo structure | Simpler deployment, shared types | Approved (2026-01-26) |
+| Simple admin auth | Only one admin needed, no complexity | Approved (2026-01-26) |
+| Polling over WebSocket | Simpler for v1, can add later | Approved (2026-01-26) |
+| 5-phase roadmap | Standard depth, covers all requirements | Approved (2026-01-26) |
 
 ---
-*Last updated: 2026-01-26 after initialization*
+*Last updated: 2026-01-26 after roadmap creation*
