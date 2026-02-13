@@ -161,6 +161,10 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
     let commitSha: string;
     let branch: string;
 
+    console.log(
+      `${logPrefix} Git sync ${owner}/${name} (token: ${githubToken ? "present" : "MISSING"})`
+    );
+
     try {
       const result = await cloneOrPull(
         github_url,
@@ -175,14 +179,24 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       // Git succeeded - reset circuit breaker
       await resetGitFailures(repository_id);
     } catch (gitError) {
-      // Git failure - record for circuit breaker
-      const { circuitOpened } = await recordGitFailure(repository_id);
-      if (circuitOpened) {
+      const gitErrorMsg = (gitError as Error).message ?? String(gitError);
+      const isAuthError = /auth|403|401|credential|permission|denied|token/i.test(gitErrorMsg);
+
+      console.error(
+        `${logPrefix} Git FAILED for ${owner}/${name}: ${gitErrorMsg}`
+      );
+      if (isAuthError) {
         console.error(
-          `${logPrefix} Circuit breaker OPENED for ${repository_id} - pausing scans`
+          `${logPrefix} ⚠ Likely authentication issue — token ${githubToken ? "was provided but may be expired/revoked" : "is MISSING (private repo?)"}`
         );
       }
-      throw gitError; // Re-throw to trigger normal error handling
+
+      // Record for circuit breaker
+      const { circuitOpened, consecutiveFailures } = await recordGitFailure(repository_id);
+      console.error(
+        `${logPrefix} Git failures: ${consecutiveFailures}/5${circuitOpened ? " — Circuit breaker OPENED" : ""}`
+      );
+      throw gitError;
     }
 
     // 2. Scan repository files (all files except .git)
