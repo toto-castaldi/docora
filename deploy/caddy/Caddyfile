@@ -2,9 +2,15 @@
     email {$CADDY_EMAIL}
 }
 
-# Documentation - docora.toto-castaldi.com
+# Documentation + Admin Dashboard - docora.toto-castaldi.com
 {$DOMAIN} {
-    reverse_proxy docora-docs:80
+    handle /admin* {
+        reverse_proxy docora-api:3000
+    }
+
+    handle {
+        reverse_proxy docora-docs:80
+    }
 
     header {
         -Server
