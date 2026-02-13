@@ -19,6 +19,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     logger: {
       level: process.env.LOG_LEVEL || "info",
     },
+    trustProxy: true,
   });
 
   server.setValidatorCompiler(validatorCompiler);
