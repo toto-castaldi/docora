@@ -17,3 +17,6 @@ databaseChangeLog:
     - include:
         file: 006-app-delivered-files.yml
         relativeToChangelogFile: true
+    - include:
+        file: 007-dashboard-indexes.yml
+        relativeToChangelogFile: true

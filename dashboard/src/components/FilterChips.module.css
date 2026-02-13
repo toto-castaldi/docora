@@ -1,0 +1,52 @@
+.container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  border: 1px solid #bfdbfe;
+}
+
+.chipLabel {
+  font-weight: 500;
+}
+
+.chipRemove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1d4ed8;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.chipRemove:hover {
+  color: #1e40af;
+}
+
+.clearAll {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  padding: 0.25rem 0;
+}
+
+.clearAll:hover {
+  color: #374151;
+}

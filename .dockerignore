@@ -6,12 +6,12 @@ docs
 bruno
 deploy
 docora_dev_data
-dist
 
 .husky
 .vscode
 .claude
 .github
+.planning
 
 .gitignore
 .release-please-manifest.json
@@ -20,3 +20,8 @@ release-please-config.json
 .env.*
 .git
 *.md
+!dashboard/**
+!packages/**
+dashboard/node_modules
+dashboard/dist
+packages/*/node_modules

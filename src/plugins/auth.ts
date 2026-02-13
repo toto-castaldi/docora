@@ -20,9 +20,14 @@ async function authPlugin(server: FastifyInstance): Promise<void> {
       const routeConfig = request.routeOptions?.config as { publicAccess?: boolean } | undefined;
 
       const path = request.url.split("?")[0];
-      
+
       //needed for plugins...
       if (path.startsWith(PUBLIC_DOCS_ROUTE)) {
+        return;
+      }
+
+      // Skip /admin routes - handled by admin-auth plugin
+      if (path.startsWith("/admin")) {
         return;
       }
 

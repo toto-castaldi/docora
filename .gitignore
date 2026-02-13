@@ -8,3 +8,6 @@ dist
 
 # Hugo generated
 docs-site/public
+
+# Dashboard build output
+dashboard/dist/

@@ -1,0 +1,21 @@
+databaseChangeLog:
+    - changeSet:
+        id: 007-01-idx-app-repositories-status
+        author: docora
+        changes:
+            - createIndex:
+                indexName: idx_app_repositories_status
+                tableName: app_repositories
+                columns:
+                    - column:
+                        name: status
+    - changeSet:
+        id: 007-02-idx-app-repositories-last-scanned-at
+        author: docora
+        changes:
+            - createIndex:
+                indexName: idx_app_repositories_last_scanned_at
+                tableName: app_repositories
+                columns:
+                    - column:
+                        name: last_scanned_at
