@@ -61,25 +61,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DCLEAN-01 | — | Pending |
-| DCLEAN-02 | — | Pending |
-| TOKEN-01 | — | Pending |
-| TOKEN-02 | — | Pending |
-| TOKEN-03 | — | Pending |
-| NOTIFY-01 | — | Pending |
-| NOTIFY-02 | — | Pending |
-| NOTIFY-03 | — | Pending |
-| DOCS-01 | — | Pending |
-| DOCS-02 | — | Pending |
-| DOCS-03 | — | Pending |
-| DOCS-04 | — | Pending |
-| DOCS-05 | — | Pending |
+| DCLEAN-01 | Phase 6 | Pending |
+| DCLEAN-02 | Phase 6 | Pending |
+| TOKEN-01 | Phase 7 | Pending |
+| TOKEN-02 | Phase 7 | Pending |
+| TOKEN-03 | Phase 7 | Pending |
+| NOTIFY-01 | Phase 8 | Pending |
+| NOTIFY-02 | Phase 8 | Pending |
+| NOTIFY-03 | Phase 8 | Pending |
+| DOCS-01 | Phase 9 | Pending |
+| DOCS-02 | Phase 9 | Pending |
+| DOCS-03 | Phase 9 | Pending |
+| DOCS-04 | Phase 9 | Pending |
+| DOCS-05 | Phase 9 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13
+- Mapped to phases: 13
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-14*
-*Last updated: 2026-02-14 after initial definition*
+*Last updated: 2026-02-14 after roadmap creation*
