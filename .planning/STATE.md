@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 6 of 9 (Dashboard Cleanup)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-14 — Roadmap created for v1.1
+Plan: 1 of 1 in current phase
+Status: Phase 6 complete
+Last activity: 2026-02-14 — Completed 06-01 Dashboard Cleanup
 
-Progress: [█████████████████████░░░░░░░░░] 71% (25/25 v1.0 complete, 0/v1.1 started)
+Progress: [██████████████████████░░░░░░░░] 73% (25/25 v1.0 complete, 1/v1.1 done)
 
 ## Performance Metrics
 
@@ -25,9 +25,9 @@ Progress: [█████████████████████░░
 - Timeline: 38 days (2026-01-06 -> 2026-02-13)
 
 **v1.1 Velocity:**
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 3 min
+- Total execution time: 0.05 hours
 
 ## Accumulated Context
 
@@ -36,11 +36,15 @@ Progress: [█████████████████████░░
 All v1.0 decisions logged in PROJECT.md Key Decisions table.
 
 v1.1 context from codebase analysis:
-- Admin repos page in `dashboard/src/pages/Repositories.tsx`, backend in `src/routes/admin/dashboard-api-repos.ts`
-- App detail page already shows repos via `AppDetailRepoTable.tsx` — safe to remove global repos page
+- Global repos page removed (06-01) — repo info now only in AppDetail per-app view
 - No PATCH endpoint exists yet; token stored in `app_repositories.github_token_encrypted`
 - Circuit breaker logic in `src/repositories/repositories.ts` (recordGitFailure)
 - Docs site is Hugo-based in `docs-site/` with single page at `docs-site/content/_index.md`
+
+Phase 6 decisions:
+- RepositorySummary type kept in shared-types (used by AppDetailRepoTable)
+- RepositoryWithStatus type kept (used by listRepositoriesByApp and dashboard-api-apps)
+- AppRepositoryStatus import removed (only used by deleted listAllRepositories)
 
 ### Pending Todos
 
@@ -53,5 +57,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: v1.1 roadmap created, ready to plan Phase 6
+Stopped at: Completed 06-01-PLAN.md (Dashboard Cleanup)
 Resume file: None
