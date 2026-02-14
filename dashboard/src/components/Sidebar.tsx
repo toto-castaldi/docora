@@ -2,7 +2,6 @@ import { NavLink } from "react-router";
 import {
   LayoutDashboard,
   Boxes,
-  GitBranch,
   AlertCircle,
   Clock,
   LogOut,
@@ -19,7 +18,6 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Overview" },
   { to: "/apps", icon: Boxes, label: "Apps" },
-  { to: "/repositories", icon: GitBranch, label: "Repositories" },
   { to: "/notifications", icon: AlertCircle, label: "Notifications" },
   { to: "/queue", icon: Clock, label: "Queue" },
 ];
