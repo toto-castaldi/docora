@@ -24,7 +24,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 
 **Milestone Goal:** Improve dashboard UX, add client-facing failure notifications, enable token management, and revamp the documentation site.
 
-- [ ] **Phase 6: Dashboard Cleanup** - Remove redundant repositories page and its backend endpoints
+- [x] **Phase 6: Dashboard Cleanup** - Remove redundant repositories page and its backend endpoints — completed 2026-02-14
 - [ ] **Phase 7: Token Management** - Enable apps to update GitHub tokens without re-registering
 - [ ] **Phase 8: Failure Notifications** - Notify apps when sync fails via circuit breaker
 - [ ] **Phase 9: Documentation Site** - Revamp docs into homepage, API docs, and webhook docs
@@ -43,7 +43,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 **Plans**: 1 plan
 
 Plans:
-- [ ] 06-01-PLAN.md --- Remove repositories page (frontend + backend) and all dead code
+- [x] 06-01-PLAN.md --- Remove repositories page (frontend + backend) and all dead code — completed 2026-02-14
 
 ### Phase 7: Token Management
 **Goal**: Apps can rotate or update their GitHub token for private repositories without losing delivery history or re-registering
@@ -100,7 +100,7 @@ Phases 6, 7, 8 are independent and can execute in any order. Phase 9 executes la
 | 3. Retry Operations & Actions | v1.0 | 6/6 | Complete | 2026-02-08 |
 | 4. Enhanced Visibility | v1.0 | 5/5 | Complete | 2026-02-13 |
 | 5. Production Hardening | v1.0 | 2/2 | Complete | 2026-02-13 |
-| 6. Dashboard Cleanup | v1.1 | 0/1 | Not started | - |
+| 6. Dashboard Cleanup | v1.1 | 1/1 | Complete | 2026-02-14 |
 | 7. Token Management | v1.1 | 0/TBD | Not started | - |
 | 8. Failure Notifications | v1.1 | 0/TBD | Not started | - |
 | 9. Documentation Site | v1.1 | 0/TBD | Not started | - |
