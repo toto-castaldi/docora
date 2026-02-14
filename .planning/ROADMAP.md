@@ -40,10 +40,10 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
   2. Navigating to the old repositories page URL returns a 404 or redirects to overview
   3. Admin API no longer exposes global repository listing endpoints (GET /api/admin/repositories returns 404)
   4. App detail page still shows its repositories correctly (no regression)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md --- Remove repositories page (frontend + backend) and all dead code
 
 ### Phase 7: Token Management
 **Goal**: Apps can rotate or update their GitHub token for private repositories without losing delivery history or re-registering
@@ -100,7 +100,7 @@ Phases 6, 7, 8 are independent and can execute in any order. Phase 9 executes la
 | 3. Retry Operations & Actions | v1.0 | 6/6 | Complete | 2026-02-08 |
 | 4. Enhanced Visibility | v1.0 | 5/5 | Complete | 2026-02-13 |
 | 5. Production Hardening | v1.0 | 2/2 | Complete | 2026-02-13 |
-| 6. Dashboard Cleanup | v1.1 | 0/TBD | Not started | - |
+| 6. Dashboard Cleanup | v1.1 | 0/1 | Not started | - |
 | 7. Token Management | v1.1 | 0/TBD | Not started | - |
 | 8. Failure Notifications | v1.1 | 0/TBD | Not started | - |
 | 9. Documentation Site | v1.1 | 0/TBD | Not started | - |
