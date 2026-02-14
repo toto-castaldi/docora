@@ -38,7 +38,15 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 
 ### Active
 
-(No active requirements — define next milestone with `/gsd:new-milestone`)
+## Current Milestone: v1.1 Polish & Resilience
+
+**Goal:** Improve dashboard UX, add client-facing failure notifications, enable token management, and revamp the documentation site.
+
+**Target features:**
+- Remove redundant repositories admin page (info already in app detail)
+- Add API endpoint to update GitHub token for private repos without re-registering
+- Send sync_failed notification to apps when circuit breaker opens
+- Revamp Docora docs site: homepage + API docs + webhook docs (3 sections)
 
 ### Out of Scope
 
@@ -53,7 +61,7 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 
 ## Context
 
-**Current state:** v1.0 shipped (2026-02-13). Dashboard fully operational with 5 phases, 25 plans executed in 1.52 hours.
+**Current state:** v1.1 started (2026-02-14). v1.0 dashboard shipped. Now focusing on polish, resilience, and documentation.
 
 **Codebase:**
 - ~7,094 LOC total (4,631 frontend React/TypeScript + 2,463 backend TypeScript)
@@ -90,4 +98,4 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 | Single ErrorBoundary with route-based reset | Simple, resets on navigation | ✓ Good — v1.0 |
 
 ---
-*Last updated: 2026-02-13 after v1.0 milestone*
+*Last updated: 2026-02-14 after v1.1 milestone start*
