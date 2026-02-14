@@ -11,11 +11,9 @@ export type {
   RepositoryWithStatus,
   FailedNotificationResult,
   ListParams,
-  RepoListParams,
 } from "./admin-dashboard-types.js";
 export {
   listAppsWithCounts,
-  listAllRepositories,
   listFailedNotifications,
 } from "./admin-dashboard-lists.js";
 
