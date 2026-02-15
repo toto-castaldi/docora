@@ -244,6 +244,21 @@ body {
   color: var(--color-gray);
 }
 
+.badge-get {
+  background: #4caf50;
+  color: var(--color-white);
+}
+
+.badge-delete {
+  background: var(--color-coral);
+  color: var(--color-white);
+}
+
+.badge-patch {
+  background: var(--color-violet);
+  color: var(--color-white);
+}
+
 /* Endpoint blocks */
 .endpoint {
   background: var(--color-light);
