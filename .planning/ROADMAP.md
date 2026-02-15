@@ -54,10 +54,10 @@ Plans:
   2. Token update is rejected with a clear error if the new token cannot access the repository on GitHub
   3. After a successful token update, the repository's error state (retry count, last error, circuit breaker) is reset to clean
   4. Existing notification and snapshot behavior continues to work with the new token
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 07-01: TBD
+- [ ] 07-01-PLAN.md --- Add PATCH /api/repositories/:repository_id/token endpoint with GitHub validation and error state reset
 
 ### Phase 8: Failure Notifications
 **Goal**: Apps are proactively informed when Docora cannot sync a watched repository, using the same trusted webhook mechanism as file notifications
@@ -101,6 +101,6 @@ Phases 6, 7, 8 are independent and can execute in any order. Phase 9 executes la
 | 4. Enhanced Visibility | v1.0 | 5/5 | Complete | 2026-02-13 |
 | 5. Production Hardening | v1.0 | 2/2 | Complete | 2026-02-13 |
 | 6. Dashboard Cleanup | v1.1 | 1/1 | Complete | 2026-02-14 |
-| 7. Token Management | v1.1 | 0/TBD | Not started | - |
+| 7. Token Management | v1.1 | 0/1 | Not started | - |
 | 8. Failure Notifications | v1.1 | 0/TBD | Not started | - |
 | 9. Documentation Site | v1.1 | 0/TBD | Not started | - |
