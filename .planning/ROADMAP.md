@@ -26,7 +26,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 
 - [x] **Phase 6: Dashboard Cleanup** - Remove redundant repositories page and its backend endpoints — completed 2026-02-14
 - [x] **Phase 7: Token Management** - Enable apps to update GitHub tokens without re-registering — completed 2026-02-15
-- [ ] **Phase 8: Failure Notifications** - Notify apps when sync fails via circuit breaker
+- [x] **Phase 8: Failure Notifications** - Notify apps when sync fails via circuit breaker — completed 2026-02-15
 - [ ] **Phase 9: Documentation Site** - Revamp docs into homepage, API docs, and webhook docs
 
 ## Phase Details
@@ -71,8 +71,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Create failure-notifier service, data access query, and wire into snapshot worker
-- [ ] 08-02-PLAN.md — Document sync_failed webhook in docs-site
+- [x] 08-01-PLAN.md — Create failure-notifier service, data access query, and wire into snapshot worker — completed 2026-02-15
+- [x] 08-02-PLAN.md — Document sync_failed webhook in docs-site — completed 2026-02-15
 
 ### Phase 9: Documentation Site
 **Goal**: Developers integrating with Docora can find clear, navigable documentation covering what Docora is, how to call its API, and what webhooks to expect
@@ -103,5 +103,5 @@ Phases 6, 7, 8 are independent and can execute in any order. Phase 9 executes la
 | 5. Production Hardening | v1.0 | 2/2 | Complete | 2026-02-13 |
 | 6. Dashboard Cleanup | v1.1 | 1/1 | Complete | 2026-02-14 |
 | 7. Token Management | v1.1 | 1/1 | Complete | 2026-02-15 |
-| 8. Failure Notifications | v1.1 | 0/2 | Planning complete | - |
+| 8. Failure Notifications | v1.1 | 2/2 | Complete | 2026-02-15 |
 | 9. Documentation Site | v1.1 | 0/TBD | Not started | - |
