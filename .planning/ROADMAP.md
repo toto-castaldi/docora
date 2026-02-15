@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Docora Admin Dashboard** — Phases 1-5 (shipped 2026-02-13)
-- **v1.1 Polish & Resilience** — Phases 6-9 (in progress)
+- ✅ **v1.1 Polish & Resilience** — Phases 6-9 (shipped 2026-02-15)
 
 ## Phases
 
@@ -20,14 +20,14 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 
 </details>
 
-### v1.1 Polish & Resilience (In Progress)
+### v1.1 Polish & Resilience — SHIPPED 2026-02-15
 
 **Milestone Goal:** Improve dashboard UX, add client-facing failure notifications, enable token management, and revamp the documentation site.
 
 - [x] **Phase 6: Dashboard Cleanup** - Remove redundant repositories page and its backend endpoints — completed 2026-02-14
 - [x] **Phase 7: Token Management** - Enable apps to update GitHub tokens without re-registering — completed 2026-02-15
 - [x] **Phase 8: Failure Notifications** - Notify apps when sync fails via circuit breaker — completed 2026-02-15
-- [ ] **Phase 9: Documentation Site** - Revamp docs into homepage, API docs, and webhook docs
+- [x] **Phase 9: Documentation Site** - Revamp docs into homepage, API docs, and webhook docs — completed 2026-02-15
 
 ## Phase Details
 
@@ -87,8 +87,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md --- Multi-page Hugo structure, homepage content, and navigation
-- [ ] 09-02-PLAN.md --- API documentation page and webhook docs restructure
+- [x] 09-01-PLAN.md --- Multi-page Hugo structure, homepage content, and navigation — completed 2026-02-15
+- [x] 09-02-PLAN.md --- API documentation page and webhook docs restructure — completed 2026-02-15
 
 ## Progress
 
@@ -105,4 +105,4 @@ Phases 6, 7, 8 are independent and can execute in any order. Phase 9 executes la
 | 6. Dashboard Cleanup | v1.1 | 1/1 | Complete | 2026-02-14 |
 | 7. Token Management | v1.1 | 1/1 | Complete | 2026-02-15 |
 | 8. Failure Notifications | v1.1 | 2/2 | Complete | 2026-02-15 |
-| 9. Documentation Site | v1.1 | 0/TBD | Not started | - |
+| 9. Documentation Site | v1.1 | 2/2 | Complete | 2026-02-15 |
