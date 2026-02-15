@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** See failures before clients report them, and fix them with one click.
-**Current focus:** v1.1 Phase 9 — Documentation Site
+**Current focus:** v1.1 complete
 
 ## Current Position
 
 Phase: 9 of 9 (Documentation Site)
-Plan: 1 of 2 in current phase
-Status: In Progress
-Last activity: 2026-02-15 — Plan 09-01 complete (multi-page site structure with homepage)
+Plan: 2 of 2 in current phase
+Status: Complete
+Last activity: 2026-02-15 — Plan 09-02 complete (API reference and webhook documentation pages)
 
-Progress: [████████████████████████████░░] 90% (25/25 v1.0 complete, 5/6 v1.1 done)
+Progress: [██████████████████████████████] 100% (25/25 v1.0 complete, 6/6 v1.1 done)
 
 ## Performance Metrics
 
@@ -25,9 +25,9 @@ Progress: [███████████████████████
 - Timeline: 38 days (2026-01-06 -> 2026-02-13)
 
 **v1.1 Velocity:**
-- Total plans completed: 5
-- Average duration: 2.5 min
-- Total execution time: 0.20 hours
+- Total plans completed: 6
+- Average duration: 2.6 min
+- Total execution time: 0.25 hours
 
 ## Accumulated Context
 
@@ -45,6 +45,9 @@ Phase 9 decisions:
 - Hugo menu-driven navigation via config.toml [[menu.main]] entries rendered in baseof.html
 - Separate layouts: homepage (hero + features) vs section pages (article + TOC)
 - home-layout class on <main> overrides grid to single column for homepage
+- Webhook content preserved verbatim from git history to avoid documentation drift
+- API docs use same visual style (endpoint divs, badge spans, field tables) as webhook docs
+- Badge colors: GET green (#4caf50), DELETE coral, PATCH violet
 
 Phase 8 decisions:
 - Fire-and-forget pattern for sync_failed: never block worker or BullMQ retry
@@ -73,5 +76,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 09-01-PLAN.md (multi-page site structure with homepage)
+Stopped at: Completed 09-02-PLAN.md (API reference and webhook documentation pages)
 Resume file: None
