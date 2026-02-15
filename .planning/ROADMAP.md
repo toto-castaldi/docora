@@ -84,10 +84,11 @@ Plans:
   3. Webhook documentation covers all four notification types: create, update, delete, and sync_failed
   4. Site has clear navigation allowing users to move between homepage, API docs, and webhook docs
   5. All documented endpoints and webhook payloads match the actual implementation
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: TBD
+- [ ] 09-01-PLAN.md --- Multi-page Hugo structure, homepage content, and navigation
+- [ ] 09-02-PLAN.md --- API documentation page and webhook docs restructure
 
 ## Progress
 
