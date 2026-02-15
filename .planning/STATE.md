@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 8 of 9 (Failure Notifications)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-15 — Phase 7 verified and complete
+Plan: 1 of 2 in current phase
+Status: Executing
+Last activity: 2026-02-15 — Plan 08-01 complete (sync_failed notification service)
 
-Progress: [████████████████████████░░░░░░] 76% (25/25 v1.0 complete, 2/4 v1.1 done)
+Progress: [█████████████████████████░░░░░] 79% (25/25 v1.0 complete, 3/4 v1.1 done)
 
 ## Performance Metrics
 
@@ -25,9 +25,9 @@ Progress: [███████████████████████
 - Timeline: 38 days (2026-01-06 -> 2026-02-13)
 
 **v1.1 Velocity:**
-- Total plans completed: 2
-- Average duration: 3 min
-- Total execution time: 0.10 hours
+- Total plans completed: 3
+- Average duration: 2.7 min
+- Total execution time: 0.13 hours
 
 ## Accumulated Context
 
@@ -40,6 +40,12 @@ v1.1 context from codebase analysis:
 - PATCH /api/repositories/:repository_id/token endpoint added (07-01)
 - Circuit breaker logic in `src/repositories/repositories.ts` (recordGitFailure)
 - Docs site is Hugo-based in `docs-site/` with single page at `docs-site/content/_index.md`
+
+Phase 8 decisions:
+- Fire-and-forget pattern for sync_failed: never block worker or BullMQ retry
+- Circuit breaker env vars read in worker directly (avoid coupling to repositories.ts)
+- Sequential notification delivery to avoid overwhelming client endpoints
+- 10s timeout for sync_failed POST (lightweight payload)
 
 Phase 7 decisions:
 - Status reset to pending_snapshot on token update to trigger fresh scan
@@ -61,5 +67,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Phase 7 complete, ready to plan Phase 8
+Stopped at: Completed 08-01-PLAN.md (sync_failed notification service)
 Resume file: None
