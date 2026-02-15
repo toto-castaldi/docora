@@ -10,7 +10,7 @@ title: "Webhook API"
 
 ## Overview
 
-When you register a repository with Docora, your application will receive HTTP POST requests whenever files are created, updated, or deleted. Your application must expose three endpoints to handle these events.
+When you register a repository with Docora, your application will receive HTTP POST requests whenever files are created, updated, or deleted. If Docora detects persistent sync failures for a repository, it sends a sync_failed alert. Your application must expose four endpoints to handle these events.
 
 ### How It Works
 
@@ -18,6 +18,7 @@ When you register a repository with Docora, your application will receive HTTP P
 2. You register one or more GitHub repositories to monitor
 3. Docora scans the repository and sends initial file notifications
 4. On subsequent changes, Docora sends create/update/delete notifications
+5. If syncing fails repeatedly, Docora sends a sync_failed alert so you can take action
 
 ---
 
@@ -95,13 +96,14 @@ function verifySignature(req, clientAuthKey) {
 
 ## Endpoints
 
-Your application must expose these three endpoints at your registered `base_url`:
+Your application must expose these endpoints at your registered `base_url`:
 
 | Endpoint | Description |
 |----------|-------------|
 | `POST {base_url}/create` | New file detected |
 | `POST {base_url}/update` | Existing file modified |
 | `POST {base_url}/delete` | File removed |
+| `POST {base_url}/sync_failed` | Repository sync failure alert |
 
 ### POST /create
 
@@ -188,6 +190,74 @@ Called when a file is removed from the repository.
   "timestamp": "2025-01-11T12:00:00.000Z"
 }
 ```
+
+### POST /sync_failed
+
+Called when Docora's circuit breaker opens for a watched repository after consecutive git sync failures. This is a proactive alert — your app does not need to poll for failures.
+
+<div class="endpoint">
+<span class="badge badge-post">POST</span> <code>{base_url}/sync_failed</code>
+</div>
+
+#### When It Fires
+
+- After consecutive git failures reach the configured threshold (default: 5), the circuit breaker opens
+- **All** apps watching the affected repository receive the notification
+- The circuit breaker has a cooldown period (default: 30 minutes) before Docora retries syncing
+
+#### Request Body
+
+```json
+{
+  "event": "sync_failed",
+  "repository": {
+    "repository_id": "repo_abc123",
+    "github_url": "https://github.com/owner/repo",
+    "owner": "owner",
+    "name": "repo"
+  },
+  "error": {
+    "type": "git_failure",
+    "message": "Authentication failed for 'https://github.com/owner/repo.git'"
+  },
+  "circuit_breaker": {
+    "status": "open",
+    "consecutive_failures": 5,
+    "threshold": 5,
+    "cooldown_until": "2024-01-15T12:30:00.000Z"
+  },
+  "retry_count": 3,
+  "timestamp": "2024-01-15T12:00:00.000Z"
+}
+```
+
+#### Payload Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `event` | string | Always `"sync_failed"` |
+| `repository` | object | The repository that failed to sync (same shape as file notification payloads) |
+| `error.type` | string | Error classification (currently always `"git_failure"`) |
+| `error.message` | string | Detailed error message from the git operation |
+| `circuit_breaker.status` | string | Always `"open"` (notification only fires when circuit opens) |
+| `circuit_breaker.consecutive_failures` | number | Number of consecutive failures that triggered the circuit |
+| `circuit_breaker.threshold` | number | Configured failure threshold (default 5) |
+| `circuit_breaker.cooldown_until` | string | ISO 8601 timestamp when Docora will retry syncing |
+| `retry_count` | number | Number of retries attempted for this app-repository pair |
+| `timestamp` | string | ISO 8601 timestamp when the notification was generated |
+
+#### Recommended Actions
+
+When your application receives a `sync_failed` notification:
+
+1. **Check if the GitHub token needs rotation** — this is the most common cause (expired or revoked token)
+2. **Verify the repository still exists** and is accessible on GitHub
+3. **Update the token** using the `PATCH /api/repositories/:repository_id/token` endpoint
+4. **Wait for automatic retry** — after the cooldown period, Docora will automatically retry syncing
+
+<div class="alert alert-info">
+<strong>Authentication:</strong> This endpoint uses the same HMAC-SHA256 signature verification as all other Docora webhooks. See the <a href="#authentication">Authentication</a> section above.
+</div>
 
 ---
 
