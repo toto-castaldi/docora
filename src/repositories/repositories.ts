@@ -541,6 +541,37 @@ export async function isRepositoryOrphan(
 }
 
 /**
+ * Find all apps watching a given repository.
+ * Used by failure-notifier to send sync_failed webhooks.
+ */
+export async function findAppsWatchingRepository(
+  repositoryId: string
+): Promise<
+  Array<{
+    app_id: string;
+    app_name: string;
+    base_url: string;
+    client_auth_key_encrypted: string;
+    retry_count: number;
+  }>
+> {
+  const db = getDatabase();
+
+  return db
+    .selectFrom("app_repositories")
+    .innerJoin("apps", "apps.app_id", "app_repositories.app_id")
+    .select([
+      "app_repositories.app_id",
+      "apps.app_name",
+      "apps.base_url",
+      "apps.client_auth_key_encrypted",
+      "app_repositories.retry_count",
+    ])
+    .where("app_repositories.repository_id", "=", repositoryId)
+    .execute();
+}
+
+/**
  * Delete a repository and its snapshots from the database.
  * Should only be called after verifying the repository is orphan.
  */
