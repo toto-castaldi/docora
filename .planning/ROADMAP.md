@@ -25,7 +25,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 **Milestone Goal:** Improve dashboard UX, add client-facing failure notifications, enable token management, and revamp the documentation site.
 
 - [x] **Phase 6: Dashboard Cleanup** - Remove redundant repositories page and its backend endpoints — completed 2026-02-14
-- [ ] **Phase 7: Token Management** - Enable apps to update GitHub tokens without re-registering
+- [x] **Phase 7: Token Management** - Enable apps to update GitHub tokens without re-registering — completed 2026-02-15
 - [ ] **Phase 8: Failure Notifications** - Notify apps when sync fails via circuit breaker
 - [ ] **Phase 9: Documentation Site** - Revamp docs into homepage, API docs, and webhook docs
 
@@ -57,7 +57,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 07-01-PLAN.md --- Add PATCH /api/repositories/:repository_id/token endpoint with GitHub validation and error state reset
+- [x] 07-01-PLAN.md --- Add PATCH /api/repositories/:repository_id/token endpoint with GitHub validation and error state reset — completed 2026-02-15
 
 ### Phase 8: Failure Notifications
 **Goal**: Apps are proactively informed when Docora cannot sync a watched repository, using the same trusted webhook mechanism as file notifications
@@ -101,6 +101,6 @@ Phases 6, 7, 8 are independent and can execute in any order. Phase 9 executes la
 | 4. Enhanced Visibility | v1.0 | 5/5 | Complete | 2026-02-13 |
 | 5. Production Hardening | v1.0 | 2/2 | Complete | 2026-02-13 |
 | 6. Dashboard Cleanup | v1.1 | 1/1 | Complete | 2026-02-14 |
-| 7. Token Management | v1.1 | 0/1 | Not started | - |
+| 7. Token Management | v1.1 | 1/1 | Complete | 2026-02-15 |
 | 8. Failure Notifications | v1.1 | 0/TBD | Not started | - |
 | 9. Documentation Site | v1.1 | 0/TBD | Not started | - |
