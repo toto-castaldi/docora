@@ -20,6 +20,7 @@ import {
   type RepositoryInfo,
 } from "../services/notifier.js";
 import { sendFileWithChunking } from "../services/chunked-notifier.js";
+import { sendSyncFailedNotification } from "../services/failure-notifier.js";
 
 import { saveSnapshot } from "../repositories/snapshots.js";
 import {
@@ -196,6 +197,28 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       console.error(
         `${logPrefix} Git failures: ${consecutiveFailures}/5${circuitOpened ? " — Circuit breaker OPENED" : ""}`
       );
+
+      if (circuitOpened) {
+        const cbThreshold = parseInt(process.env.CIRCUIT_BREAKER_THRESHOLD || "5", 10);
+        const cbCooldownMs = parseInt(process.env.CIRCUIT_BREAKER_COOLDOWN_MS || "1800000", 10);
+
+        sendSyncFailedNotification({
+          repositoryId: repository_id,
+          githubUrl: github_url,
+          owner,
+          name,
+          errorMessage: (gitError as Error).message ?? String(gitError),
+          consecutiveFailures,
+          threshold: cbThreshold,
+          cooldownUntil: new Date(Date.now() + cbCooldownMs),
+        }).catch((err) => {
+          console.error(
+            `${logPrefix} Failed to send sync_failed notifications:`,
+            (err as Error).message
+          );
+        });
+      }
+
       throw gitError;
     }
 

@@ -16,13 +16,15 @@
         <span>Docora</span>
       </a>
       <nav class="nav">
-        <a href="https://api.docora.toto-castaldi.com/docs" target="_blank">API</a>
-        <a href="https://github.com/toto-castaldi/docora" target="_blank">GitHub</a>
+        {{ range .Site.Menus.main }}
+        <a href="{{ .URL }}" class="nav-link{{ if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }} nav-active{{ end }}">{{ .Name }}</a>
+        {{ end }}
+        <a href="https://github.com/toto-castaldi/docora" target="_blank" class="nav-link">GitHub</a>
       </nav>
     </div>
   </header>
 
-  <main class="main">
+  <main class="main{{ if .IsHome }} home-layout{{ end }}">
     <div class="container">
       {{ block "main" . }}{{ end }}
     </div>

@@ -48,6 +48,3 @@ export interface ListParams {
   search: string;
 }
 
-export interface RepoListParams extends ListParams {
-  status?: string;
-}

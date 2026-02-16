@@ -1,7 +1,6 @@
 import type {
   AppSummary,
   AppDetail,
-  RepositorySummary,
   QueueStatus,
   QueueJob,
   FailedNotification,
@@ -100,13 +99,6 @@ export async function fetchApps(
 
 export async function fetchAppDetail(appId: string): Promise<AppDetail> {
   return fetchApi<AppDetail>(`/api/apps/${appId}`);
-}
-
-export async function fetchRepositories(
-  params?: ListQueryOptions & { status?: string }
-): Promise<PaginatedResponse<RepositorySummary>> {
-  const qs = buildQueryString(params ?? {});
-  return fetchApi<PaginatedResponse<RepositorySummary>>(`/api/repositories${qs}`);
 }
 
 export async function fetchQueue(): Promise<{

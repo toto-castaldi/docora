@@ -8,7 +8,6 @@ import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { Apps } from "./pages/Apps";
 import { AppDetail } from "./pages/AppDetail";
-import { Repositories } from "./pages/Repositories";
 import { Notifications } from "./pages/Notifications";
 import { Queue } from "./pages/Queue";
 
@@ -24,7 +23,6 @@ function ErrorBoundaryRoutes() {
               <Route index element={<Dashboard />} />
               <Route path="apps" element={<Apps />} />
               <Route path="apps/:appId" element={<AppDetail />} />
-              <Route path="repositories" element={<Repositories />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="queue" element={<Queue />} />
             </Route>

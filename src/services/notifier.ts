@@ -33,7 +33,7 @@ export interface NotificationResult {
 }
 
 /** Endpoint types for granular notifications */
-export type NotificationEndpoint = "create" | "update" | "delete";
+export type NotificationEndpoint = "create" | "update" | "delete" | "sync_failed";
 
 /** File data in notification payload */
 export interface FilePayloadData {

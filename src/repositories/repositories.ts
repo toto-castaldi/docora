@@ -452,6 +452,40 @@ export async function resetGitFailures(repositoryId: string): Promise<void> {
 }
 
 /**
+ * Update the GitHub token for an app-repository link.
+ * Encrypts the new token, resets error state, and resets circuit breaker.
+ * Delivery history is preserved by design.
+ */
+export async function updateGithubToken(
+  appId: string,
+  repositoryId: string,
+  githubToken: string
+): Promise<boolean> {
+  const db = getDatabase();
+
+  const encrypted = encryptToken(githubToken);
+
+  const result = await db
+    .updateTable("app_repositories")
+    .set({
+      github_token_encrypted: encrypted,
+      retry_count: 0,
+      last_error: null,
+      status: "pending_snapshot",
+    })
+    .where("app_id", "=", appId)
+    .where("repository_id", "=", repositoryId)
+    .executeTakeFirst();
+
+  if (!result.numUpdatedRows || result.numUpdatedRows === BigInt(0)) {
+    return false;
+  }
+
+  await resetGitFailures(repositoryId);
+  return true;
+}
+
+/**
  * Unlink an app from a repository.
  * Returns the repository info if unlinked, null if link didn't exist.
  */
@@ -504,6 +538,37 @@ export async function isRepositoryOrphan(
     .executeTakeFirst();
 
   return (result?.count ?? 0) === 0;
+}
+
+/**
+ * Find all apps watching a given repository.
+ * Used by failure-notifier to send sync_failed webhooks.
+ */
+export async function findAppsWatchingRepository(
+  repositoryId: string
+): Promise<
+  Array<{
+    app_id: string;
+    app_name: string;
+    base_url: string;
+    client_auth_key_encrypted: string;
+    retry_count: number;
+  }>
+> {
+  const db = getDatabase();
+
+  return db
+    .selectFrom("app_repositories")
+    .innerJoin("apps", "apps.app_id", "app_repositories.app_id")
+    .select([
+      "app_repositories.app_id",
+      "apps.app_name",
+      "apps.base_url",
+      "apps.client_auth_key_encrypted",
+      "app_repositories.retry_count",
+    ])
+    .where("app_repositories.repository_id", "=", repositoryId)
+    .execute();
 }
 
 /**

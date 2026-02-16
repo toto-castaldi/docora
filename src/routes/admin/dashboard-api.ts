@@ -1,7 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { ApiErrorResponse } from "@docora/shared-types";
 import { appsRoutes } from "./dashboard-api-apps.js";
-import { reposRoutes } from "./dashboard-api-repos.js";
 import { notificationsRoutes } from "./dashboard-api-notifications.js";
 import { queueRoutes } from "./dashboard-api-queue.js";
 
@@ -19,7 +18,6 @@ export async function dashboardApiRoutes(
 
   // Register sub-route plugins
   await server.register(appsRoutes);
-  await server.register(reposRoutes);
   await server.register(notificationsRoutes);
   await server.register(queueRoutes);
 }

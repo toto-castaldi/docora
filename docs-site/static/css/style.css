@@ -244,6 +244,21 @@ body {
   color: var(--color-gray);
 }
 
+.badge-get {
+  background: #4caf50;
+  color: var(--color-white);
+}
+
+.badge-delete {
+  background: var(--color-coral);
+  color: var(--color-white);
+}
+
+.badge-patch {
+  background: var(--color-violet);
+  color: var(--color-white);
+}
+
 /* Endpoint blocks */
 .endpoint {
   background: var(--color-light);
@@ -358,4 +373,152 @@ body {
 .alert-important {
   background: rgba(255, 112, 97, 0.1);
   border-left: 4px solid var(--color-coral);
+}
+
+/* Navigation active state */
+.nav-link {
+  color: var(--color-gray);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--color-violet);
+}
+
+.nav-active {
+  color: var(--color-violet);
+  font-weight: 600;
+}
+
+/* Homepage layout — single column (no TOC sidebar) */
+.home-layout .container {
+  grid-template-columns: 1fr;
+}
+
+.home-layout {
+  padding: 0;
+}
+
+/* Hero section */
+.hero {
+  background: linear-gradient(135deg, var(--color-violet) 0%, #7B4BB9 100%);
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.hero h1 {
+  color: var(--color-white);
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.hero-subtitle {
+  color: var(--color-white);
+  opacity: 0.9;
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Features section */
+.features {
+  max-width: 800px;
+  margin: 3rem auto;
+  padding: 0 2rem;
+}
+
+.features h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-dark);
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.features h2:first-child {
+  margin-top: 0;
+}
+
+.features p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.features ul,
+.features ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.features li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.features strong {
+  font-weight: 600;
+}
+
+.features code {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: 0.875rem;
+  background: var(--color-light);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+}
+
+/* Get Started cards */
+.get-started {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.get-started-card {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: var(--color-dark);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.get-started-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--color-violet);
+}
+
+.get-started-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-violet);
+  margin-bottom: 0.5rem;
+}
+
+.get-started-card p {
+  font-size: 0.95rem;
+  color: var(--color-gray);
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .get-started {
+    flex-direction: column;
+  }
 }

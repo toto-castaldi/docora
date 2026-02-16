@@ -72,6 +72,30 @@ export const NoContentSchema = z.undefined().openapi({
   description: "No Content - Successfully processed",
 });
 
+export const UpdateTokenRequestSchema = z
+  .object({
+    github_token: z
+      .string()
+      .regex(
+        /^(ghp_|github_pat_)/,
+        "Must be a valid GitHub token (starts with ghp_ or github_pat_)"
+      )
+      .max(255)
+      .openapi({
+        description: "New GitHub personal access token",
+        example: "ghp_xxxxxxxxxxxx",
+      }),
+  })
+  .openapi("UpdateTokenRequest");
+
+export const UpdateTokenResponseSchema = z
+  .object({
+    message: z
+      .string()
+      .openapi({ example: "Token updated successfully" }),
+  })
+  .openapi("UpdateTokenResponse");
+
 export type RegisterRepositoryRequest = z.infer<
   typeof RegisterRepositoryRequestSchema
 >;
@@ -80,3 +104,5 @@ export type RegisterRepositoryResponse = z.infer<
 >;
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 export type RepositoryParams = z.infer<typeof RepositoryParamsSchema>;
+export type UpdateTokenRequest = z.infer<typeof UpdateTokenRequestSchema>;
+export type UpdateTokenResponse = z.infer<typeof UpdateTokenResponseSchema>;
