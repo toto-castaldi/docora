@@ -32,9 +32,9 @@ Your application registers repositories to watch. Docora handles the scanning, c
 ## Get Started
 
 <div class="get-started">
-  <a href="/api/" class="get-started-card">
+  <a href="/docs" class="get-started-card">
     <h3>API Documentation</h3>
-    <p>Learn how to register your app and manage repositories</p>
+    <p>Interactive API reference powered by Swagger UI</p>
   </a>
   <a href="/webhooks/" class="get-started-card">
     <h3>Webhook Reference</h3>

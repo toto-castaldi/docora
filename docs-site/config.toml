@@ -13,13 +13,18 @@ title = "Docora Documentation"
 
 [[menu.main]]
   name = "API"
-  url = "/api/"
+  url = "/docs"
   weight = 2
 
 [[menu.main]]
   name = "Webhooks"
   url = "/webhooks/"
   weight = 3
+
+[[menu.main]]
+  name = "Admin"
+  url = "/admin"
+  weight = 4
 
 [markup]
   [markup.highlight]
