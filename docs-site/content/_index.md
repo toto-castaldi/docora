@@ -34,10 +34,10 @@ Your application registers repositories to watch. Docora handles the scanning, c
 <div class="get-started">
   <a href="/docs" class="get-started-card">
     <h3>API Documentation</h3>
-    <p>Interactive API reference powered by Swagger UI</p>
+    <p>YOU call Docora</p>
   </a>
   <a href="/webhooks/" class="get-started-card">
     <h3>Webhook Reference</h3>
-    <p>Understand the notifications Docora sends to your app</p>
+    <p>Docora calls your App</p>
   </a>
 </div>

@@ -6,7 +6,7 @@ title: "Webhook Reference"
 <p>Docora sends real-time HTTP POST notifications to your application when repository files change or sync failures occur. This page covers the webhook endpoints your app must implement.</p>
 </div>
 
-To register your app and start receiving webhooks, see the [API Documentation](/api/).
+To register your app and start receiving webhooks, see the [API Documentation](/docs).
 
 ## Overview
 
