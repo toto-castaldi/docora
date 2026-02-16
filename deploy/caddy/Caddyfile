@@ -8,6 +8,14 @@
         reverse_proxy docora-api:3000
     }
 
+    handle /docs* {
+        reverse_proxy docora-api:3000
+    }
+
+    handle /openapi.json {
+        reverse_proxy docora-api:3000
+    }
+
     handle {
         reverse_proxy docora-docs:80
     }
