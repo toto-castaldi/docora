@@ -8,7 +8,7 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
-import { registerSwagger } from "./plugins/swagger.js";
+import { registerSwagger, PUBLIC_DOCS_ROUTE } from "./plugins/swagger.js";
 import authPlugin from "./plugins/auth.js";
 import adminAuthPlugin from "./plugins/admin-auth.js";
 import { adminRoutes } from "./routes/admin/index.js";
@@ -26,13 +26,14 @@ export async function buildServer(): Promise<FastifyInstance> {
   server.setSerializerCompiler(serializerCompiler);
 
   //security headers (CSP, XSS, clickjacking protection)
+  //Swagger UI needs 'unsafe-inline' scripts to initialize — relax CSP for /docs paths
   await server.register(helmet, {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:"],
+        imgSrc: ["'self'", "data:", "https://validator.swagger.io"],
         connectSrc: ["'self'"],
         fontSrc: ["'self'"],
         objectSrc: ["'none'"],
@@ -41,6 +42,15 @@ export async function buildServer(): Promise<FastifyInstance> {
         formAction: ["'self'"],
       },
     },
+  });
+
+  // Relax CSP for Swagger UI — needs inline scripts to render
+  server.addHook("onRequest", async (request, reply) => {
+    if (request.url.startsWith(PUBLIC_DOCS_ROUTE)) {
+      reply.header("Content-Security-Policy",
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://validator.swagger.io; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+      );
+    }
   });
   //allows cross-origin requests
   await server.register(cors, {
