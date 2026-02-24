@@ -1,259 +1,295 @@
 # Stack Research
 
-**Domain:** React Admin Dashboard for Fastify Backend (Monorepo Integration)
-**Researched:** 2026-01-26
+**Domain:** v1.2 Hardening — Git race condition fix, admin-only onboarding, app cascade delete
+**Researched:** 2026-02-24
 **Confidence:** HIGH
 
-## Executive Summary
+## Verdict: No New Core Dependencies Required
 
-For adding an admin monitoring dashboard to Docora (existing Fastify/TypeScript/PostgreSQL backend), the recommended stack is **Vite + React 19 + shadcn/ui + TanStack Query/Table** served via `@fastify/static`. This stack aligns with the existing pnpm-based project and provides modern, type-safe tooling with excellent developer experience.
+The three v1.2 features are implementable entirely within the existing stack. One optional
+library (`async-mutex`) is recommended for the race condition fix. Cascade delete and admin
+auth protection require zero new libraries — only a Liquibase migration and a route change.
 
-Key principles:
-- **Custom dashboard over framework** - react-admin/refine are overkill for a simple monitoring dashboard
-- **Headless components** - shadcn/ui provides flexibility without vendor lock-in
-- **TanStack ecosystem** - Query for data fetching, Table for data grids, unified approach
-- **Monorepo via pnpm workspaces** - Leverages existing pnpm setup
+---
 
-## Recommended Stack
+## Feature 1: Race Condition Fix (Git Clone Mutex)
 
-### Core Technologies
+### Problem
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| React | ^19.2.0 | UI framework | Latest stable with concurrent rendering, Activity component for performance. React 19.2.3 released Dec 2025. | HIGH |
-| Vite | ^6.0.0 | Build tool | 5x faster builds than v5, first-party plugin ecosystem, replaced CRA as standard. Tailwind v4 has native Vite plugin. | HIGH |
-| TypeScript | ^5.9.0 | Type safety | Already in Docora (5.9.3). Zod v4 tested against TS 5.5+. | HIGH |
-| Tailwind CSS | ^4.0.0 | Styling | CSS-first config (no JS config file), Oxide engine 100x faster incremental builds. Released Jan 2025. | HIGH |
-| shadcn/ui | latest | UI components | Not a dependency - copies component source into project. Built on Radix primitives + Tailwind. Full ownership/customization. | HIGH |
+`cloneOrPull()` in `src/services/git.ts` has no concurrency guard. BullMQ runs up to 5
+concurrent jobs in the same Node.js event loop (async interleaving, not OS threads). When
+two apps both watch the same repository, two jobs can enter `cloneOrPull()` for the same
+local path simultaneously:
 
-### Data Layer
+- Job A checks `existsSync(join(localPath, ".git"))` → false, proceeds to clone
+- Job B checks the same path → false (A hasn't finished yet), also proceeds to clone
+- Both call `git.clone()` to the same directory → filesystem corruption or EEXIST error
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| TanStack Query | ^5.90.0 | Server state | De facto standard for async data. Auto-caching, background refetch, devtools. v5.90.20 released Jan 2025. | HIGH |
-| TanStack Table | ^8.21.0 | Data tables | Headless table with sorting, filtering, pagination. shadcn/ui uses this for data-table component. v8.21.3 released Apr 2025. | HIGH |
-| Zustand | ^5.0.10 | Client state | Minimal API, ~2KB. Perfect for UI state (sidebar open, theme). Use with TanStack Query for server state. Released Jan 2025. | HIGH |
+### Solution: Per-Key In-Process Mutex
 
-### Form & Validation
+Since BullMQ workers share one Node.js event loop (concurrency=5 means 5 interleaved async
+operations, not 5 OS threads), an in-process `Map<string, Mutex>` keyed by repo local path
+is the correct and sufficient solution. No Redis distributed lock is needed unless the
+architecture moves to multiple worker processes on separate machines.
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| React Hook Form | ^7.54.0 | Form handling | Uncontrolled inputs = minimal re-renders. Works seamlessly with shadcn/ui Form component. | HIGH |
-| Zod | ^4.3.0 | Schema validation | Already in Docora backend. Share schemas between frontend/backend for type safety. | HIGH |
-| @hookform/resolvers | ^5.0.0 | RHF + Zod glue | Official integration, automatic type inference from Zod schemas. | HIGH |
+### Recommended Library: `async-mutex`
 
-### Visualization
+**Current version:** 0.5.0 (confirmed from npm registry, 2026-02-24)
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| Recharts | ^3.0.0 | Charts | React-native, SVG-based, composable. v3.0 (mid-2025) improved TypeScript + accessibility. Ideal for admin dashboards with moderate data. | MEDIUM |
-| Lucide React | ^0.562.0 | Icons | Used by shadcn/ui. 1,667 tree-shakable icons. Clean, consistent aesthetic. | HIGH |
+**Why async-mutex:**
+- Zero runtime dependencies (only tslib as peer, already transitively present)
+- Native TypeScript types — no `@types/` package needed
+- `runExclusive()` automatically releases the lock on resolve OR reject (no finally blocks)
+- `Mutex` API is minimal: construct once, call `runExclusive`, done
+- MIT license, active maintenance
 
-### Backend Integration
+**Why NOT async-lock v1.4.1:**
+- JavaScript-only library, no built-in TypeScript types
+- Has native per-key locking, but the API is callback-first with awkward async/await wrapping
+- Extra complexity is unwarranted when a `Map<string, Mutex>` with async-mutex achieves the same
 
-| Technology | Version | Purpose | Why Recommended | Confidence |
-|------------|---------|---------|-----------------|------------|
-| @fastify/static | ^8.1.0 | Serve SPA | Serves dashboard build from `/admin`. Compatible with Fastify 5.x. Configure wildcard for SPA routing. | HIGH |
+**Why NOT Redis distributed lock (redlock):**
+- Docora's worker is a single process (concurrency=5 within one event loop)
+- Redis round-trips on every git operation add latency with zero benefit
+- Only warranted if deploying multiple worker processes on different machines
 
-### Development Tools
+### Implementation Pattern
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| Vitest | Testing | Already in Docora. Use for dashboard component tests. |
-| @vitejs/plugin-react-swc | React compilation | SWC-based, faster than Babel alternative. |
-| eslint + prettier | Code quality | Extend existing Docora config. |
+```typescript
+import { Mutex } from "async-mutex";
+
+// Module-level singleton, keyed by repo local path (e.g., "/data/repos/owner/name")
+const repoLocks = new Map<string, Mutex>();
+
+function getRepoMutex(repoPath: string): Mutex {
+  if (!repoLocks.has(repoPath)) {
+    repoLocks.set(repoPath, new Mutex());
+  }
+  return repoLocks.get(repoPath)!;
+}
+
+export async function cloneOrPull(
+  githubUrl: string,
+  owner: string,
+  name: string,
+  githubToken?: string
+): Promise<CloneResult> {
+  const localPath = getLocalRepoPath(owner, name);
+  const mutex = getRepoMutex(localPath);
+
+  return mutex.runExclusive(async () => {
+    // ... existing clone/pull logic unchanged
+  });
+}
+```
+
+With concurrency=5, the Map will hold at most 5 entries at peak. Memory footprint is
+negligible. Locks for repos no longer actively watched persist in memory but are harmless
+(they are released Mutex objects consuming a few bytes each).
+
+---
+
+## Feature 2: Admin-Only Onboarding Endpoint
+
+### Problem
+
+`POST /api/apps/onboard` uses `config: { publicAccess: true }` which bypasses the bearer
+token auth hook in `auth.ts`. Any caller on the internet can register an app. The admin
+session auth in `admin-auth.ts` only protects `/admin/*` routes and does not cover
+`/api/apps/onboard`.
+
+### Solution: Move Route to `/admin/api/` Prefix
+
+No new library needed. The existing admin session infrastructure already covers this.
+
+**Recommended approach: relocate the route**
+
+Change the route URL from `/api/apps/onboard` to `/admin/api/apps/onboard` and remove the
+`config: { publicAccess: true }` flag. The `admin-auth.ts` `onRequest` hook fires for all
+`/admin/*` requests and already checks `request.session?.adminId`. No additional code is
+required.
+
+**Why this approach over per-route preHandler:**
+- The `admin-auth.ts` scoped hook is already the established pattern for admin-only routes
+- Moving to `/admin/api/` communicates intent clearly (this is an admin operation)
+- Avoids mixing admin session checks into bearer-token protected route space
+- The dashboard frontend already calls `/admin/api/*` endpoints — one consistent namespace
+
+**What needs updating:**
+- Route URL in `src/routes/apps/onboard.ts`: `/api/apps/onboard` → `/admin/api/apps/onboard`
+- Route registration in `src/routes/index.ts` or admin routes index
+- Dashboard API client URL in `dashboard/src/api/` (if onboarding is called from dashboard)
+
+### Existing Auth Infrastructure (no changes needed)
+
+| Component | File | Role in v1.2 |
+|-----------|------|--------------|
+| `admin-auth.ts` plugin | `src/plugins/admin-auth.ts` | `onRequest` hook blocks unauthenticated `/admin/*` — zero changes |
+| `@fastify/session` | package.json (already installed) | Session store reads `adminId` from Redis |
+| `@fastify/cookie` | package.json (already installed) | Cookie parsing for session |
+| `IoRedisSessionStore` | `src/plugins/admin-auth.ts` | Custom ioredis-backed session store |
+
+---
+
+## Feature 3: App Deletion with Cascade Cleanup
+
+### Problem
+
+No app deletion exists. Deleting an app requires cleaning up all dependent data:
+1. `app_repositories` rows for the app (per-app repo links)
+2. `app_delivered_files` rows for the app
+3. For each repository that becomes orphan: `repository_snapshots`, `snapshot_files` (cascade from snapshots), `repositories` row
+4. Local git clone — only if no other app watches that repo
+5. Finally the `apps` row itself
+
+### Current FK Cascade State
+
+Verified from existing Liquibase migrations in `deploy/liquibase/changelog/`:
+
+| FK Constraint | Table | Current onDelete | Action Needed |
+|---------------|-------|-----------------|---------------|
+| `fk_app_repositories_app` | `app_repositories.app_id → apps.app_id` | NONE (no cascade) | Add CASCADE |
+| `fk_app_delivered_files_app` | `app_delivered_files.app_id → apps.app_id` | CASCADE (migration 006) | None |
+| `fk_app_delivered_files_repo` | `app_delivered_files.repository_id → repositories.repository_id` | CASCADE (migration 006) | None |
+| `fk_snapshots_repository` | `repository_snapshots.repository_id → repositories.repository_id` | NONE | None (handled in `deleteRepository()`) |
+| `fk_snapshot_files_snapshot` | `snapshot_files.snapshot_id → repository_snapshots.id` | CASCADE via `deleteCascade: true` | None |
+
+### Solution: One Liquibase Migration + Existing Application Logic
+
+**Migration 008:** Drop and re-add `fk_app_repositories_app` with `onDelete: CASCADE`.
+
+After this migration, a single `DELETE FROM apps WHERE app_id = ?` automatically removes
+all `app_repositories` and `app_delivered_files` rows for that app.
+
+The orphan-repository check and local clone deletion must remain in application code because:
+- The "is this repo orphan?" decision requires checking cross-app state
+- Local filesystem cleanup (`deleteLocalRepository`) cannot be expressed in a DB trigger
+- The pattern already exists in `src/services/repository-management.ts`
+
+**Application-level delete flow:**
+
+```typescript
+// Step 1: collect repo links before deletion (need owner/name for local path cleanup)
+const repos = await db
+  .selectFrom("app_repositories")
+  .innerJoin("repositories", "repositories.repository_id", "app_repositories.repository_id")
+  .select(["app_repositories.repository_id", "repositories.owner", "repositories.name"])
+  .where("app_repositories.app_id", "=", appId)
+  .execute();
+
+// Step 2: delete the app — DB cascades to app_repositories and app_delivered_files
+await db.deleteFrom("apps").where("app_id", "=", appId).execute();
+
+// Step 3: for each formerly-linked repo, clean up orphans
+for (const repo of repos) {
+  const orphan = await isRepositoryOrphan(repo.repository_id);
+  if (orphan) {
+    await deleteRepository(repo.repository_id); // removes repository_snapshots + snapshot_files
+    deleteLocalRepository(repo.owner, repo.name); // removes local clone
+  }
+}
+```
+
+No new Kysely APIs required. The existing `deleteFrom`, `selectFrom`, `innerJoin`, and the
+helper functions in `src/repositories/repositories.ts` (`isRepositoryOrphan`,
+`deleteRepository`) and `src/services/git.ts` (`deleteLocalRepository`) cover everything.
+
+### Liquibase Migration 008 (YAML)
+
+Pattern follows `006-app-delivered-files.yml` exactly:
+
+```yaml
+databaseChangeLog:
+  - changeSet:
+      id: 008-app-cascade-delete
+      author: docora
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: app_repositories
+            constraintName: fk_app_repositories_app
+        - addForeignKeyConstraint:
+            baseTableName: app_repositories
+            baseColumnNames: app_id
+            referencedTableName: apps
+            referencedColumnNames: app_id
+            constraintName: fk_app_repositories_app
+            onDelete: CASCADE
+```
+
+---
+
+## New Additions Summary
+
+### Supporting Libraries
+
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| `async-mutex` | 0.5.0 | Per-key in-process mutex for git operations | Required for the race condition fix in `src/services/git.ts` |
+
+### Database Migrations
+
+| Migration | Purpose | Pattern Used |
+|-----------|---------|-------------|
+| `008-app-cascade-delete.yml` | Add `ON DELETE CASCADE` to `fk_app_repositories_app` | `dropForeignKeyConstraint` + `addForeignKeyConstraint` with `onDelete: CASCADE` — same as migration 006 |
+
+---
 
 ## Installation
 
 ```bash
-# In monorepo root, create workspace config
-# pnpm-workspace.yaml:
-# packages:
-#   - 'dashboard'
-
-# Create dashboard app
-cd /home/toto/scm-projects/docora
-pnpm create vite dashboard --template react-swc-ts
-
-# Core dependencies (from dashboard directory)
-cd dashboard
-pnpm add react@^19.2.0 react-dom@^19.2.0
-pnpm add @tanstack/react-query@^5.90.0
-pnpm add @tanstack/react-table@^8.21.0
-pnpm add zustand@^5.0.10
-pnpm add react-hook-form@^7.54.0
-pnpm add @hookform/resolvers@^5.0.0
-pnpm add zod@^4.3.0
-pnpm add recharts@^3.0.0
-pnpm add lucide-react@^0.562.0
-
-# Tailwind CSS v4
-pnpm add -D tailwindcss@^4.0.0
-
-# shadcn/ui (run init command, copies components)
-pnpm dlx shadcn@latest init
-
-# Dev dependencies
-pnpm add -D @types/react@^19.0.0 @types/react-dom@^19.0.0
-pnpm add -D @vitejs/plugin-react-swc@^3.8.0
-pnpm add -D vitest@^4.0.0 @testing-library/react@^16.0.0
-
-# Backend: serve dashboard
-cd ..
-pnpm add @fastify/static@^8.1.0
+# From the repo root — only new runtime dependency for v1.2
+pnpm add async-mutex@0.5.0
 ```
+
+---
+
+## What NOT to Add
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| `redlock` (Redis distributed lock) | Single-process worker; Redis round-trips add latency with no benefit | `async-mutex` in-process Map |
+| `async-lock` | JavaScript-only, no built-in TypeScript types | `async-mutex` with native TypeScript types |
+| `@fastify/auth` plugin | Route-level auth decorators are overkill; the existing `onRequest` hook pattern covers all admin routes | Existing `admin-auth.ts` `onRequest` hook via URL relocation |
+| New session middleware | Session auth is already fully implemented in `admin-auth.ts` | Move onboard route to `/admin/api/` prefix |
+| Manual cascade delete loops for `app_repositories` | Error-prone, not atomic; a missing delete leaves orphaned rows | DB `ON DELETE CASCADE` via migration 008 |
+| Application-level delete for `app_delivered_files` | Already has `ON DELETE CASCADE` from migration 006 — no app code needed | Existing DB constraint handles it |
+
+---
 
 ## Alternatives Considered
 
 | Recommended | Alternative | When to Use Alternative |
 |-------------|-------------|-------------------------|
-| Custom + shadcn/ui | react-admin | Enterprise apps needing RBAC, i18n, audit logs out-of-box. Overkill for simple monitoring. |
-| Custom + shadcn/ui | Refine | Multi-backend apps, SSR requirements, larger teams. More opinionated than needed here. |
-| Recharts | Chart.js (react-chartjs-2) | Need canvas rendering for 10K+ data points. Bundle size critical (11KB vs larger). |
-| Recharts | Tremor | Want pre-styled dashboard components. Less flexible, more opinionated. |
-| TanStack Router | React Router | Already familiar with React Router, simple routing needs. TanStack Router better for type-safe complex routing. |
-| Zustand | Redux Toolkit | Complex state with time-travel debugging, large team needing strict patterns. |
-| Zustand | React Context | Very simple state, no need for selectors/middleware. |
+| `async-mutex` in-process Map | Redis `redlock` distributed lock | Use only when running multiple worker processes on separate machines sharing the same repo storage |
+| Move onboard to `/admin/api/apps/onboard` | Add per-route `preHandler` session check at `/api/apps/onboard` | If the original URL must remain for backward compatibility with existing clients |
+| DB `ON DELETE CASCADE` for `app_repositories` | Delete `app_repositories` rows before deleting `apps` in application code | When per-row logging or conditional deletion is needed |
+| Collect repo IDs before app delete, check orphan after | DB trigger for orphan cleanup | PostgreSQL triggers cannot invoke filesystem operations; app logic is unavoidable for local clone deletion |
 
-## What NOT to Use
-
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| Create React App (CRA) | Deprecated, no longer maintained. Slow builds. | Vite |
-| Material-UI (MUI) | Large bundle, opinionated styling conflicts with Tailwind. License concerns for some. | shadcn/ui + Tailwind |
-| Ant Design | Heavy, enterprise-focused, complex theming. | shadcn/ui |
-| Redux (plain) | Boilerplate-heavy, overkill for admin dashboard state. | Zustand |
-| Axios | Docora already uses axios, but for new dashboard prefer native fetch with TanStack Query. | fetch + TanStack Query |
-| localStorage for auth | XSS vulnerable. | HttpOnly cookies |
-| react-table v7 | Unmaintained. | @tanstack/react-table v8 |
-
-## Monorepo Structure
-
-```
-docora/
-├── src/                      # Existing Fastify backend
-├── dashboard/                # New React admin dashboard
-│   ├── src/
-│   │   ├── components/       # shadcn/ui + custom components
-│   │   ├── hooks/            # Custom hooks
-│   │   ├── lib/              # Utilities (cn, api client)
-│   │   ├── pages/            # Route pages
-│   │   └── main.tsx
-│   ├── package.json
-│   ├── vite.config.ts
-│   └── tsconfig.json
-├── package.json              # Root package.json
-├── pnpm-workspace.yaml       # NEW: workspace config
-└── tsconfig.base.json        # NEW: shared TS config
-```
-
-### pnpm-workspace.yaml
-
-```yaml
-packages:
-  - 'dashboard'
-```
-
-### Root package.json scripts
-
-```json
-{
-  "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "dev:dashboard": "pnpm --filter dashboard dev",
-    "build": "tsc && pnpm --filter dashboard build",
-    "build:dashboard": "pnpm --filter dashboard build"
-  }
-}
-```
-
-## Authentication Pattern
-
-For a simple single-admin dashboard:
-
-**Recommended: Session cookie with httpOnly flag**
-
-```
-1. POST /api/admin/login { username, password }
-   - Validate credentials (bcrypt - already in Docora)
-   - Set httpOnly, secure, sameSite=strict cookie with session token
-   - Return { success: true }
-
-2. All /api/admin/* routes check session cookie
-   - Fastify preHandler hook validates session
-   - 401 if invalid/expired
-
-3. Dashboard checks auth on load
-   - TanStack Query fetches /api/admin/me
-   - Redirect to /login if 401
-```
-
-**Why not JWT in localStorage:**
-- XSS attack can steal token
-- HttpOnly cookies cannot be accessed by JavaScript
-- Session cookies automatically sent with requests
-
-## Fastify Static Configuration
-
-```typescript
-// src/plugins/admin-static.ts
-import fastifyStatic from '@fastify/static';
-import path from 'path';
-
-export async function registerAdminStatic(fastify: FastifyInstance) {
-  // Serve dashboard build
-  await fastify.register(fastifyStatic, {
-    root: path.join(process.cwd(), 'dashboard', 'dist'),
-    prefix: '/admin/',
-    decorateReply: false, // Avoid conflict if already registered
-  });
-
-  // SPA fallback - serve index.html for client-side routes
-  fastify.setNotFoundHandler((request, reply) => {
-    if (request.url.startsWith('/admin')) {
-      return reply.sendFile('index.html', path.join(process.cwd(), 'dashboard', 'dist'));
-    }
-    // ... existing 404 handling
-  });
-}
-```
+---
 
 ## Version Compatibility
 
-| Package A | Compatible With | Notes |
-|-----------|-----------------|-------|
-| React 19.2 | TanStack Query 5.x | Works, may not work with React Compiler yet |
-| React 19.2 | TanStack Table 8.x | Works, compiler compatibility pending |
-| Tailwind 4.0 | Vite 6.x | Native @tailwindcss/vite plugin |
-| shadcn/ui | Tailwind 4.0 | Updated docs for v4 compatibility |
-| Zod 4.x | TypeScript 5.5+ | Tested and compatible |
-| Fastify 5.x | @fastify/static 8.x | Verified compatible |
+| Package | Compatible With | Notes |
+|---------|-----------------|-------|
+| `async-mutex@0.5.0` | Node.js >= 22, TypeScript 5.x, ESM | Native ESM + CJS dual package. `tslib` peer dep already present transitively in the project. |
+| `async-mutex@0.5.0` | BullMQ 5.x (same-process event loop concurrency) | Works correctly because BullMQ's `concurrency` option interleaves async jobs on one event loop — in-process mutexes are shared across all concurrent job executions. |
+
+---
 
 ## Sources
 
-### Official Documentation (HIGH confidence)
-- [React 19.2 Release Notes](https://react.dev/blog/2025/10/01/react-19-2) - Activity component, useEffectEvent
-- [Vite Getting Started](https://vite.dev/guide/) - Templates, configuration
-- [Tailwind CSS v4](https://tailwindcss.com/blog/tailwindcss-v4) - CSS-first config, Oxide engine
-- [shadcn/ui](https://ui.shadcn.com/) - Component installation, data-table guide
-- [TanStack Query](https://tanstack.com/query/latest) - v5 features, Suspense support
-- [TanStack Table](https://tanstack.com/table/latest) - Headless table API
-- [Zustand](https://zustand.docs.pmnd.rs/) - Store patterns
-- [@fastify/static GitHub](https://github.com/fastify/fastify-static) - SPA configuration
-
-### Package Registries (HIGH confidence)
-- @tanstack/react-query: 5.90.20 (Jan 2025)
-- @tanstack/react-table: 8.21.3 (Apr 2025)
-- zustand: 5.0.10 (Jan 2025)
-- lucide-react: 0.562.0 (Dec 2025)
-
-### Community Resources (MEDIUM confidence)
-- [TanStack Suite Guide 2025](https://andrewbaisden.medium.com/how-to-build-modern-react-apps-with-the-tanstack-suite-in-2025-ba335f3e59f9)
-- [pnpm Monorepo Tutorial](https://dev.to/lico/react-monorepo-setup-tutorial-with-pnpm-and-vite-react-project-ui-utils-5705)
-- [Recharts vs Chart.js 2025](https://blog.logrocket.com/best-react-chart-libraries-2025/)
-- [JWT in Admin Apps](https://marmelab.com/blog/2020/07/02/manage-your-jwt-react-admin-authentication-in-memory.html)
-- [React State Management 2025](https://www.developerway.com/posts/react-state-management-2025)
+- npm registry `async-mutex@0.5.0` — version, description, dependency count verified (HIGH confidence)
+- GitHub `DirtyHairy/async-mutex` — API review: `Mutex`, `Semaphore`, `runExclusive`; no built-in keyed locking, pattern requires external Map (HIGH confidence)
+- npm registry `async-lock@1.4.1` — confirmed JavaScript-only, per-key native, no TypeScript (HIGH confidence)
+- `deploy/liquibase/changelog/006-app-delivered-files.yml` — confirmed `addForeignKeyConstraint` with `onDelete: CASCADE` pattern used in this codebase (HIGH confidence — direct code inspection)
+- `deploy/liquibase/changelog/002-create-repositories-table.yml` — confirmed `fk_app_repositories_app` exists without `onDelete` cascade (HIGH confidence — direct code inspection)
+- `src/plugins/admin-auth.ts` — confirmed `onRequest` hook guards all `/admin/*` routes (HIGH confidence — direct code inspection)
+- `src/routes/apps/onboard.ts` — confirmed `publicAccess: true` flag bypasses bearer auth (HIGH confidence — direct code inspection)
+- `src/services/repository-management.ts` — confirmed orphan-repo cleanup pattern (`isRepositoryOrphan`, `deleteRepository`, `deleteLocalRepository`) already implemented (HIGH confidence — direct code inspection)
+- BullMQ concurrency docs — confirmed workers process multiple jobs in same event loop via async interleaving, not threads (MEDIUM confidence — docs describe behavior, Node.js single-thread model is well-established)
+- Liquibase official docs `addForeignKeyConstraint` — confirmed `onDelete: CASCADE` YAML attribute and `dropForeignKeyConstraint` syntax (HIGH confidence)
 
 ---
-*Stack research for: Docora Admin Dashboard*
-*Researched: 2026-01-26*
+
+*Stack research for: Docora v1.2 Hardening & App Management*
+*Researched: 2026-02-24*
