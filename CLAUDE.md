@@ -30,7 +30,7 @@ pnpm worker:start # Run compiled worker
 - `src/routes/index.ts` - Route aggregator that registers all route modules
 - `src/routes/health.ts` - GET `/health` endpoint (timestamp, uptime)
 - `src/routes/version.ts` - GET `/version` endpoint (version info, build details)
-- `src/routes/apps/onboard.ts` - POST `/api/apps/onboard` (app registration)
+- `src/routes/admin/onboard.ts` - POST `/admin/api/apps/onboard` (admin-only app registration)
 - `src/routes/repositories/register.ts` - POST `/api/repositories` (repo registration)
 
 **Database Layer:**

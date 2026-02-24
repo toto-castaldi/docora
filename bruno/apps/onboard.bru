@@ -5,9 +5,16 @@ meta {
 }
 
 post {
-    url: {{baseUrl}}/api/apps/onboard
+    url: {{baseUrl}}/admin/api/apps/onboard
     body: json
     auth: none
+}
+
+# This endpoint requires admin session authentication.
+# Set the adminSessionCookie variable in your Bruno environment
+# with a valid session cookie from /admin/api/login.
+headers {
+    Cookie: {{adminSessionCookie}}
 }
 
 body:json {
