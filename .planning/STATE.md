@@ -2,18 +2,17 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-16)
+See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** See failures before clients report them, and fix them with one click.
-**Current focus:** Planning next milestone
+**Current focus:** Milestone v1.2 — Hardening & App Management
 
 ## Current Position
 
-Phase: All complete (v1.0: 5 phases, v1.1: 4 phases)
-Status: Between milestones
-Last activity: 2026-02-16 — v1.1 milestone archived
-
-Progress: [██████████████████████████████] 100% (25/25 v1.0 + 6/6 v1.1)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-24 — Milestone v1.2 started
 
 ## Performance Metrics
 
@@ -37,7 +36,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-1 pending — race condition on shared git clone with per-app tokens
+1 pending — race condition on shared git clone with per-app tokens (being addressed in v1.2)
 
 ### Blockers/Concerns
 
@@ -45,6 +44,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-16
-Stopped at: Completed v1.1 milestone archival
+Last session: 2026-02-24
+Stopped at: Defining v1.2 milestone requirements
 Resume file: None
