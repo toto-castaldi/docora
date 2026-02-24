@@ -43,6 +43,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Phase 10: LockTimeoutError is plain Error (not UnrecoverableError) so BullMQ retries on contention
 - Phase 10: Lock scope minimal -- only filesystem git operations locked, not scan/notify/save
 - Phase 11: Onboard route moved to /admin/api/apps/onboard with session auth (Plan 01)
+- Phase 11: Added route to PUBLIC_ADMIN_PATHS for custom 401 message control (Plan 01)
 - Phase 11: Documentation updated to remove all self-service onboarding language (Plan 02)
 
 ### Pending Todos
@@ -56,5 +57,5 @@ Race condition on shared git clone -- RESOLVED by Phase 10 (RACE-01, repo-lock s
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 11-02-PLAN.md (documentation update)
+Stopped at: Completed 11-01-PLAN.md (onboarding lockdown route + tests)
 Resume file: None

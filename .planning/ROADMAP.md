@@ -55,7 +55,7 @@ See: `.planning/milestones/v1.1-ROADMAP.md` for full details.
 **Plans**: 1 plan
 
 Plans:
-- [ ] 10-01-PLAN.md — Redis-based per-repo distributed mutex with Redlock, integrated into snapshot worker and repository management
+- [x] 10-01-PLAN.md — Redis-based per-repo distributed mutex with Redlock, integrated into snapshot worker and repository management
 
 ### Phase 11: Onboarding Lockdown
 **Goal**: Only authenticated admins can register new apps; the security gap of open onboarding is closed
