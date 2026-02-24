@@ -5,14 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** See failures before clients report them, and fix them with one click.
-**Current focus:** Milestone v1.2 — Hardening & App Management
+**Current focus:** Phase 10 — Git Concurrency Fix (v1.2)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 10 of 13 (Git Concurrency Fix)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-02-24 — Milestone v1.2 started
+Status: Ready to plan
+Last activity: 2026-02-24 — Roadmap created for v1.2
+
+Progress: [██████████████████████░░░░░░░░] 71% (31/31 v1.0-v1.1 plans complete, 0/? v1.2 plans)
 
 ## Performance Metrics
 
@@ -20,13 +22,16 @@ Last activity: 2026-02-24 — Milestone v1.2 started
 - Total plans completed: 25
 - Average duration: 3.5 min
 - Total execution time: 1.52 hours
-- Timeline: 38 days (2026-01-06 -> 2026-02-13)
 
 **v1.1 Velocity:**
 - Total plans completed: 6
 - Average duration: 2.6 min
 - Total execution time: 0.25 hours
-- Timeline: 2 days (2026-02-14 -> 2026-02-15)
+
+**v1.2 Velocity:**
+- Total plans completed: 0
+- Average duration: —
+- Total execution time: —
 
 ## Accumulated Context
 
@@ -36,14 +41,14 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-1 pending — race condition on shared git clone with per-app tokens (being addressed in v1.2)
+Race condition on shared git clone — being addressed by Phase 10 (RACE-01).
 
 ### Blockers/Concerns
 
-None.
+- Phase 12: Kysely `SELECT ... FOR UPDATE` syntax needs confirmation during planning (narrow API question, not design uncertainty).
 
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Defining v1.2 milestone requirements
+Stopped at: Roadmap created for v1.2 milestone
 Resume file: None
