@@ -14,7 +14,7 @@ Requirements for Hardening & App Management milestone. Each maps to roadmap phas
 ### Security
 
 - [ ] **SEC-01**: Admin can onboard new apps only when authenticated via admin session; unauthenticated requests receive 401 with descriptive error
-- [ ] **SEC-02**: API documentation reflects that onboarding requires admin authentication
+- [x] **SEC-02**: API documentation reflects that onboarding requires admin authentication
 
 ### App Lifecycle
 
@@ -57,7 +57,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | RACE-01 | Phase 10 | Complete |
 | SEC-01 | Phase 11 | Pending |
-| SEC-02 | Phase 11 | Pending |
+| SEC-02 | Phase 11 | Complete |
 | DEL-01 | Phase 12 | Pending |
 | DEL-02 | Phase 12 | Pending |
 | DEL-03 | Phase 13 | Pending |
