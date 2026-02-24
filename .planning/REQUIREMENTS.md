@@ -9,7 +9,7 @@ Requirements for Hardening & App Management milestone. Each maps to roadmap phas
 
 ### Correctness
 
-- [ ] **RACE-01**: Git operations on the same repository path are serialized via per-repo mutex, preserving parallelism across different repositories
+- [x] **RACE-01**: Git operations on the same repository path are serialized via per-repo mutex, preserving parallelism across different repositories
 
 ### Security
 
@@ -55,7 +55,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RACE-01 | Phase 10 | Pending |
+| RACE-01 | Phase 10 | Complete |
 | SEC-01 | Phase 11 | Pending |
 | SEC-02 | Phase 11 | Pending |
 | DEL-01 | Phase 12 | Pending |
