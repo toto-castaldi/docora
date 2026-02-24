@@ -5,6 +5,7 @@ import {
 } from "../repositories/repositories.js";
 import { clearDeliveries } from "../repositories/deliveries.js";
 import { deleteLocalRepository } from "./git.js";
+import { withRepoLock } from "./repo-lock.js";
 
 export interface UnwatchResult {
   success: boolean;
@@ -35,11 +36,17 @@ export async function unwatchRepository(
   const orphan = await isRepositoryOrphan(repositoryId);
 
   if (orphan) {
-    // Delete repository from database
+    // Delete repository from database (DB ops stay outside the lock)
     await deleteRepository(repositoryId);
 
-    // Delete local clone
-    deleteLocalRepository(repoInfo.owner, repoInfo.name);
+    // Delete local clone (filesystem op protected by per-repo lock)
+    await withRepoLock(
+      `${repoInfo.owner}/${repoInfo.name}`,
+      `unwatch-${appId}`,
+      async () => {
+        deleteLocalRepository(repoInfo.owner, repoInfo.name);
+      }
+    );
   }
 
   return { success: true, wasOrphan: orphan };

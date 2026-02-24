@@ -12,6 +12,7 @@
 
 import { Worker, Job } from "bullmq";
 import { cloneOrPull } from "../services/git.js";
+import { withRepoLock } from "../services/repo-lock.js";
 import { scanRepository } from "../services/scanner.js";
 import { defaultPipeline } from "../plugins/pipeline.js";
 import {
@@ -157,70 +158,68 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
       : undefined;
     const clientAuthKey = decryptToken(client_auth_key_encrypted);
 
-    // 2. Clone or pull repository (with circuit breaker)
-    let localPath: string;
-    let commitSha: string;
-    let branch: string;
-
+    // 2. Clone or pull repository (with per-repo distributed lock + circuit breaker)
     console.log(
       `${logPrefix} Git sync ${owner}/${name} (token: ${githubToken ? "present" : "MISSING"})`
     );
 
-    try {
-      const result = await cloneOrPull(
-        github_url,
-        owner,
-        name,
-        githubToken
-      );
-      localPath = result.localPath;
-      commitSha = result.commitSha;
-      branch = result.branch;
-
-      // Git succeeded - reset circuit breaker
-      await resetGitFailures(repository_id);
-    } catch (gitError) {
-      const gitErrorMsg = (gitError as Error).message ?? String(gitError);
-      const isAuthError = /auth|403|401|credential|permission|denied|token/i.test(gitErrorMsg);
-
-      console.error(
-        `${logPrefix} Git FAILED for ${owner}/${name}: ${gitErrorMsg}`
-      );
-      if (isAuthError) {
-        console.error(
-          `${logPrefix} ⚠ Likely authentication issue — token ${githubToken ? "was provided but may be expired/revoked" : "is MISSING (private repo?)"}`
-        );
-      }
-
-      // Record for circuit breaker
-      const { circuitOpened, consecutiveFailures } = await recordGitFailure(repository_id);
-      console.error(
-        `${logPrefix} Git failures: ${consecutiveFailures}/5${circuitOpened ? " — Circuit breaker OPENED" : ""}`
-      );
-
-      if (circuitOpened) {
-        const cbThreshold = parseInt(process.env.CIRCUIT_BREAKER_THRESHOLD || "5", 10);
-        const cbCooldownMs = parseInt(process.env.CIRCUIT_BREAKER_COOLDOWN_MS || "1800000", 10);
-
-        sendSyncFailedNotification({
-          repositoryId: repository_id,
-          githubUrl: github_url,
-          owner,
-          name,
-          errorMessage: (gitError as Error).message ?? String(gitError),
-          consecutiveFailures,
-          threshold: cbThreshold,
-          cooldownUntil: new Date(Date.now() + cbCooldownMs),
-        }).catch((err) => {
-          console.error(
-            `${logPrefix} Failed to send sync_failed notifications:`,
-            (err as Error).message
+    const { localPath, commitSha, branch } = await withRepoLock(
+      `${owner}/${name}`,
+      job.id ?? "unknown",
+      async () => {
+        try {
+          const result = await cloneOrPull(
+            github_url,
+            owner,
+            name,
+            githubToken
           );
-        });
-      }
+          await resetGitFailures(repository_id);
+          return result;
+        } catch (gitError) {
+          const gitErrorMsg = (gitError as Error).message ?? String(gitError);
+          const isAuthError = /auth|403|401|credential|permission|denied|token/i.test(gitErrorMsg);
 
-      throw gitError;
-    }
+          console.error(
+            `${logPrefix} Git FAILED for ${owner}/${name}: ${gitErrorMsg}`
+          );
+          if (isAuthError) {
+            console.error(
+              `${logPrefix} ⚠ Likely authentication issue — token ${githubToken ? "was provided but may be expired/revoked" : "is MISSING (private repo?)"}`
+            );
+          }
+
+          // Record for circuit breaker
+          const { circuitOpened, consecutiveFailures } = await recordGitFailure(repository_id);
+          console.error(
+            `${logPrefix} Git failures: ${consecutiveFailures}/5${circuitOpened ? " — Circuit breaker OPENED" : ""}`
+          );
+
+          if (circuitOpened) {
+            const cbThreshold = parseInt(process.env.CIRCUIT_BREAKER_THRESHOLD || "5", 10);
+            const cbCooldownMs = parseInt(process.env.CIRCUIT_BREAKER_COOLDOWN_MS || "1800000", 10);
+
+            sendSyncFailedNotification({
+              repositoryId: repository_id,
+              githubUrl: github_url,
+              owner,
+              name,
+              errorMessage: (gitError as Error).message ?? String(gitError),
+              consecutiveFailures,
+              threshold: cbThreshold,
+              cooldownUntil: new Date(Date.now() + cbCooldownMs),
+            }).catch((err) => {
+              console.error(
+                `${logPrefix} Failed to send sync_failed notifications:`,
+                (err as Error).message
+              );
+            });
+          }
+
+          throw gitError;
+        }
+      }
+    );
 
     // 2. Scan repository files (all files except .git)
     const scannedFiles = await scanRepository(localPath);

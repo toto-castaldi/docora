@@ -23,6 +23,10 @@ vi.mock("../../src/services/git.js", () => ({
   deleteLocalRepository: vi.fn(),
 }));
 
+vi.mock("../../src/services/repo-lock.js", () => ({
+  withRepoLock: vi.fn((_repoPath: string, _jobId: string, fn: () => Promise<unknown>) => fn()),
+}));
+
 const mockedUnlinkAppFromRepository = vi.mocked(unlinkAppFromRepository);
 const mockedIsRepositoryOrphan = vi.mocked(isRepositoryOrphan);
 const mockedDeleteRepository = vi.mocked(deleteRepository);
