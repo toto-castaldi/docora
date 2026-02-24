@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 10 of 13 (Git Concurrency Fix)
-Plan: —
-Status: Ready to plan
-Last activity: 2026-02-24 — Roadmap created for v1.2
+Plan: 1 of 1 complete
+Status: Phase 10 complete
+Last activity: 2026-02-24 — Phase 10 Plan 01 executed (repo-lock)
 
-Progress: [██████████████████████░░░░░░░░] 71% (31/31 v1.0-v1.1 plans complete, 0/? v1.2 plans)
+Progress: [██████████████████████░░░░░░░░] 74% (31/31 v1.0-v1.1 plans complete, 1/? v1.2 plans)
 
 ## Performance Metrics
 
@@ -29,9 +29,9 @@ Progress: [██████████████████████░
 - Total execution time: 0.25 hours
 
 **v1.2 Velocity:**
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 1
+- Average duration: 6 min
+- Total execution time: 0.10 hours
 
 ## Accumulated Context
 
@@ -39,9 +39,13 @@ Progress: [██████████████████████░
 
 All decisions logged in PROJECT.md Key Decisions table.
 
+- Phase 10: Used Redlock with dedicated Redis connection to avoid BullMQ interference
+- Phase 10: LockTimeoutError is plain Error (not UnrecoverableError) so BullMQ retries on contention
+- Phase 10: Lock scope minimal -- only filesystem git operations locked, not scan/notify/save
+
 ### Pending Todos
 
-Race condition on shared git clone — being addressed by Phase 10 (RACE-01).
+Race condition on shared git clone -- RESOLVED by Phase 10 (RACE-01, repo-lock service).
 
 ### Blockers/Concerns
 
@@ -50,5 +54,5 @@ Race condition on shared git clone — being addressed by Phase 10 (RACE-01).
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Roadmap created for v1.2 milestone
+Stopped at: Completed 10-01-PLAN.md (repo-lock service)
 Resume file: None

@@ -37,7 +37,7 @@ See: `.planning/milestones/v1.1-ROADMAP.md` for full details.
 
 **Milestone Goal:** Eliminate the race condition on shared git clones, lock down open onboarding behind admin auth, and give admins the ability to delete apps with full cascade cleanup.
 
-- [ ] **Phase 10: Git Concurrency Fix** — Serialize git operations per repository path to prevent corruption under concurrent BullMQ jobs
+- [x] **Phase 10: Git Concurrency Fix** — Serialize git operations per repository path to prevent corruption under concurrent BullMQ jobs (completed 2026-02-24)
 - [ ] **Phase 11: Onboarding Lockdown** — Protect app onboarding behind admin authentication and update documentation
 - [ ] **Phase 12: App Deletion Backend** — Cascade app deletion through all dependent records with safe shared-resource handling
 - [ ] **Phase 13: App Deletion UI** — Dashboard interface for triggering and confirming app deletion
@@ -114,7 +114,7 @@ Phases 10, 11, 12 are independent. Phase 13 depends on Phase 12.
 | 7. Token Management | v1.1 | 1/1 | Complete | 2026-02-15 |
 | 8. Failure Notifications | v1.1 | 2/2 | Complete | 2026-02-15 |
 | 9. Documentation Site | v1.1 | 2/2 | Complete | 2026-02-15 |
-| 10. Git Concurrency Fix | v1.2 | 0/? | Not started | - |
+| 10. Git Concurrency Fix | 1/1 | Complete   | 2026-02-24 | - |
 | 11. Onboarding Lockdown | v1.2 | 0/? | Not started | - |
 | 12. App Deletion Backend | v1.2 | 0/? | Not started | - |
 | 13. App Deletion UI | v1.2 | 0/? | Not started | - |
