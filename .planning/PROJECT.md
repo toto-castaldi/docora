@@ -54,7 +54,20 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 
 ### Active
 
-(No active requirements — run `/gsd:new-milestone` to define next milestone)
+<!-- v1.2 Hardening & App Management -->
+
+- [ ] Race condition fix on shared git clone with per-app tokens
+- [ ] Onboarding endpoint protected by admin authentication
+- [ ] Admin can delete an app with cascade cleanup (preserving shared repos)
+
+## Current Milestone: v1.2 Hardening & App Management
+
+**Goal:** Eliminate the race condition on shared git clones, lock down the open onboarding endpoint behind admin auth, and give admins the ability to delete apps with full cascade cleanup.
+
+**Target features:**
+- Fix race condition when multiple apps with different tokens watch the same repo
+- Protect `POST /api/apps/onboard` behind admin auth (no more open access)
+- Admin can delete an app from the dashboard (cascade: app, links, snapshots, deliveries; preserve repo clones used by other apps)
 
 ### Out of Scope
 
@@ -70,7 +83,7 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 
 ## Context
 
-**Current state:** v1.1 shipped (2026-02-15). Both milestones complete. Dashboard fully operational with token management and failure notifications.
+**Current state:** v1.2 in progress (started 2026-02-24). Fixing race condition, securing onboarding, adding app deletion.
 
 **Codebase:**
 - Tech stack: Fastify + TypeScript + PostgreSQL + Redis/BullMQ + React + TanStack Query
@@ -113,4 +126,4 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 | Per-app GitHub token in app_repositories | Different apps can use different auth | ⚠️ Revisit — race condition on shared clone |
 
 ---
-*Last updated: 2026-02-16 after v1.1 milestone completion*
+*Last updated: 2026-02-24 after v1.2 milestone start*
