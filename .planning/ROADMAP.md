@@ -52,10 +52,10 @@ See: `.planning/milestones/v1.1-ROADMAP.md` for full details.
   1. Two concurrent snapshot jobs for different apps watching the same private repo both complete without git errors (no `index.lock` failures, no wrong-token fetches)
   2. Two concurrent snapshot jobs for different repos execute in parallel (per-repo locking does not degrade to a global lock)
   3. If a git operation fails mid-lock, the mutex is released and subsequent operations on the same repo proceed normally
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 10-01: TBD
+- [ ] 10-01-PLAN.md — Redis-based per-repo distributed mutex with Redlock, integrated into snapshot worker and repository management
 
 ### Phase 11: Onboarding Lockdown
 **Goal**: Only authenticated admins can register new apps; the security gap of open onboarding is closed
