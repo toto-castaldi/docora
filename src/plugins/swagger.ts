@@ -22,7 +22,7 @@ export async function registerSwagger(server: FastifyInstance): Promise<void> {
             type: "http",
             scheme: "bearer",
             bearerFormat: "JWT",
-            description: "Enter your app token from /api/apps/onboard",
+            description: "Enter the app token received during admin onboarding",
           },
         },
       },

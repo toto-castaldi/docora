@@ -66,6 +66,7 @@ class IoRedisSessionStore {
 const PUBLIC_ADMIN_PATHS = [
   "/admin/api/login",
   "/admin/login",
+  "/admin/api/apps/onboard",
 ];
 
 function isPublicAdminPath(path: string): boolean {
