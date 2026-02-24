@@ -1,0 +1,72 @@
+# Requirements: Docora v1.2
+
+**Defined:** 2026-02-24
+**Core Value:** See failures before clients report them, and fix them with one click.
+
+## v1.2 Requirements
+
+Requirements for Hardening & App Management milestone. Each maps to roadmap phases.
+
+### Correctness
+
+- [ ] **RACE-01**: Git operations on the same repository path are serialized via per-repo mutex, preserving parallelism across different repositories
+
+### Security
+
+- [ ] **SEC-01**: Admin can onboard new apps only when authenticated via admin session; unauthenticated requests receive 401 with descriptive error
+- [ ] **SEC-02**: API documentation reflects that onboarding requires admin authentication
+
+### App Lifecycle
+
+- [ ] **DEL-01**: Admin can delete an app with full cascade cleanup (app record, repository links, snapshots, deliveries) while preserving repo clones used by other apps
+- [ ] **DEL-02**: In-flight BullMQ jobs for a deleted app exit cleanly without FK violations or retry loops
+- [ ] **DEL-03**: Admin can trigger app deletion from the dashboard with a confirmation dialog showing impact scope
+
+## Future Requirements
+
+Deferred to post-v1.2. Tracked but not in current roadmap.
+
+### Scalability
+
+- **SCALE-01**: Redis-based distributed git lock for multi-worker deployment
+- **SCALE-02**: BullMQ job proactive cancellation on app deletion
+
+### App Lifecycle
+
+- **DEL-04**: Client self-service app deletion via bearer token auth
+- **DEL-05**: Soft delete / recycle bin for app recovery
+
+### Audit
+
+- **AUDIT-01**: Onboarding audit log for compliance tracking
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Multi-worker distributed locking | Single-worker Docker Compose deployment; in-process mutex sufficient |
+| Client-facing app deletion | Requires separate auth model; admin-only for now |
+| Soft delete / recycle bin | Only justified if accidental deletion becomes a production problem |
+| Onboarding audit log | Only if compliance requirements emerge |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| RACE-01 | — | Pending |
+| SEC-01 | — | Pending |
+| SEC-02 | — | Pending |
+| DEL-01 | — | Pending |
+| DEL-02 | — | Pending |
+| DEL-03 | — | Pending |
+
+**Coverage:**
+- v1.2 requirements: 6 total
+- Mapped to phases: 0
+- Unmapped: 6 (will be mapped during roadmap creation)
+
+---
+*Requirements defined: 2026-02-24*
+*Last updated: 2026-02-24 after initial definition*
