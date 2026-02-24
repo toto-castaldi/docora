@@ -66,10 +66,11 @@ Plans:
   2. A request with only a bearer token (no admin session) to `POST /api/apps/onboard` receives a 401 response (bearer auth alone is insufficient)
   3. An authenticated admin can still onboard new apps successfully through the existing endpoint
   4. The docs site accurately reflects that onboarding requires admin authentication (no stale self-service language)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 11-01: TBD
+- [ ] 11-01-PLAN.md — Relocate onboard route to admin tree with session auth and integration tests
+- [ ] 11-02-PLAN.md — Update documentation (Hugo site, Bruno collection, CLAUDE.md) for admin-only onboarding
 
 ### Phase 12: App Deletion Backend
 **Goal**: Admins can delete an app via API with full cascade cleanup, preserving shared resources used by other apps
