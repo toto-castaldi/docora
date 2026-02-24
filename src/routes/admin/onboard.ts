@@ -12,15 +12,32 @@ const ErrorResponseSchema = z.object({
   error: z.string(),
 });
 
-export async function onboardRoute(server: FastifyInstance): Promise<void> {
+function isApiRequest(request: { headers: { accept?: string }; url: string }): boolean {
+  const accept = request.headers.accept ?? "";
+  return accept.includes("application/json") || request.url.includes("/admin/api/");
+}
+
+export async function adminOnboardRoute(server: FastifyInstance): Promise<void> {
+  // Encapsulated session check with custom 401 message
+  server.addHook("onRequest", async (request, reply) => {
+    if (!request.session?.get("adminId")) {
+      if (isApiRequest(request)) {
+        return reply.code(401).send({
+          error: "Admin authentication required. Use the admin dashboard to onboard new apps.",
+        });
+      }
+      return reply.redirect("/admin/login");
+    }
+  });
+
   server.post(
-    "/api/apps/onboard",
+    "/admin/api/apps/onboard",
     {
-      config: { publicAccess: true },
       schema: {
         body: OnboardRequestSchema,
         response: {
           201: OnboardResponseSchema,
+          401: ErrorResponseSchema,
           422: ErrorResponseSchema,
         },
       },
@@ -28,7 +45,6 @@ export async function onboardRoute(server: FastifyInstance): Promise<void> {
     async (request, reply) => {
       const body = request.body as OnboardRequest;
 
-      // SSRF check
       const urlCheck = isUrlSafe(body.base_url);
       if (!urlCheck.safe) {
         return reply.status(422).send({ error: urlCheck.reason });
