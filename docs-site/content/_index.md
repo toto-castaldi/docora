@@ -11,7 +11,7 @@ Your application registers repositories to watch. Docora handles the scanning, c
 
 ## How It Works
 
-1. **Onboard your app** -- Register with Docora to receive an app ID and bearer token. Docora uses these credentials to authenticate your API calls and sign webhook deliveries.
+1. **Onboard your app** -- An admin registers your app through the Docora admin dashboard. You receive an app ID and bearer token. Docora uses these credentials to authenticate your API calls and sign webhook deliveries.
 
 2. **Watch repositories** -- Tell Docora which GitHub repositories to monitor. You can watch public repositories directly or provide a GitHub token for private ones.
 
