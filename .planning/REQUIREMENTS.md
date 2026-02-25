@@ -20,7 +20,7 @@ Requirements for Hardening & App Management milestone. Each maps to roadmap phas
 
 - [x] **DEL-01**: Admin can delete an app with full cascade cleanup (app record, repository links, snapshots, deliveries) while preserving repo clones used by other apps
 - [x] **DEL-02**: In-flight BullMQ jobs for a deleted app exit cleanly without FK violations or retry loops
-- [ ] **DEL-03**: Admin can trigger app deletion from the dashboard with a confirmation dialog showing impact scope
+- [x] **DEL-03**: Admin can trigger app deletion from the dashboard with a confirmation dialog showing impact scope
 
 ## Future Requirements
 
@@ -60,7 +60,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEC-02 | Phase 11 | Complete |
 | DEL-01 | Phase 12 | Complete |
 | DEL-02 | Phase 12 | Complete |
-| DEL-03 | Phase 13 | Pending |
+| DEL-03 | Phase 13 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 6 total
