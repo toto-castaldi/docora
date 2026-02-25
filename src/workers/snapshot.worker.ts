@@ -36,6 +36,7 @@ import {
   recordGitFailure,
   resetGitFailures,
 } from "../repositories/repositories.js";
+import { findAppById } from "../repositories/apps.js";
 import { decryptToken } from "../utils/crypto.js";
 import { getRedisUrl, getRedisOptions } from "../queue/connection.js";
 import {
@@ -280,6 +281,14 @@ async function processSnapshotJob(job: Job<SnapshotJobData>): Promise<void> {
           console.log(`${logPrefix}        ~ ${icon}${c.path}`);
         }
       }
+    }
+
+    // Check if app still exists before committing results
+    // (handles case where app was deleted while this job was processing)
+    const appStillExists = await findAppById(app_id);
+    if (!appStillExists) {
+      console.log(`${logPrefix} App deleted, aborting job`);
+      return; // Clean completion — no throw, no retry
     }
 
     // 5. Send notifications for each change

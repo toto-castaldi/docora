@@ -37,3 +37,14 @@ export async function createApp(
     created_at: now.toISOString(),
   };
 }
+
+export async function findAppById(
+  appId: string
+): Promise<{ app_id: string } | undefined> {
+  const db = getDatabase();
+  return db
+    .selectFrom("apps")
+    .select("app_id")
+    .where("app_id", "=", appId)
+    .executeTakeFirst();
+}
