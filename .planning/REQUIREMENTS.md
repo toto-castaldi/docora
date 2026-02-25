@@ -1,0 +1,98 @@
+# Requirements: Docora
+
+**Defined:** 2026-02-25
+**Core Value:** See failures before clients report them, and fix them with one click.
+
+## v1.3 Requirements
+
+Requirements for milestone v1.3 — Versioning System. Each maps to roadmap phases.
+
+### Cleanup
+
+- [ ] **CLEAN-01**: commitlint, czg, cz-git dependencies removed from package.json
+- [ ] **CLEAN-02**: commit-msg and prepare-commit-msg husky hooks removed (pre-commit kept for typecheck)
+- [ ] **CLEAN-03**: commitlint.config.js removed
+- [ ] **CLEAN-04**: CI release job removed (no commit analysis, tagging, or version-bump commits)
+
+### Version Infrastructure
+
+- [ ] **VER-01**: scripts/extract-version.cjs reads milestone version from STATE.md
+- [ ] **VER-02**: Extract script generates src/version.ts with version baked as string literal
+- [ ] **VER-03**: Extract script syncs package.json version field
+- [ ] **VER-04**: Version format uses major.minor only (v1.3+dev local, v1.3+108.a3bc02d CI)
+- [ ] **VER-05**: Extract script prints version to stdout for CI consumption
+- [ ] **VER-06**: GET /version route returns clean response (remove stale `fake` field)
+
+### CI/CD
+
+- [ ] **CI-01**: Every push to main triggers build + Docker push + deploy
+- [ ] **CI-02**: CI extracts version from STATE.md via extract script for Docker image tagging
+- [ ] **CI-03**: Build metadata (run number, SHA, date) available in running containers
+
+### Onboarding UI
+
+- [ ] **ONBD-01**: Admin can access onboard page from dashboard navigation
+- [ ] **ONBD-02**: Onboard form validates app_name, base_url, email, client_auth_key (+ optional website, description)
+- [ ] **ONBD-03**: After successful onboarding, modal shows app_id and token with copy-to-clipboard
+- [ ] **ONBD-04**: Modal warns that token will not be shown again
+
+### Dashboard
+
+- [ ] **DASH-09**: Dashboard layout shows current version in footer
+
+## Future Requirements
+
+Deferred to future milestones. Tracked but not in current roadmap.
+
+### Observability
+
+- **OBS-01**: Full notification delivery history/audit log (requires new table)
+- **OBS-02**: Email/Slack alerting for failures
+
+### Multi-Admin
+
+- **ADM-01**: Multi-user admin with RBAC
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Git tags for releases | GSD-native versioning uses STATE.md, no tags needed |
+| Patch version numbers | major.minor only per VERSIONING.md spec |
+| Conventional commits for versioning | Commits still follow convention for readability, not for version bumping |
+| Client self-service onboarding | Admin-only by design |
+| OAuth/SSO authentication | Simple username/password sufficient |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CLEAN-01 | — | Pending |
+| CLEAN-02 | — | Pending |
+| CLEAN-03 | — | Pending |
+| CLEAN-04 | — | Pending |
+| VER-01 | — | Pending |
+| VER-02 | — | Pending |
+| VER-03 | — | Pending |
+| VER-04 | — | Pending |
+| VER-05 | — | Pending |
+| VER-06 | — | Pending |
+| CI-01 | — | Pending |
+| CI-02 | — | Pending |
+| CI-03 | — | Pending |
+| ONBD-01 | — | Pending |
+| ONBD-02 | — | Pending |
+| ONBD-03 | — | Pending |
+| ONBD-04 | — | Pending |
+| DASH-09 | — | Pending |
+
+**Coverage:**
+- v1.3 requirements: 18 total
+- Mapped to phases: 0
+- Unmapped: 18 (awaiting roadmap)
+
+---
+*Requirements defined: 2026-02-25*
+*Last updated: 2026-02-25 after initial definition*
