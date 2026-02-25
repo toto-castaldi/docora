@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** See failures before clients report them, and fix them with one click.
-**Current focus:** Phase 11 — Onboarding Lockdown (v1.2)
+**Current focus:** Phase 12 — App Deletion Backend (v1.2)
 
 ## Current Position
 
-Phase: 11 of 13 (Onboarding Lockdown)
+Phase: 12 of 13 (App Deletion Backend)
 Plan: 2 of 2 complete
-Status: Phase 11 complete
-Last activity: 2026-02-24 — Phase 11 Plan 02 executed (documentation update)
+Status: Phase 12 Plan 02 complete
+Last activity: 2026-02-25 — Phase 12 Plan 02 executed (worker app-existence guard)
 
-Progress: [█████████████████████████░░░░░] 77% (31/31 v1.0-v1.1 plans complete, 3/? v1.2 plans)
+Progress: [██████████████████████████░░░░] 80% (31/31 v1.0-v1.1 plans complete, 5/? v1.2 plans)
 
 ## Performance Metrics
 
@@ -29,9 +29,9 @@ Progress: [███████████████████████
 - Total execution time: 0.25 hours
 
 **v1.2 Velocity:**
-- Total plans completed: 3
-- Average duration: 5.7 min
-- Total execution time: 0.28 hours
+- Total plans completed: 4
+- Average duration: 5.0 min
+- Total execution time: 0.33 hours
 
 ## Accumulated Context
 
@@ -45,6 +45,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Phase 11: Onboard route moved to /admin/api/apps/onboard with session auth (Plan 01)
 - Phase 11: Added route to PUBLIC_ADMIN_PATHS for custom 401 message control (Plan 01)
 - Phase 11: Documentation updated to remove all self-service onboarding language (Plan 02)
+- Phase 12: Worker app-existence guard placed after scan but before notifications for clean abort (Plan 02)
+- Phase 12: Guard uses return (not throw) for BullMQ clean completion -- no retry loop for deleted apps (Plan 02)
 
 ### Pending Todos
 
@@ -56,6 +58,6 @@ Race condition on shared git clone -- RESOLVED by Phase 10 (RACE-01, repo-lock s
 
 ## Session Continuity
 
-Last session: 2026-02-24
-Stopped at: Completed 11-01-PLAN.md (onboarding lockdown route + tests)
+Last session: 2026-02-25
+Stopped at: Completed 12-02-PLAN.md (worker app-existence guard + tests)
 Resume file: None
