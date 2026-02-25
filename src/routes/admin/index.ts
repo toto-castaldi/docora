@@ -4,6 +4,7 @@ import { adminOnboardRoute } from "./onboard.js";
 import { dashboardApiRoutes } from "./dashboard-api.js";
 import { dashboardActionRoutes } from "./dashboard-actions.js";
 import { dashboardBulkActionRoutes } from "./dashboard-bulk-actions.js";
+import { deleteAppRoute } from "./delete-app.js";
 import { staticRoutes } from "./static.js";
 
 export async function adminRoutes(server: FastifyInstance): Promise<void> {
@@ -14,5 +15,6 @@ export async function adminRoutes(server: FastifyInstance): Promise<void> {
   await server.register(dashboardApiRoutes);
   await server.register(dashboardActionRoutes);
   await server.register(dashboardBulkActionRoutes);
+  await server.register(deleteAppRoute);
   await server.register(staticRoutes);
 }
