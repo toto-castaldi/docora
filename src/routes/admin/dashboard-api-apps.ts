@@ -3,6 +3,8 @@ import {
   listAppsWithCounts,
   getAppById,
   listRepositoriesByApp,
+  countSnapshotsByApp,
+  countDeliveriesByApp,
 } from "../../repositories/admin-dashboard.js";
 import type { RepositoryWithStatus } from "../../repositories/admin-dashboard.js";
 import { parseQueryParams, validateSortColumn } from "./query-params.js";
@@ -78,7 +80,12 @@ export async function appsRoutes(server: FastifyInstance): Promise<void> {
         return reply.code(404).send({ error: "App not found" });
       }
 
-      const repos = await listRepositoriesByApp(appId);
+      const [repos, snapshotCount, deliveryCount] = await Promise.all([
+        listRepositoriesByApp(appId),
+        countSnapshotsByApp(appId),
+        countDeliveriesByApp(appId),
+      ]);
+
       const repositories: RepositorySummary[] = repos.map((repo) => ({
         repository_id: repo.repository_id,
         github_url: repo.github_url,
@@ -101,6 +108,8 @@ export async function appsRoutes(server: FastifyInstance): Promise<void> {
         created_at: app.created_at.toISOString(),
         repository_count: repos.length,
         failed_notification_count: failedCount,
+        snapshot_count: snapshotCount,
+        delivery_count: deliveryCount,
         repositories,
       };
 

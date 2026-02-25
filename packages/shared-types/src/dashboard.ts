@@ -25,7 +25,16 @@ export interface AppDetail extends AppSummary {
   email: string;
   website: string | null;
   description: string | null;
+  snapshot_count: number;
+  delivery_count: number;
   repositories: RepositorySummary[];
+}
+
+/** Result of deleting an app */
+export interface DeleteAppResult {
+  deleted: boolean;
+  repositories_unlinked: number;
+  orphaned_repositories_cleaned: number;
 }
 
 /** Failed notification entry */

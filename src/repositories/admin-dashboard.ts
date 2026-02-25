@@ -88,6 +88,41 @@ export async function listRepositoriesByApp(
 }
 
 /**
+ * Count total snapshots across all repositories linked to an app
+ */
+export async function countSnapshotsByApp(appId: string): Promise<number> {
+  const db = getDatabase();
+
+  const result = await db
+    .selectFrom("repository_snapshots")
+    .innerJoin(
+      "app_repositories",
+      "app_repositories.repository_id",
+      "repository_snapshots.repository_id"
+    )
+    .select((eb) => eb.fn.count("repository_snapshots.id").as("count"))
+    .where("app_repositories.app_id", "=", appId)
+    .executeTakeFirst();
+
+  return Number(result?.count) || 0;
+}
+
+/**
+ * Count total deliveries for an app
+ */
+export async function countDeliveriesByApp(appId: string): Promise<number> {
+  const db = getDatabase();
+
+  const result = await db
+    .selectFrom("app_delivered_files")
+    .select((eb) => eb.fn.count("app_id").as("count"))
+    .where("app_id", "=", appId)
+    .executeTakeFirst();
+
+  return Number(result?.count) || 0;
+}
+
+/**
  * Get overview counts for dashboard (not paginated)
  */
 export async function getOverviewCounts(): Promise<{
