@@ -52,3 +52,32 @@ See: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1-REQUIREM
 
 ---
 
+
+## v1.2 Hardening & App Management (Shipped: 2026-02-25)
+
+**Phases:** 10-13 (7 plans)
+**Timeline:** 2 days (2026-02-24 → 2026-02-25)
+**Execution time:** 0.52 hours (~4.5 min avg per plan)
+**Files changed:** 67 (6,377 insertions, 125 deletions)
+
+**Delivered:** Race condition fix for concurrent git operations, onboarding lockdown behind admin auth, and full app deletion lifecycle with cascade cleanup and dashboard UI.
+
+**Key accomplishments:**
+- Per-repo distributed mutex via Redlock serializes concurrent git operations without global locking
+- Onboard route relocated to admin tree with session auth enforcement and custom 401 messages
+- Documentation (Hugo site, Bruno, CLAUDE.md) updated for admin-only onboarding
+- Cascade app deletion preserving shared repo clones used by other apps
+- Worker app-existence guard prevents FK violations and retry loops for deleted apps
+- Dashboard deletion UI with confirmation dialogs showing snapshot/delivery impact counts
+
+**Audit:** PASSED — 6/6 requirements, 4/4 phases, 8/8 integration, 4/4 E2E flows
+
+**Tech debt carried forward:**
+- shutdownRepoLock() and closeDeleteQueue() exported but not called in graceful shutdown (LOW)
+- DeleteAppResult type duplicated in service and shared-types (LOW)
+- DASH-07 partial: failed notifications only, full delivery history still deferred
+
+See: `.planning/milestones/v1.2-ROADMAP.md`, `.planning/milestones/v1.2-REQUIREMENTS.md`
+
+---
+
