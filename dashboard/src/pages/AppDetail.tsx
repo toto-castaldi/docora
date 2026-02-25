@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router";
+import { Link, useParams, useNavigate } from "react-router";
 import { formatDistanceToNow, format } from "date-fns";
 import {
   ArrowLeft,
@@ -6,9 +6,11 @@ import {
   RefreshCcw,
   Loader2,
   RotateCw,
+  Trash2,
 } from "lucide-react";
 import { usePollingQuery } from "../hooks/usePolling";
 import { useAppActions } from "../hooks/useAppActions";
+import { useDeleteApp } from "../hooks/useDeleteApp";
 import { fetchAppDetail } from "../api/admin";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { BulkProgress } from "../components/BulkProgress";
@@ -30,6 +32,10 @@ export function AppDetail() {
   });
 
   const actions = useAppActions(appId!);
+  const navigate = useNavigate();
+  const deleteAction = useDeleteApp({
+    onSuccess: () => navigate("/apps"),
+  });
 
   if (isLoading) {
     return (
@@ -69,6 +75,13 @@ export function AppDetail() {
         <div className={styles.headerInfo}>
           <h1 className={styles.title}>{app.app_name}</h1>
           <p className={styles.url}>{app.base_url}</p>
+          <button
+            className={styles.deleteAppButton}
+            onClick={() => deleteAction.requestDelete(app.app_id, app.app_name, app)}
+          >
+            <Trash2 size={14} />
+            Delete App
+          </button>
         </div>
         <div className={styles.refreshInfo}>
           <span>Updated {lastUpdated}</span>
@@ -195,6 +208,26 @@ export function AppDetail() {
         variant="danger"
         onConfirm={actions.handleBulkResync}
         onCancel={() => actions.setShowResyncConfirm(false)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteAction.pendingDelete}
+        title="Delete App"
+        message={
+          deleteAction.pendingDelete ? (
+            <>
+              This will permanently delete <strong>{deleteAction.pendingDelete.appName}</strong> along with{" "}
+              {deleteAction.pendingDelete.repositoryCount} repositories,{" "}
+              {deleteAction.pendingDelete.snapshotCount} snapshots, and{" "}
+              {deleteAction.pendingDelete.deliveryCount} deliveries.
+            </>
+          ) : ""
+        }
+        confirmLabel="Delete permanently"
+        variant="danger"
+        loading={deleteAction.isPending}
+        onConfirm={deleteAction.confirmDelete}
+        onCancel={deleteAction.cancelDelete}
       />
     </div>
   );
