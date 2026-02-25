@@ -11,6 +11,7 @@ import type {
   BulkProgressResponse,
   ApiResponse,
   ApiErrorResponse,
+  DeleteAppResult,
 } from "@docora/shared-types";
 
 export interface ListQueryOptions {
@@ -63,6 +64,23 @@ async function postApi<T>(endpoint: string, body: unknown): Promise<T> {
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => ({
+      error: "Unknown error",
+    }))) as ApiErrorResponse;
+    throw new ApiError(errorData.error, response.status);
+  }
+
+  const data = (await response.json()) as ApiResponse<T>;
+  return data.data;
+}
+
+async function deleteApi<T>(endpoint: string): Promise<T> {
+  const response = await fetch(`/admin${endpoint}`, {
+    method: "DELETE",
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -154,6 +172,10 @@ export async function resyncByApp(
   appId: string
 ): Promise<BulkRetryResponse> {
   return postApi<BulkRetryResponse>(`/api/resync/app/${appId}`, {});
+}
+
+export async function deleteApp(appId: string): Promise<DeleteAppResult> {
+  return deleteApi<DeleteAppResult>(`/api/apps/${appId}`);
 }
 
 export { ApiError };
