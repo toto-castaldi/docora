@@ -25,4 +25,5 @@ export type {
   BulkRetryResponse,
   BulkProgressResponse,
   ResyncRequest,
+  DeleteAppResult,
 } from "./dashboard.js";
