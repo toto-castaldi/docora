@@ -95,10 +95,11 @@ Plans:
   1. Admin can initiate app deletion from both the Apps list page and the App Detail page
   2. A confirmation dialog appears before deletion, showing the app name and describing the scope of what will be removed
   3. After successful deletion, the admin is navigated back to the Apps list and the deleted app no longer appears
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 13-01: TBD
+- [ ] 13-01-PLAN.md — Backend count enrichment, deleteApi helper, ConfirmDialog loading state enhancement
+- [ ] 13-02-PLAN.md — Delete buttons and confirmation dialogs on Apps list and AppDetail pages
 
 ## Progress
 
