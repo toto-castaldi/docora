@@ -51,7 +51,15 @@
   background-color: #f9fafb;
 }
 
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .confirmButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 0.375rem;
@@ -64,6 +72,20 @@
 
 .confirmButton:hover {
   opacity: 0.9;
+}
+
+.confirmButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .confirmDanger {

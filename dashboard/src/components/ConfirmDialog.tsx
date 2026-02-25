@@ -1,15 +1,17 @@
 import { useRef, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import styles from "./ConfirmDialog.module.css";
 
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
-  message: string;
+  message: React.ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
   variant?: "danger" | "warning";
+  loading?: boolean;
 }
 
 export function ConfirmDialog({
@@ -21,6 +23,7 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
   variant = "danger",
+  loading = false,
 }: ConfirmDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -58,15 +61,17 @@ export function ConfirmDialog({
     >
       <div className={styles.content}>
         <h3 className={styles.title}>{title}</h3>
-        <p className={styles.message}>{message}</p>
+        <div className={styles.message}>{message}</div>
         <div className={styles.actions}>
-          <button className={styles.cancelButton} onClick={onCancel}>
+          <button className={styles.cancelButton} onClick={onCancel} disabled={loading}>
             {cancelLabel}
           </button>
           <button
             className={`${styles.confirmButton} ${confirmClass}`}
             onClick={onConfirm}
+            disabled={loading}
           >
+            {loading && <Loader2 size={14} className={styles.spin} />}
             {confirmLabel}
           </button>
         </div>
