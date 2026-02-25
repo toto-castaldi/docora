@@ -294,3 +294,24 @@
 .resyncAllButton:hover {
   background-color: #4f46e5;
 }
+
+.deleteAppButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background-color: transparent;
+  border: 1px solid #ef4444;
+  border-radius: 0.375rem;
+  color: #ef4444;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  margin-top: 0.5rem;
+}
+
+.deleteAppButton:hover {
+  background-color: #ef4444;
+  color: white;
+}
