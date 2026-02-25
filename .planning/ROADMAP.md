@@ -39,7 +39,7 @@ See: `.planning/milestones/v1.1-ROADMAP.md` for full details.
 
 - [x] **Phase 10: Git Concurrency Fix** — Serialize git operations per repository path to prevent corruption under concurrent BullMQ jobs (completed 2026-02-24)
 - [x] **Phase 11: Onboarding Lockdown** — Protect app onboarding behind admin authentication and update documentation (completed 2026-02-24)
-- [ ] **Phase 12: App Deletion Backend** — Cascade app deletion through all dependent records with safe shared-resource handling
+- [x] **Phase 12: App Deletion Backend** — Cascade app deletion through all dependent records with safe shared-resource handling (completed 2026-02-25)
 - [ ] **Phase 13: App Deletion UI** — Dashboard interface for triggering and confirming app deletion
 
 ## Phase Details
@@ -118,5 +118,5 @@ Phases 10, 11, 12 are independent. Phase 13 depends on Phase 12.
 | 9. Documentation Site | v1.1 | 2/2 | Complete | 2026-02-15 |
 | 10. Git Concurrency Fix | v1.2 | 1/1 | Complete | 2026-02-24 |
 | 11. Onboarding Lockdown | v1.2 | Complete    | 2026-02-25 | 2026-02-24 |
-| 12. App Deletion Backend | 1/2 | In Progress|  | - |
+| 12. App Deletion Backend | 2/2 | Complete   | 2026-02-25 | - |
 | 13. App Deletion UI | v1.2 | 0/? | Not started | - |

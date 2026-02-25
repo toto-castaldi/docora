@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 
 Phase: 12 of 13 (App Deletion Backend)
 Plan: 2 of 2 complete
-Status: Phase 12 Plan 02 complete
-Last activity: 2026-02-25 — Phase 12 Plan 02 executed (worker app-existence guard)
+Status: Phase 12 complete
+Last activity: 2026-02-25 — Phase 12 Plan 01 executed (app deletion service + admin route)
 
 Progress: [██████████████████████████░░░░] 80% (31/31 v1.0-v1.1 plans complete, 5/? v1.2 plans)
 
@@ -29,9 +29,9 @@ Progress: [███████████████████████
 - Total execution time: 0.25 hours
 
 **v1.2 Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 5.0 min
-- Total execution time: 0.33 hours
+- Total execution time: 0.42 hours
 
 ## Accumulated Context
 
@@ -47,6 +47,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Phase 11: Documentation updated to remove all self-service onboarding language (Plan 02)
 - Phase 12: Worker app-existence guard placed after scan but before notifications for clean abort (Plan 02)
 - Phase 12: Guard uses return (not throw) for BullMQ clean completion -- no retry loop for deleted apps (Plan 02)
+- Phase 12: 200 with summary body instead of 204 for delete endpoint to give dashboard feedback (Plan 01)
+- Phase 12: BullMQ Queue singleton per service file following admin-actions.ts lazy-init pattern (Plan 01)
 
 ### Pending Todos
 
@@ -59,5 +61,5 @@ Race condition on shared git clone -- RESOLVED by Phase 10 (RACE-01, repo-lock s
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 12-02-PLAN.md (worker app-existence guard + tests)
+Stopped at: Completed 12-01-PLAN.md (app deletion service + admin route + tests)
 Resume file: None
