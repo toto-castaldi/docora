@@ -81,10 +81,11 @@ Plans:
   2. Deleting an app that shares a repository with another app preserves the repo clone on disk and the repository record in the database
   3. Deleting an app that is the sole watcher of a repository also removes the local clone and repository record
   4. A BullMQ snapshot job that is in-flight when its app is deleted exits cleanly without FK violations or entering a retry loop
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md — App deletion service + admin route with cascade cleanup and tests
+- [ ] 12-02-PLAN.md — Worker app-existence guard for in-flight job handling and tests
 
 ### Phase 13: App Deletion UI
 **Goal**: Admins can trigger app deletion from the dashboard with clear visibility into what will be affected
@@ -117,5 +118,5 @@ Phases 10, 11, 12 are independent. Phase 13 depends on Phase 12.
 | 9. Documentation Site | v1.1 | 2/2 | Complete | 2026-02-15 |
 | 10. Git Concurrency Fix | v1.2 | 1/1 | Complete | 2026-02-24 |
 | 11. Onboarding Lockdown | v1.2 | Complete    | 2026-02-25 | 2026-02-24 |
-| 12. App Deletion Backend | v1.2 | 0/? | Not started | - |
+| 12. App Deletion Backend | v1.2 | 0/2 | Not started | - |
 | 13. App Deletion UI | v1.2 | 0/? | Not started | - |
