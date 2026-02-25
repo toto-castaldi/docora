@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** See failures before clients report them, and fix them with one click.
-**Current focus:** Phase 12 — App Deletion Backend (v1.2)
+**Current focus:** Phase 13 — App Deletion UI (v1.2)
 
 ## Current Position
 
-Phase: 12 of 13 (App Deletion Backend)
-Plan: 2 of 2 complete
-Status: Phase 12 complete
-Last activity: 2026-02-25 — Phase 12 Plan 01 executed (app deletion service + admin route)
+Phase: 13 of 13 (App Deletion UI)
+Plan: 1 of 2 complete
+Status: Executing Phase 13
+Last activity: 2026-02-25 — Phase 13 Plan 01 executed (AppDetail counts, deleteApi, ConfirmDialog loading)
 
-Progress: [██████████████████████████░░░░] 80% (31/31 v1.0-v1.1 plans complete, 5/? v1.2 plans)
+Progress: [███████████████████████████░░░] 83% (31/31 v1.0-v1.1 plans complete, 6/? v1.2 plans)
 
 ## Performance Metrics
 
@@ -29,9 +29,9 @@ Progress: [███████████████████████
 - Total execution time: 0.25 hours
 
 **v1.2 Velocity:**
-- Total plans completed: 5
-- Average duration: 5.0 min
-- Total execution time: 0.42 hours
+- Total plans completed: 6
+- Average duration: 4.8 min
+- Total execution time: 0.49 hours
 
 ## Accumulated Context
 
@@ -49,6 +49,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Phase 12: Guard uses return (not throw) for BullMQ clean completion -- no retry loop for deleted apps (Plan 02)
 - Phase 12: 200 with summary body instead of 204 for delete endpoint to give dashboard feedback (Plan 01)
 - Phase 12: BullMQ Queue singleton per service file following admin-actions.ts lazy-init pattern (Plan 01)
+- Phase 13: Used Promise.all for parallel snapshot/delivery count queries in app detail endpoint (Plan 01)
 
 ### Pending Todos
 
@@ -61,5 +62,5 @@ Race condition on shared git clone -- RESOLVED by Phase 10 (RACE-01, repo-lock s
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 12-01-PLAN.md (app deletion service + admin route + tests)
+Stopped at: Completed 13-01-PLAN.md (AppDetail counts, deleteApi, ConfirmDialog loading)
 Resume file: None
