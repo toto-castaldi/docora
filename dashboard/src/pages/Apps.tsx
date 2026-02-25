@@ -1,18 +1,22 @@
 import { Link } from "react-router";
 import { formatDistanceToNow } from "date-fns";
-import { RefreshCw, Loader2, Boxes } from "lucide-react";
+import { RefreshCw, Loader2, Boxes, Trash2 } from "lucide-react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useTableParams } from "../hooks/useTableParams.js";
+import { useDeleteApp } from "../hooks/useDeleteApp.js";
 import { DataTable } from "../components/DataTable.js";
 import type { Column } from "../components/DataTable.js";
 import { Pagination } from "../components/Pagination.js";
 import { FilterBar } from "../components/FilterBar.js";
 import { FilterChips } from "../components/FilterChips.js";
+import { ConfirmDialog } from "../components/ConfirmDialog.js";
 import { fetchApps } from "../api/admin.js";
 import type { AppSummary } from "@docora/shared-types";
 import styles from "./Apps.module.css";
 
-function useAppsColumns(): Column<AppSummary>[] {
+function useAppsColumns(
+  onDeleteRequest: (appId: string, appName: string) => void
+): Column<AppSummary>[] {
   return [
     {
       key: "app_name",
@@ -60,6 +64,23 @@ function useAppsColumns(): Column<AppSummary>[] {
       render: (app) =>
         formatDistanceToNow(new Date(app.created_at), { addSuffix: true }),
     },
+    {
+      key: "actions",
+      label: "",
+      sortable: false,
+      render: (app) => (
+        <button
+          className={styles.deleteButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteRequest(app.app_id, app.app_name);
+          }}
+          title="Delete app"
+        >
+          <Trash2 size={16} />
+        </button>
+      ),
+    },
   ];
 }
 
@@ -84,7 +105,8 @@ export function Apps() {
       refetchInterval: 10_000,
     });
 
-  const columns = useAppsColumns();
+  const deleteAction = useDeleteApp();
+  const columns = useAppsColumns((appId, appName) => deleteAction.requestDelete(appId, appName));
   const apps = data?.data ?? [];
   const pagination = data?.pagination;
   const hasFilters = !!search;
@@ -191,6 +213,26 @@ export function Apps() {
           onLimitChange={(l) => updateParams({ limit: String(l) })}
         />
       )}
+
+      <ConfirmDialog
+        open={!!deleteAction.pendingDelete}
+        title="Delete App"
+        message={
+          deleteAction.pendingDelete ? (
+            <>
+              This will permanently delete <strong>{deleteAction.pendingDelete.appName}</strong> along with{" "}
+              {deleteAction.pendingDelete.repositoryCount} repositories,{" "}
+              {deleteAction.pendingDelete.snapshotCount} snapshots, and{" "}
+              {deleteAction.pendingDelete.deliveryCount} deliveries.
+            </>
+          ) : ""
+        }
+        confirmLabel="Delete permanently"
+        variant="danger"
+        loading={deleteAction.isPending}
+        onConfirm={deleteAction.confirmDelete}
+        onCancel={deleteAction.cancelDelete}
+      />
     </div>
   );
 }
