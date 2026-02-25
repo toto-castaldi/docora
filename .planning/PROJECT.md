@@ -63,7 +63,13 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 
 ### Active
 
-(No active milestone — use `/gsd:new-milestone` to start next)
+<!-- v1.3 Versioning System -->
+
+- [ ] Replace commit-based versioning with GSD-native milestone versioning
+- [ ] Create extract-version script reading STATE.md as single source of truth
+- [ ] Simplify CI/CD pipeline (every push to main → build → deploy)
+- [ ] Show version in dashboard footer
+- [ ] Remove commitlint/czg/cz-git tooling
 
 ### Out of Scope
 
@@ -81,7 +87,17 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 
 ## Context
 
-**Current state:** v1.2 shipped (2026-02-25). All hardening and app management features complete.
+**Current state:** v1.3 in progress. Replacing commit-based versioning with GSD-native milestone versioning.
+
+## Current Milestone: v1.3 Versioning System
+
+**Goal:** Clean up old commit-based versioning and replace with GSD-native milestone versioning where STATE.md is the single source of truth.
+
+**Target features:**
+- Extract-version script (STATE.md → version.ts → package.json)
+- Simplified CI/CD pipeline (no commit analysis, deploy on every push to main)
+- Dashboard footer showing version
+- Removal of commitlint/czg/cz-git toolchain
 
 **Codebase:**
 - ~60,400 LOC TypeScript
@@ -133,4 +149,4 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 | useDeleteApp hook with optional AppDetail | Skip fetch when counts already available | ✓ Good — v1.2 |
 
 ---
-*Last updated: 2026-02-25 after v1.2 milestone*
+*Last updated: 2026-02-25 after v1.3 milestone start*
