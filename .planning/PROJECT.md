@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An admin monitoring dashboard for Docora, the headless GitHub repository monitoring service. Provides proactive system health monitoring with full visibility into apps, repositories, notifications, and job queues — plus one-click retry and recovery operations, GitHub token rotation, proactive sync failure notifications, and developer-facing documentation — so administrators can see and fix failures before clients report them.
+An admin monitoring dashboard for Docora, the headless GitHub repository monitoring service. Provides proactive system health monitoring with full visibility into apps, repositories, notifications, and job queues — plus one-click retry and recovery operations, GitHub token rotation, proactive sync failure notifications, app lifecycle management, and developer-facing documentation — so administrators can see and fix failures before clients report them.
 
 ## Core Value
 
@@ -52,22 +52,18 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 - ✓ DOCS-04: Webhook docs cover all 4 notification types — v1.1
 - ✓ DOCS-05: Site has clear navigation between sections — v1.1
 
-### Active
-
 <!-- v1.2 Hardening & App Management -->
 
-- [ ] Race condition fix on shared git clone with per-app tokens
-- [ ] Onboarding endpoint protected by admin authentication
-- [ ] Admin can delete an app with cascade cleanup (preserving shared repos)
+- ✓ RACE-01: Git operations serialized via per-repo distributed mutex — v1.2
+- ✓ SEC-01: Onboarding endpoint protected by admin session auth — v1.2
+- ✓ SEC-02: Documentation reflects admin-only onboarding — v1.2
+- ✓ DEL-01: App cascade deletion with shared-resource preservation — v1.2
+- ✓ DEL-02: In-flight jobs exit cleanly on app deletion — v1.2
+- ✓ DEL-03: Dashboard deletion UI with confirmation dialogs — v1.2
 
-## Current Milestone: v1.2 Hardening & App Management
+### Active
 
-**Goal:** Eliminate the race condition on shared git clones, lock down the open onboarding endpoint behind admin auth, and give admins the ability to delete apps with full cascade cleanup.
-
-**Target features:**
-- Fix race condition when multiple apps with different tokens watch the same repo
-- Protect `POST /api/apps/onboard` behind admin auth (no more open access)
-- Admin can delete an app from the dashboard (cascade: app, links, snapshots, deliveries; preserve repo clones used by other apps)
+(No active milestone — use `/gsd:new-milestone` to start next)
 
 ### Out of Scope
 
@@ -80,21 +76,26 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 - Email/Slack alerting — proactive notification deferred
 - Multi-user admin with RBAC — overkill for single-developer use case
 - Sync recovery notification — when circuit closes again, nice to have
+- Client self-service app deletion — requires separate auth model
+- Soft delete / recycle bin for app recovery — only if accidental deletion becomes a problem
 
 ## Context
 
-**Current state:** v1.2 in progress (started 2026-02-24). Fixing race condition, securing onboarding, adding app deletion.
+**Current state:** v1.2 shipped (2026-02-25). All hardening and app management features complete.
 
 **Codebase:**
+- ~60,400 LOC TypeScript
 - Tech stack: Fastify + TypeScript + PostgreSQL + Redis/BullMQ + React + TanStack Query
 - Monorepo: `dashboard/` (React frontend), `packages/shared-types/` (shared TypeScript types)
 - Admin auth: session-based with Redis store, isolated from client bearer token auth
 - Docs site: Hugo-based in `docs-site/` with multi-page layout (homepage, API, webhooks)
 - Docker: multi-stage build includes dashboard assets and docs site
+- Distributed locking: Redlock-based per-repo mutex for concurrent git safety
 
 **Known tech debt:**
 - DASH-07 partial implementation (failed notifications only, not full delivery history)
-- Race condition on shared git clone when multiple apps watch same private repo with different tokens
+- shutdownRepoLock() and closeDeleteQueue() exported but not wired into graceful shutdown
+- DeleteAppResult type duplicated in service and shared-types
 - 6 runtime behaviors need human verification (CSP, rate limiting, error boundary, Docker build)
 - Test coverage on existing client API routes could be improved
 
@@ -123,7 +124,13 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 | Fire-and-forget sync_failed notifications | Never block worker or BullMQ retry | ✓ Good — v1.1 |
 | Reset status to pending_snapshot on token update | Triggers fresh scan with new token | ✓ Good — v1.1 |
 | Hugo multi-page docs with menu config | Clean separation of homepage, API, webhooks | ✓ Good — v1.1 |
-| Per-app GitHub token in app_repositories | Different apps can use different auth | ⚠️ Revisit — race condition on shared clone |
+| Per-app GitHub token in app_repositories | Different apps can use different auth | ✓ Good — race condition fixed by Redlock in v1.2 |
+| Redlock with dedicated Redis connection | Avoid blocking BullMQ queue operations | ✓ Good — v1.2 |
+| Minimal lock scope (git ops only) | Reduce contention and TTL risk | ✓ Good — v1.2 |
+| Onboard route in admin tree | Session auth enforcement, custom 401 | ✓ Good — v1.2 |
+| Transaction cascade delete (FK-safe order) | Atomic cleanup, no orphaned records | ✓ Good — v1.2 |
+| 200 with summary body for delete | Dashboard feedback on deletion scope | ✓ Good — v1.2 |
+| useDeleteApp hook with optional AppDetail | Skip fetch when counts already available | ✓ Good — v1.2 |
 
 ---
-*Last updated: 2026-02-24 after v1.2 milestone start*
+*Last updated: 2026-02-25 after v1.2 milestone*
