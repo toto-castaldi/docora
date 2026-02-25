@@ -69,30 +69,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLEAN-01 | — | Pending |
-| CLEAN-02 | — | Pending |
-| CLEAN-03 | — | Pending |
-| CLEAN-04 | — | Pending |
-| VER-01 | — | Pending |
-| VER-02 | — | Pending |
-| VER-03 | — | Pending |
-| VER-04 | — | Pending |
-| VER-05 | — | Pending |
-| VER-06 | — | Pending |
-| CI-01 | — | Pending |
-| CI-02 | — | Pending |
-| CI-03 | — | Pending |
-| ONBD-01 | — | Pending |
-| ONBD-02 | — | Pending |
-| ONBD-03 | — | Pending |
-| ONBD-04 | — | Pending |
-| DASH-09 | — | Pending |
+| CLEAN-01 | Phase 14 | Pending |
+| CLEAN-02 | Phase 14 | Pending |
+| CLEAN-03 | Phase 14 | Pending |
+| CLEAN-04 | Phase 14 | Pending |
+| VER-01 | Phase 15 | Pending |
+| VER-02 | Phase 15 | Pending |
+| VER-03 | Phase 15 | Pending |
+| VER-04 | Phase 15 | Pending |
+| VER-05 | Phase 15 | Pending |
+| VER-06 | Phase 15 | Pending |
+| CI-01 | Phase 16 | Pending |
+| CI-02 | Phase 16 | Pending |
+| CI-03 | Phase 16 | Pending |
+| ONBD-01 | Phase 17 | Pending |
+| ONBD-02 | Phase 17 | Pending |
+| ONBD-03 | Phase 17 | Pending |
+| ONBD-04 | Phase 17 | Pending |
+| DASH-09 | Phase 15 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18 (awaiting roadmap)
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-25*
-*Last updated: 2026-02-25 after initial definition*
+*Last updated: 2026-02-25 after roadmap creation*

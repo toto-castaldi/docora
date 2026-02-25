@@ -5,6 +5,7 @@
 - ✅ **v1.0 Docora Admin Dashboard** — Phases 1-5 (shipped 2026-02-13)
 - ✅ **v1.1 Polish & Resilience** — Phases 6-9 (shipped 2026-02-15)
 - ✅ **v1.2 Hardening & App Management** — Phases 10-13 (shipped 2026-02-25)
+- **v1.3 Versioning System** — Phases 14-17 (in progress)
 
 ## Phases
 
@@ -45,7 +46,81 @@ See: `.planning/milestones/v1.2-ROADMAP.md` for full details.
 
 </details>
 
+### v1.3 Versioning System (In Progress)
+
+**Milestone Goal:** Replace commit-based versioning with GSD-native milestone versioning where STATE.md is the single source of truth, simplify CI/CD, and add admin onboarding UI to the dashboard.
+
+- [ ] **Phase 14: Toolchain Cleanup** - Remove commitlint/czg/cz-git tooling and old CI release job
+- [ ] **Phase 15: Version Infrastructure** - Build extract-version script and display version in dashboard
+- [ ] **Phase 16: CI/CD Pipeline** - Simplify pipeline to build-and-deploy on every push to main
+- [ ] **Phase 17: Onboarding UI** - Admin can onboard new apps directly from the dashboard
+
+## Phase Details
+
+### Phase 14: Toolchain Cleanup
+**Goal**: Old commit-based versioning toolchain is fully removed without breaking the development workflow
+**Depends on**: Nothing (first phase of v1.3)
+**Requirements**: CLEAN-01, CLEAN-02, CLEAN-03, CLEAN-04
+**Success Criteria** (what must be TRUE):
+  1. Running `pnpm install` completes without commitlint, czg, or cz-git being installed
+  2. Making a commit with a non-conventional message succeeds (commit-msg hook no longer enforces format)
+  3. The pre-commit hook still runs typecheck on commit (not removed)
+  4. CI pipeline no longer has a release job that analyzes commits, creates tags, or bumps versions
+**Plans**: TBD
+
+Plans:
+- [ ] 14-01: TBD
+
+### Phase 15: Version Infrastructure
+**Goal**: Version is derived from STATE.md as the single source of truth and is visible to both the API and dashboard users
+**Depends on**: Phase 14
+**Requirements**: VER-01, VER-02, VER-03, VER-04, VER-05, VER-06, DASH-09
+**Success Criteria** (what must be TRUE):
+  1. Running `node scripts/extract-version.cjs` reads the milestone from STATE.md and generates `src/version.ts` with the version baked in
+  2. After running the extract script, `package.json` version field matches the extracted milestone version
+  3. The extract script prints the version string to stdout (consumable by CI)
+  4. GET /version returns a response with the milestone-derived version and no stale `fake` field
+  5. Dashboard footer displays the current version string
+**Plans**: TBD
+
+Plans:
+- [ ] 15-01: TBD
+- [ ] 15-02: TBD
+
+### Phase 16: CI/CD Pipeline
+**Goal**: Every push to main automatically builds, tags with the correct version, and deploys without commit analysis
+**Depends on**: Phase 15
+**Requirements**: CI-01, CI-02, CI-03
+**Success Criteria** (what must be TRUE):
+  1. Pushing any commit to main triggers a CI workflow that builds and pushes a Docker image
+  2. The Docker image is tagged with a version derived from STATE.md via the extract script (not from commit history)
+  3. Build metadata (run number, commit SHA, build date) is accessible inside running containers
+**Plans**: TBD
+
+Plans:
+- [ ] 16-01: TBD
+
+### Phase 17: Onboarding UI
+**Goal**: Admin can onboard new client apps entirely from the dashboard without using curl or external tools
+**Depends on**: Phase 14 (no dependency on versioning phases)
+**Requirements**: ONBD-01, ONBD-02, ONBD-03, ONBD-04
+**Success Criteria** (what must be TRUE):
+  1. Admin can navigate to an onboarding page from the dashboard sidebar/navigation
+  2. The onboard form validates required fields (app_name, base_url, email, client_auth_key) and accepts optional fields (website, description)
+  3. After successful onboarding, a modal displays the generated app_id and token with copy-to-clipboard buttons
+  4. The modal clearly warns that the token will not be shown again
+**Plans**: TBD
+
+Plans:
+- [ ] 17-01: TBD
+- [ ] 17-02: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 14 -> 15 -> 16 -> 17
+
+Note: Phase 17 (Onboarding UI) is independent of Phases 15-16 and could execute after Phase 14 in any order relative to 15-16.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -62,3 +137,7 @@ See: `.planning/milestones/v1.2-ROADMAP.md` for full details.
 | 11. Onboarding Lockdown | v1.2 | 2/2 | Complete | 2026-02-24 |
 | 12. App Deletion Backend | v1.2 | 2/2 | Complete | 2026-02-25 |
 | 13. App Deletion UI | v1.2 | 2/2 | Complete | 2026-02-25 |
+| 14. Toolchain Cleanup | v1.3 | 0/? | Not started | - |
+| 15. Version Infrastructure | v1.3 | 0/? | Not started | - |
+| 16. CI/CD Pipeline | v1.3 | 0/? | Not started | - |
+| 17. Onboarding UI | v1.3 | 0/? | Not started | - |
