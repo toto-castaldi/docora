@@ -25,9 +25,9 @@ Requirements for milestone v1.3 — Versioning System. Each maps to roadmap phas
 
 ### CI/CD
 
-- [ ] **CI-01**: Every push to main triggers build + Docker push + deploy
-- [ ] **CI-02**: CI extracts version from STATE.md via extract script for Docker image tagging
-- [ ] **CI-03**: Build metadata (run number, SHA, date) available in running containers
+- [x] **CI-01**: Every push to main triggers build + Docker push + deploy
+- [x] **CI-02**: CI extracts version from STATE.md via extract script for Docker image tagging
+- [x] **CI-03**: Build metadata (run number, SHA, date) available in running containers
 
 ### Onboarding UI
 
@@ -79,9 +79,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VER-04 | Phase 15 | Complete |
 | VER-05 | Phase 15 | Complete |
 | VER-06 | Phase 15 | Complete |
-| CI-01 | Phase 16 | Pending |
-| CI-02 | Phase 16 | Pending |
-| CI-03 | Phase 16 | Pending |
+| CI-01 | Phase 16 | Complete |
+| CI-02 | Phase 16 | Complete |
+| CI-03 | Phase 16 | Complete |
 | ONBD-01 | Phase 17 | Pending |
 | ONBD-02 | Phase 17 | Pending |
 | ONBD-03 | Phase 17 | Pending |
