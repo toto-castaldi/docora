@@ -178,4 +178,23 @@ export async function deleteApp(appId: string): Promise<DeleteAppResult> {
   return deleteApi<DeleteAppResult>(`/api/apps/${appId}`);
 }
 
+export interface OnboardFormData {
+  app_name: string;
+  base_url: string;
+  email: string;
+  client_auth_key: string;
+  website?: string;
+  description?: string;
+}
+
+export interface OnboardResult {
+  app_id: string;
+  token: string;
+  created_at: string;
+}
+
+export async function onboardApp(data: OnboardFormData): Promise<OnboardResult> {
+  return postApi<OnboardResult>("/api/apps/onboard", data);
+}
+
 export { ApiError };

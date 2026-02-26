@@ -10,6 +10,7 @@ import { Apps } from "./pages/Apps";
 import { AppDetail } from "./pages/AppDetail";
 import { Notifications } from "./pages/Notifications";
 import { Queue } from "./pages/Queue";
+import { Onboard } from "./pages/Onboard";
 
 function ErrorBoundaryRoutes() {
   const location = useLocation();
@@ -25,6 +26,7 @@ function ErrorBoundaryRoutes() {
               <Route path="apps/:appId" element={<AppDetail />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="queue" element={<Queue />} />
+              <Route path="onboard" element={<Onboard />} />
             </Route>
           </Route>
         </Routes>
