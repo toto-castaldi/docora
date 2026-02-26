@@ -140,5 +140,5 @@ Note: Phase 17 (Onboarding UI) is independent of Phases 15-16 and could execute 
 | 13. App Deletion UI | v1.2 | 2/2 | Complete | 2026-02-25 |
 | 14. Toolchain Cleanup | 2/2 | Complete    | 2026-02-26 | - |
 | 15. Version Infrastructure | 2/2 | Complete    | 2026-02-26 | - |
-| 16. CI/CD Pipeline | v1.3 | 1/1 | Complete | 2026-02-26 |
+| 16. CI/CD Pipeline | v1.3 | Complete    | 2026-02-26 | 2026-02-26 |
 | 17. Onboarding UI | v1.3 | 0/? | Not started | - |
