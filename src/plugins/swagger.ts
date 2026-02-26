@@ -27,7 +27,12 @@ export async function registerSwagger(server: FastifyInstance): Promise<void> {
         },
       },
     },
-    transform: jsonSchemaTransform,
+    transform: ({ schema, url, ...rest }) => {
+      if (url.startsWith("/admin")) {
+        return { schema: { ...schema, hide: true }, url, ...rest };
+      }
+      return jsonSchemaTransform({ schema, url, ...rest });
+    },
   });
 
   await server.register(fastifySwaggerUi, {
