@@ -12,7 +12,7 @@ Requirements for milestone v1.3 — Versioning System. Each maps to roadmap phas
 - [ ] **CLEAN-01**: commitlint, czg, cz-git dependencies removed from package.json
 - [ ] **CLEAN-02**: commit-msg and prepare-commit-msg husky hooks removed (pre-commit kept for typecheck)
 - [ ] **CLEAN-03**: commitlint.config.js removed
-- [ ] **CLEAN-04**: CI release job removed (no commit analysis, tagging, or version-bump commits)
+- [x] **CLEAN-04**: CI release job removed (no commit analysis, tagging, or version-bump commits)
 
 ### Version Infrastructure
 
@@ -72,7 +72,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLEAN-01 | Phase 14 | Pending |
 | CLEAN-02 | Phase 14 | Pending |
 | CLEAN-03 | Phase 14 | Pending |
-| CLEAN-04 | Phase 14 | Pending |
+| CLEAN-04 | Phase 14 | Complete |
 | VER-01 | Phase 15 | Pending |
 | VER-02 | Phase 15 | Pending |
 | VER-03 | Phase 15 | Pending |
@@ -95,4 +95,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-25*
-*Last updated: 2026-02-25 after roadmap creation*
+*Last updated: 2026-02-26 after 14-02 execution*
