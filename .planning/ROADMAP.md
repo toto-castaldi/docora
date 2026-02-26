@@ -53,7 +53,7 @@ See: `.planning/milestones/v1.2-ROADMAP.md` for full details.
 - [x] **Phase 14: Toolchain Cleanup** - Remove commitlint/czg/cz-git tooling and old CI release job (completed 2026-02-26)
 - [x] **Phase 15: Version Infrastructure** - Build extract-version script and display version in dashboard (completed 2026-02-26)
 - [x] **Phase 16: CI/CD Pipeline** - Simplify pipeline to build-and-deploy on every push to main (completed 2026-02-26)
-- [ ] **Phase 17: Onboarding UI** - Admin can onboard new apps directly from the dashboard
+- [x] **Phase 17: Onboarding UI** - Admin can onboard new apps directly from the dashboard (completed 2026-02-26)
 
 ## Phase Details
 
@@ -141,4 +141,4 @@ Note: Phase 17 (Onboarding UI) is independent of Phases 15-16 and could execute 
 | 14. Toolchain Cleanup | 2/2 | Complete    | 2026-02-26 | - |
 | 15. Version Infrastructure | 2/2 | Complete    | 2026-02-26 | - |
 | 16. CI/CD Pipeline | v1.3 | Complete    | 2026-02-26 | 2026-02-26 |
-| 17. Onboarding UI | v1.3 | 1/2 | In progress | - |
+| 17. Onboarding UI | 2/2 | Complete   | 2026-02-26 | - |
