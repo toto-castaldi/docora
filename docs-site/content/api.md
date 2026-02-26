@@ -25,9 +25,9 @@ curl -X POST https://your-docora-instance/api/repositories \
   -d '{"github_url": "https://github.com/owner/repo"}'
 ```
 
-{{< alert "important" >}}
-**Keep your token secret.** The bearer token authenticates all your API calls. Do not expose it in client-side code, logs, or public repositories.
-{{< /alert >}}
+<div class="alert alert-important">
+<strong>Keep your token secret.</strong> The bearer token authenticates all your API calls. Do not expose it in client-side code, logs, or public repositories.
+</div>
 
 ---
 
@@ -85,9 +85,9 @@ Register a GitHub repository for Docora to monitor. Docora validates the reposit
 | 404 | Repository not found on GitHub (or token lacks access) |
 | 422 | Invalid GitHub URL format |
 
-{{< alert "info" >}}
-**Re-registration:** Registering a repository your app already watches will unwatch it first and re-register it, triggering a fresh full scan.
-{{< /alert >}}
+<div class="alert alert-info">
+<strong>Re-registration:</strong> Registering a repository your app already watches will unwatch it first and re-register it, triggering a fresh full scan.
+</div>
 
 ---
 
@@ -168,9 +168,9 @@ Update the GitHub personal access token for a watched repository. This resets an
 | 404 | Repository not found or not registered for this app |
 | 422 | Token cannot access this repository |
 
-{{< alert "info" >}}
-**When to use:** If you receive a [sync_failed webhook](/webhooks/#post-sync_failed), use this endpoint to rotate the token and restore syncing.
-{{< /alert >}}
+<div class="alert alert-info">
+<strong>When to use:</strong> If you receive a <a href="/webhooks/#post-sync_failed">sync_failed webhook</a>, use this endpoint to rotate the token and restore syncing.
+</div>
 
 ---
 
