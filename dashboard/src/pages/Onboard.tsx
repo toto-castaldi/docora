@@ -1,20 +1,9 @@
-import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { FormField } from "../components/FormField.js";
 import { PasswordField } from "../components/PasswordField.js";
+import { CredentialsModal } from "../components/CredentialsModal.js";
 import { useOnboardForm } from "../hooks/useOnboardForm.js";
 import styles from "./Onboard.module.css";
-
-function SuccessBanner({ appId, onDismiss }: { appId: string; onDismiss: () => void }) {
-  return (
-    <div className={styles.successBanner}>
-      <CheckCircle size={18} />
-      <span>App onboarded successfully! App ID: <strong>{appId}</strong></span>
-      <button type="button" className={styles.dismissButton} onClick={onDismiss}>
-        Dismiss
-      </button>
-    </div>
-  );
-}
 
 function ErrorBanner({ message }: { message: string }) {
   return (
@@ -42,7 +31,6 @@ export function Onboard() {
         </p>
       </div>
 
-      {result && <SuccessBanner appId={result.app_id} onDismiss={dismissResult} />}
       {apiError && <ErrorBanner message={apiError} />}
 
       <form onSubmit={handleSubmit} className={styles.form} noValidate>
@@ -121,6 +109,15 @@ export function Onboard() {
           )}
         </button>
       </form>
+
+      {result && (
+        <CredentialsModal
+          open={!!result}
+          appId={result.app_id}
+          token={result.token}
+          onClose={dismissResult}
+        />
+      )}
     </div>
   );
 }
