@@ -12,6 +12,7 @@ docora_dev_data
 .claude
 .github
 .planning
+!.planning/STATE.md
 
 .gitignore
 .release-please-manifest.json
