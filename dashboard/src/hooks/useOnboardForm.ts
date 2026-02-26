@@ -65,8 +65,6 @@ export function useOnboardForm() {
     try {
       const data = await onboardApp(stripOptionalBlanks(form));
       setResult(data);
-      setForm(INITIAL_FORM);
-      console.log("Onboard success:", data);
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "An unexpected error occurred";
       setApiError(message);
@@ -77,6 +75,7 @@ export function useOnboardForm() {
 
   function dismissResult() {
     setResult(null);
+    setForm(INITIAL_FORM);
   }
 
   return {
