@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Versioning System
 status: in-progress
-last_updated: "2026-02-26T08:05:20Z"
+last_updated: "2026-02-26T08:09:10Z"
 progress:
   total_phases: 6
   completed_phases: 6
   total_plans: 27
-  completed_plans: 27
+  completed_plans: 28
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 15 of 17 (Version Infrastructure)
-Plan: 1 of 2 (15-01 complete)
-Status: Phase 15 in progress
-Last activity: 2026-02-26 — Completed 15-01 (Extract-version codegen script)
+Plan: 2 of 2 (15-02 complete)
+Status: Phase 15 complete
+Last activity: 2026-02-26 — Completed 15-02 (Dashboard version display)
 
-Progress: [███░░░░░░░] 30%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [███░░░░░░░] 30%
 
 ### Decisions
 
+- 15-02: Read version from generated src/version.ts (not package.json) for dashboard build-time injection to get full version with suffix
 - 15-01: package.json uses semver {major}.{minor}.0 (no suffix) while internal version uses {major}.{minor}+suffix
 - 15-01: Extract script is CommonJS (.cjs) to avoid ESM config dependency
 - 14-02: Delete release job entirely (no reusable parts for Phase 16); comment out docker/deploy jobs to preserve config references for Phase 16
@@ -71,5 +72,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 15-01-PLAN.md (Extract-version codegen script)
+Stopped at: Completed 15-02-PLAN.md (Dashboard version display)
 Resume file: None
