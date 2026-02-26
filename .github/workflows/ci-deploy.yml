@@ -96,6 +96,8 @@ jobs:
                     tags: |
                         ${{ env.REGISTRY }}/${{ github.repository }}-docs:${{ steps.version.outputs.docker_tag }}
                         ${{ env.REGISTRY }}/${{ github.repository }}-docs:latest
+                    build-args: |
+                        VERSION=${{ steps.version.outputs.version }}
 
     # ─────────────────────────────────────────────
     # Deploy to Production
