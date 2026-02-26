@@ -61,6 +61,7 @@ export function Sidebar() {
           <LogOut size={16} />
           Logout
         </button>
+        <p className={styles.versionText}>v{__APP_VERSION__}</p>
       </div>
     </aside>
   );

@@ -99,3 +99,11 @@
   color: #9ca3af;
   text-align: center;
 }
+
+.versionText {
+  margin-top: 0.75rem;
+  font-size: 0.625rem;
+  color: #6b7280;
+  text-align: center;
+  letter-spacing: 0.025em;
+}
