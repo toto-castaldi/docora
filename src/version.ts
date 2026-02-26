@@ -5,10 +5,10 @@
 export const VERSION = "1.3+dev";
 
 export const BUILD_INFO = {
-  version: "1.0+dev",
+  version: "1.3+dev",
   buildNumber: "dev",
   gitSha: "local",
-  buildDate: "2026-02-26T08:06:55.800Z",
+  buildDate: "2026-02-26T11:47:40.716Z",
 } as const;
 
 export type BuildInfo = typeof BUILD_INFO;

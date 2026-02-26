@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An admin monitoring dashboard for Docora, the headless GitHub repository monitoring service. Provides proactive system health monitoring with full visibility into apps, repositories, notifications, and job queues — plus one-click retry and recovery operations, GitHub token rotation, proactive sync failure notifications, app lifecycle management, and developer-facing documentation — so administrators can see and fix failures before clients report them.
+An admin monitoring dashboard for Docora, the headless GitHub repository monitoring service. Provides proactive system health monitoring with full visibility into apps, repositories, notifications, and job queues — plus one-click retry and recovery operations, GitHub token rotation, proactive sync failure notifications, app lifecycle management, in-dashboard app onboarding, developer-facing documentation, and GSD-native milestone versioning — so administrators can see and fix failures before clients report them.
 
 ## Core Value
 
@@ -61,15 +61,17 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 - ✓ DEL-02: In-flight jobs exit cleanly on app deletion — v1.2
 - ✓ DEL-03: Dashboard deletion UI with confirmation dialogs — v1.2
 
-### Active
-
 <!-- v1.3 Versioning System -->
 
-- [ ] Replace commit-based versioning with GSD-native milestone versioning
-- [ ] Create extract-version script reading STATE.md as single source of truth
-- [ ] Simplify CI/CD pipeline (every push to main → build → deploy)
-- [ ] Show version in dashboard footer
-- [ ] Remove commitlint/czg/cz-git tooling
+- ✓ CLEAN-01..04: Commit tooling removed (commitlint, czg, cz-git, husky hooks, CI release job) — v1.3
+- ✓ VER-01..06: Version derived from STATE.md via codegen script, flat /version endpoint — v1.3
+- ✓ CI-01..03: Push-to-deploy CI/CD with STATE.md-derived Docker image tagging — v1.3
+- ✓ ONBD-01..04: In-dashboard onboarding with credentials modal and copy-to-clipboard — v1.3
+- ✓ DASH-09: Dashboard footer shows current version — v1.3
+
+### Active
+
+(No active requirements — start next milestone with `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -84,35 +86,29 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 - Sync recovery notification — when circuit closes again, nice to have
 - Client self-service app deletion — requires separate auth model
 - Soft delete / recycle bin for app recovery — only if accidental deletion becomes a problem
+- Client self-service onboarding — admin-only by design
+- Git tags for releases — GSD-native versioning uses STATE.md
+- Patch version numbers — major.minor only per versioning spec
 
 ## Context
 
-**Current state:** v1.3 in progress. Replacing commit-based versioning with GSD-native milestone versioning.
-
-## Current Milestone: v1.3 Versioning System
-
-**Goal:** Clean up old commit-based versioning and replace with GSD-native milestone versioning where STATE.md is the single source of truth.
-
-**Target features:**
-- Extract-version script (STATE.md → version.ts → package.json)
-- Simplified CI/CD pipeline (no commit analysis, deploy on every push to main)
-- Dashboard footer showing version
-- Removal of commitlint/czg/cz-git toolchain
+**Current state:** v1.3 shipped. All 4 milestones complete.
 
 **Codebase:**
-- ~60,400 LOC TypeScript
+- ~60,900 LOC TypeScript
 - Tech stack: Fastify + TypeScript + PostgreSQL + Redis/BullMQ + React + TanStack Query
 - Monorepo: `dashboard/` (React frontend), `packages/shared-types/` (shared TypeScript types)
 - Admin auth: session-based with Redis store, isolated from client bearer token auth
 - Docs site: Hugo-based in `docs-site/` with multi-page layout (homepage, API, webhooks)
 - Docker: multi-stage build includes dashboard assets and docs site
 - Distributed locking: Redlock-based per-repo mutex for concurrent git safety
+- Version: codegen from STATE.md via extract-version.cjs → version.ts → Docker image tags
 
 **Known tech debt:**
 - DASH-07 partial implementation (failed notifications only, not full delivery history)
 - shutdownRepoLock() and closeDeleteQueue() exported but not wired into graceful shutdown
 - DeleteAppResult type duplicated in service and shared-types
-- 6 runtime behaviors need human verification (CSP, rate limiting, error boundary, Docker build)
+- 8 human-verification items (visual UI, live CI run, Docker build)
 - Test coverage on existing client API routes could be improved
 
 ## Constraints
@@ -121,6 +117,7 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 - **Architecture**: Monorepo — dashboard lives inside Docora repo
 - **Auth**: Simple username/password, not OAuth
 - **Deployment**: Dashboard served alongside API via Fastify static file serving
+- **Versioning**: STATE.md is single source of truth, codegen at build time
 
 ## Key Decisions
 
@@ -147,6 +144,12 @@ An admin monitoring dashboard for Docora, the headless GitHub repository monitor
 | Transaction cascade delete (FK-safe order) | Atomic cleanup, no orphaned records | ✓ Good — v1.2 |
 | 200 with summary body for delete | Dashboard feedback on deletion scope | ✓ Good — v1.2 |
 | useDeleteApp hook with optional AppDetail | Skip fetch when counts already available | ✓ Good — v1.2 |
+| STATE.md as version source of truth | No commit analysis, single codegen entry point | ✓ Good — v1.3 |
+| CommonJS extract script (.cjs) | Runs with plain node, no ESM config dependency | ✓ Good — v1.3 |
+| Vite define for build-time version | No runtime env resolution, baked at compile time | ✓ Good — v1.3 |
+| Reusable FormField/PasswordField components | SRP, 150-line limit, ready for future forms | ✓ Good — v1.3 |
+| CopyField as separate component | DRY, reusable clipboard pattern | ✓ Good — v1.3 |
+| Docker build-args for CI metadata | Version baked into image at build time | ✓ Good — v1.3 |
 
 ---
-*Last updated: 2026-02-25 after v1.3 milestone start*
+*Last updated: 2026-02-26 after v1.3 milestone*
