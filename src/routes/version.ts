@@ -1,9 +1,5 @@
 import { FastifyInstance } from "fastify";
-import {
-  BUILD_INFO,
-  getVersionString,
-  getFullVersionString,
-} from "../version.js";
+import { BUILD_INFO } from "../version.js";
 
 export async function versionRoutes(server: FastifyInstance): Promise<void> {
   server.get(
@@ -13,10 +9,10 @@ export async function versionRoutes(server: FastifyInstance): Promise<void> {
     },
     async () => {
       return {
-        version: getVersionString(),
-        full: getFullVersionString(),
-        details: BUILD_INFO,
-        fake: "3",
+        version: BUILD_INFO.version,
+        buildNumber: BUILD_INFO.buildNumber,
+        gitSha: BUILD_INFO.gitSha,
+        buildDate: BUILD_INFO.buildDate,
       };
     }
   );
