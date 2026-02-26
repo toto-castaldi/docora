@@ -34,6 +34,7 @@ export async function adminOnboardRoute(server: FastifyInstance): Promise<void> 
     "/admin/api/apps/onboard",
     {
       schema: {
+        hide: true,
         body: OnboardRequestSchema,
         response: {
           201: z.object({ data: OnboardResponseSchema }),
