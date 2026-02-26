@@ -4,6 +4,7 @@ import {
   Boxes,
   AlertCircle,
   Clock,
+  UserPlus,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -20,6 +21,7 @@ const navItems: NavItem[] = [
   { to: "/apps", icon: Boxes, label: "Apps" },
   { to: "/notifications", icon: AlertCircle, label: "Notifications" },
   { to: "/queue", icon: Clock, label: "Queue" },
+  { to: "/onboard", icon: UserPlus, label: "Onboard App" },
 ];
 
 export function Sidebar() {
