@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 
 Milestone: v1.3 Versioning System — SHIPPED 2026-02-26
 Status: Milestone complete
-Last activity: 2026-02-26 — Archived v1.3 milestone
+Last activity: 2026-02-26 - Completed quick task 1: Hide all admin routes from Swagger API docs
 
 Progress: [██████████] 100%
 
@@ -71,6 +71,12 @@ None.
 ### Blockers/Concerns
 
 None.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 1 | Hide all admin routes from Swagger API docs | 2026-02-26 | ef2a6c0 | [1-hide-all-admin-routes-from-swagger-api-d](./quick/1-hide-all-admin-routes-from-swagger-api-d/) |
 
 ## Session Continuity
 
