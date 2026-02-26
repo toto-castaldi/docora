@@ -40,98 +40,89 @@ jobs:
                 run: pnpm test
 
     # ─────────────────────────────────────────────
-    # Docker and Deploy jobs disabled — Phase 16 will redesign with STATE.md-based versioning
-    # ─────────────────────────────────────────────
-
-    # ─────────────────────────────────────────────
     # Build & Push Docker Image
     # ─────────────────────────────────────────────
-    # docker:
-    #     needs: release
-    #     if: needs.release.outputs.released == 'true'
-    #     runs-on: ubuntu-latest
-    #     permissions:
-    #         contents: write
-    #         packages: write
-    #     steps:
-    #         -   uses: actions/checkout@v4
-    #
-    #         -   name: Log in to Container Registry
-    #             uses: docker/login-action@v3
-    #             with:
-    #                 registry: ${{ env.REGISTRY }}
-    #                 username: ${{ github.actor }}
-    #                 password: ${{ secrets.GITHUB_TOKEN }}
-    #
-    #         -   name: Extract metadata
-    #             id: meta
-    #             uses: docker/metadata-action@v5
-    #             with:
-    #                 images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-    #                 tags: |
-    #                     type=semver,pattern={{version}},value=${{ needs.release.outputs.version }}
-    #                     type=raw,value=latest
-    #
-    #         -   name: Build and push API image
-    #             uses: docker/build-push-action@v6
-    #             with:
-    #                 context: .
-    #                 push: true
-    #                 tags: ${{ steps.meta.outputs.tags }}
-    #                 labels: ${{ steps.meta.outputs.labels }}
-    #                 build-args: |
-    #                     BUILD_NUMBER=${{ github.run_number }}
-    #                     COMMIT_SHA=${{ github.sha }}
-    #                     BUILD_DATE=${{ github.event.head_commit.timestamp }}
-    #
-    #         -   name: Extract metadata for docs image
-    #             id: meta-docs
-    #             uses: docker/metadata-action@v5
-    #             with:
-    #                 images: ${{ env.REGISTRY }}/${{ github.repository }}-docs
-    #                 tags: |
-    #                     type=semver,pattern={{version}},value=${{ needs.release.outputs.version }}
-    #                     type=raw,value=latest
-    #
-    #         -   name: Build and push docs image
-    #             uses: docker/build-push-action@v6
-    #             with:
-    #                 context: ./docs-site
-    #                 push: true
-    #                 tags: ${{ steps.meta-docs.outputs.tags }}
-    #                 labels: ${{ steps.meta-docs.outputs.labels }}
-    #                 build-args: |
-    #                     VERSION=${{ needs.release.outputs.version }}
+    docker:
+        needs: build-test
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        outputs:
+            version: ${{ steps.version.outputs.version }}
+        steps:
+            - uses: actions/checkout@v4
+
+            -   name: Setup Node.js
+                uses: actions/setup-node@v4
+                with:
+                    node-version: 22
+
+            -   name: Extract version from STATE.md
+                id: version
+                run: |
+                    VERSION=$(BUILD_NUMBER=${{ github.run_number }} COMMIT_SHA=${{ github.sha }} node scripts/extract-version.cjs)
+                    echo "version=$VERSION" >> $GITHUB_OUTPUT
+                    echo "Extracted version: $VERSION"
+
+            -   name: Log in to Container Registry
+                uses: docker/login-action@v3
+                with:
+                    registry: ${{ env.REGISTRY }}
+                    username: ${{ github.actor }}
+                    password: ${{ secrets.GITHUB_TOKEN }}
+
+            -   name: Build and push API image
+                uses: docker/build-push-action@v6
+                with:
+                    context: .
+                    push: true
+                    tags: |
+                        ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+                        ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+                    build-args: |
+                        BUILD_NUMBER=${{ github.run_number }}
+                        COMMIT_SHA=${{ github.sha }}
+                        BUILD_DATE=${{ github.event.head_commit.timestamp }}
+
+            -   name: Build and push docs image
+                uses: docker/build-push-action@v6
+                with:
+                    context: ./docs-site
+                    push: true
+                    tags: |
+                        ${{ env.REGISTRY }}/${{ github.repository }}-docs:${{ steps.version.outputs.version }}
+                        ${{ env.REGISTRY }}/${{ github.repository }}-docs:latest
 
     # ─────────────────────────────────────────────
-    # Deploy to DigitalOcean
+    # Deploy to Production
     # ─────────────────────────────────────────────
-    # deploy:
-    #     needs: [release, docker]
-    #     if: needs.release.outputs.released == 'true'
-    #     runs-on: ubuntu-latest
-    #     steps:
-    #         -   uses: actions/checkout@v4
-    #
-    #         -   name: Copy files to server
-    #             uses: appleboy/scp-action@v0.1.7
-    #             with:
-    #                 host: ${{ secrets.DEPLOY_HOST }}
-    #                 username: ${{ secrets.DEPLOY_USER }}
-    #                 key: ${{ secrets.DEPLOY_SSH_KEY }}
-    #                 source: "deploy/docker-compose.yml,deploy/caddy/Caddyfile,deploy/liquibase"
-    #                 target: "/opt/docora"
-    #                 strip_components: 1
-    #
-    #         -   name: Deploy via SSH
-    #             uses: appleboy/ssh-action@v1
-    #             with:
-    #                 host: ${{ secrets.DEPLOY_HOST }}
-    #                 username: ${{ secrets.DEPLOY_USER }}
-    #                 key: ${{ secrets.DEPLOY_SSH_KEY }}
-    #                 script: |
-    #                     cd /opt/docora
-    #                     docker compose -f docker-compose.yml pull
-    #                     docker compose -f docker-compose.yml up -d --remove-orphans
-    #                     docker compose -f docker-compose.yml restart caddy
-    #                     docker image prune -f
+    deploy:
+        needs: docker
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            -   name: Copy files to server
+                uses: appleboy/scp-action@v0.1.7
+                with:
+                    host: ${{ secrets.DEPLOY_HOST }}
+                    username: ${{ secrets.DEPLOY_USER }}
+                    key: ${{ secrets.DEPLOY_SSH_KEY }}
+                    source: "deploy/docker-compose.yml,deploy/caddy/Caddyfile,deploy/liquibase"
+                    target: "/opt/docora"
+                    strip_components: 1
+
+            -   name: Deploy via SSH
+                uses: appleboy/ssh-action@v1
+                with:
+                    host: ${{ secrets.DEPLOY_HOST }}
+                    username: ${{ secrets.DEPLOY_USER }}
+                    key: ${{ secrets.DEPLOY_SSH_KEY }}
+                    script: |
+                        cd /opt/docora
+                        docker compose -f docker-compose.yml pull
+                        docker compose -f docker-compose.yml up -d --remove-orphans
+                        docker compose -f docker-compose.yml restart caddy
+                        docker image prune -f
