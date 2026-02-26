@@ -38,7 +38,7 @@ Requirements for milestone v1.3 — Versioning System. Each maps to roadmap phas
 
 ### Dashboard
 
-- [ ] **DASH-09**: Dashboard layout shows current version in footer
+- [x] **DASH-09**: Dashboard layout shows current version in footer
 
 ## Future Requirements
 
@@ -86,7 +86,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ONBD-02 | Phase 17 | Pending |
 | ONBD-03 | Phase 17 | Pending |
 | ONBD-04 | Phase 17 | Pending |
-| DASH-09 | Phase 15 | Pending |
+| DASH-09 | Phase 15 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 18 total
