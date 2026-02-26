@@ -96,10 +96,10 @@ Plans:
   1. Pushing any commit to main triggers a CI workflow that builds and pushes a Docker image
   2. The Docker image is tagged with a version derived from STATE.md via the extract script (not from commit history)
   3. Build metadata (run number, commit SHA, build date) is accessible inside running containers
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 16-01: TBD
+- [ ] 16-01: Rebuild CI/CD pipeline with STATE.md-based versioning, Docker push, and deploy
 
 ### Phase 17: Onboarding UI
 **Goal**: Admin can onboard new client apps entirely from the dashboard without using curl or external tools
