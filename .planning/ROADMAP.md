@@ -50,7 +50,7 @@ See: `.planning/milestones/v1.2-ROADMAP.md` for full details.
 
 **Milestone Goal:** Replace commit-based versioning with GSD-native milestone versioning where STATE.md is the single source of truth, simplify CI/CD, and add admin onboarding UI to the dashboard.
 
-- [ ] **Phase 14: Toolchain Cleanup** - Remove commitlint/czg/cz-git tooling and old CI release job
+- [x] **Phase 14: Toolchain Cleanup** - Remove commitlint/czg/cz-git tooling and old CI release job (completed 2026-02-26)
 - [ ] **Phase 15: Version Infrastructure** - Build extract-version script and display version in dashboard
 - [ ] **Phase 16: CI/CD Pipeline** - Simplify pipeline to build-and-deploy on every push to main
 - [ ] **Phase 17: Onboarding UI** - Admin can onboard new apps directly from the dashboard
@@ -138,7 +138,7 @@ Note: Phase 17 (Onboarding UI) is independent of Phases 15-16 and could execute 
 | 11. Onboarding Lockdown | v1.2 | 2/2 | Complete | 2026-02-24 |
 | 12. App Deletion Backend | v1.2 | 2/2 | Complete | 2026-02-25 |
 | 13. App Deletion UI | v1.2 | 2/2 | Complete | 2026-02-25 |
-| 14. Toolchain Cleanup | v1.3 | 1/2 | In progress | - |
+| 14. Toolchain Cleanup | 2/2 | Complete   | 2026-02-26 | - |
 | 15. Version Infrastructure | v1.3 | 0/? | Not started | - |
 | 16. CI/CD Pipeline | v1.3 | 0/? | Not started | - |
 | 17. Onboarding UI | v1.3 | 0/? | Not started | - |

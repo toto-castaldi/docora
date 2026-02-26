@@ -8,7 +8,7 @@ progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 14 of 17 (Toolchain Cleanup)
-Plan: 2 of 2
-Status: Executing
-Last activity: 2026-02-26 — Completed 14-02 (Remove CI release job)
+Plan: 2 of 2 (all complete)
+Status: Phase 14 complete
+Last activity: 2026-02-26 — Completed 14-01 (Remove commit tooling)
 
-Progress: [█░░░░░░░░░] 12%
+Progress: [██░░░░░░░░] 25%
 
 ## Performance Metrics
 
@@ -47,15 +47,16 @@ Progress: [█░░░░░░░░░] 12%
 - Total execution time: 0.52 hours
 
 **v1.3 Velocity:**
-- Total plans completed: 1
-- Average duration: 1.0 min
-- Total execution time: 0.02 hours
+- Total plans completed: 2
+- Average duration: 2.0 min
+- Total execution time: 0.07 hours
 
 ## Accumulated Context
 
 ### Decisions
 
 - 14-02: Delete release job entirely (no reusable parts for Phase 16); comment out docker/deploy jobs to preserve config references for Phase 16
+- 14-01: Version reset to 0.0.0 as neutral placeholder; conventional commit format retained as preferred informal style
 
 ### Pending Todos
 
@@ -68,5 +69,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 14-02-PLAN.md (Remove CI release job)
+Stopped at: Completed 14-01-PLAN.md (Remove commit tooling) — Phase 14 fully complete
 Resume file: None
