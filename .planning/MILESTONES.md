@@ -81,3 +81,33 @@ See: `.planning/milestones/v1.2-ROADMAP.md`, `.planning/milestones/v1.2-REQUIREM
 
 ---
 
+
+## v1.3 Versioning System (Shipped: 2026-02-26)
+
+**Phases:** 14-17 (7 plans)
+**Timeline:** 2 days (2026-02-25 → 2026-02-26)
+**Execution time:** 0.16 hours (~2.0 min avg per plan)
+**Files changed:** 121 (11,280 insertions, 2,022 deletions)
+
+**Delivered:** GSD-native milestone versioning with STATE.md as single source of truth, simplified push-to-deploy CI/CD, dashboard version display, and admin onboarding UI with credential modal.
+
+**Key accomplishments:**
+- Removed commit-based versioning toolchain (commitlint, czg, cz-git, husky hooks)
+- Built codegen script deriving version from STATE.md as single source of truth
+- Dashboard sidebar displays version with build-time Vite injection
+- CI/CD pipeline rebuilt: push-to-deploy with STATE.md-derived Docker image tagging
+- Admin onboard form with validated fields and reusable FormField/PasswordField components
+- Credentials modal with copy-to-clipboard and one-time token warning
+
+**Audit:** TECH DEBT — 18/18 requirements, 4/4 phases, 13/14 integration, 5/5 E2E flows
+
+**Tech debt carried forward:**
+- DASH-07 partial: failed notifications only, full delivery history still deferred
+- shutdownRepoLock() and closeDeleteQueue() not wired into graceful shutdown
+- DeleteAppResult type duplicated in service and shared-types
+- 8 human-verification items (visual UI testing, live CI run)
+
+See: `.planning/milestones/v1.3-ROADMAP.md`, `.planning/milestones/v1.3-REQUIREMENTS.md`
+
+---
+
