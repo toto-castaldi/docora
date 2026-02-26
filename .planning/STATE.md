@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Versioning System
 status: unknown
-last_updated: "2026-02-26T08:49:21.141Z"
+last_updated: "2026-02-26T10:23:48Z"
 progress:
   total_phases: 8
   completed_phases: 8
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 17 of 17 (Onboarding UI)
-Plan: 1 of 2 (17-01 complete)
-Status: In progress
-Last activity: 2026-02-26 — Completed 17-01 (Onboard Form Page)
+Plan: 2 of 2 (17-02 complete)
+Status: Phase complete
+Last activity: 2026-02-26 — Completed 17-02 (Credentials Modal)
 
-Progress: [████████░░] 80%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -47,14 +47,15 @@ Progress: [████████░░] 80%
 - Total execution time: 0.52 hours
 
 **v1.3 Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 2.0 min
-- Total execution time: 0.13 hours
+- Total execution time: 0.16 hours
 
 ## Accumulated Context
 
 ### Decisions
 
+- 17-02: Extracted CopyField into its own component for SRP and reusability; form reset deferred to modal close instead of on API success
 - 17-01: Wrapped backend onboard response in { data: ... } to match dashboard postApi convention; split form into reusable FormField/PasswordField components and useOnboardForm hook
 - 16-01: Version extracted from STATE.md via extract-version.cjs in both CI and Docker build (not from commit history); images tagged with version + latest
 - 15-02: Read version from generated src/version.ts (not package.json) for dashboard build-time injection to get full version with suffix
@@ -74,5 +75,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 17-01-PLAN.md (Onboard Form Page)
+Stopped at: Completed 17-02-PLAN.md (Credentials Modal)
 Resume file: None
