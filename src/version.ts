@@ -8,7 +8,7 @@ export const BUILD_INFO = {
   version: "1.0+dev",
   buildNumber: "dev",
   gitSha: "local",
-  buildDate: "2026-02-26T08:04:14.726Z",
+  buildDate: "2026-02-26T08:06:55.800Z",
 } as const;
 
 export type BuildInfo = typeof BUILD_INFO;

@@ -85,8 +85,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 15-01: TBD
-- [ ] 15-02: TBD
+- [x] 15-01: Extract-version script, version.ts generation, /version route cleanup
+- [ ] 15-02: Dashboard footer version display
 
 ### Phase 16: CI/CD Pipeline
 **Goal**: Every push to main automatically builds, tags with the correct version, and deploys without commit analysis
@@ -139,6 +139,6 @@ Note: Phase 17 (Onboarding UI) is independent of Phases 15-16 and could execute 
 | 12. App Deletion Backend | v1.2 | 2/2 | Complete | 2026-02-25 |
 | 13. App Deletion UI | v1.2 | 2/2 | Complete | 2026-02-25 |
 | 14. Toolchain Cleanup | 2/2 | Complete    | 2026-02-26 | - |
-| 15. Version Infrastructure | v1.3 | 0/? | Not started | - |
+| 15. Version Infrastructure | v1.3 | 1/2 | In progress | - |
 | 16. CI/CD Pipeline | v1.3 | 0/? | Not started | - |
 | 17. Onboarding UI | v1.3 | 0/? | Not started | - |
