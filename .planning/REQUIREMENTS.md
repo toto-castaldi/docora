@@ -31,8 +31,8 @@ Requirements for milestone v1.3 — Versioning System. Each maps to roadmap phas
 
 ### Onboarding UI
 
-- [ ] **ONBD-01**: Admin can access onboard page from dashboard navigation
-- [ ] **ONBD-02**: Onboard form validates app_name, base_url, email, client_auth_key (+ optional website, description)
+- [x] **ONBD-01**: Admin can access onboard page from dashboard navigation
+- [x] **ONBD-02**: Onboard form validates app_name, base_url, email, client_auth_key (+ optional website, description)
 - [ ] **ONBD-03**: After successful onboarding, modal shows app_id and token with copy-to-clipboard
 - [ ] **ONBD-04**: Modal warns that token will not be shown again
 
@@ -82,8 +82,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CI-01 | Phase 16 | Complete |
 | CI-02 | Phase 16 | Complete |
 | CI-03 | Phase 16 | Complete |
-| ONBD-01 | Phase 17 | Pending |
-| ONBD-02 | Phase 17 | Pending |
+| ONBD-01 | Phase 17 | Complete |
+| ONBD-02 | Phase 17 | Complete |
 | ONBD-03 | Phase 17 | Pending |
 | ONBD-04 | Phase 17 | Pending |
 | DASH-09 | Phase 15 | Complete |
