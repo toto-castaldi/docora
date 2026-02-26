@@ -36,7 +36,7 @@ export async function adminOnboardRoute(server: FastifyInstance): Promise<void> 
       schema: {
         body: OnboardRequestSchema,
         response: {
-          201: OnboardResponseSchema,
+          201: z.object({ data: OnboardResponseSchema }),
           401: ErrorResponseSchema,
           422: ErrorResponseSchema,
         },
@@ -51,7 +51,7 @@ export async function adminOnboardRoute(server: FastifyInstance): Promise<void> 
       }
 
       const result = await createApp(body);
-      return reply.status(201).send(result);
+      return reply.status(201).send({ data: result });
     }
   );
 }
