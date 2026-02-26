@@ -16,12 +16,12 @@ Requirements for milestone v1.3 — Versioning System. Each maps to roadmap phas
 
 ### Version Infrastructure
 
-- [ ] **VER-01**: scripts/extract-version.cjs reads milestone version from STATE.md
-- [ ] **VER-02**: Extract script generates src/version.ts with version baked as string literal
-- [ ] **VER-03**: Extract script syncs package.json version field
-- [ ] **VER-04**: Version format uses major.minor only (v1.3+dev local, v1.3+108.a3bc02d CI)
-- [ ] **VER-05**: Extract script prints version to stdout for CI consumption
-- [ ] **VER-06**: GET /version route returns clean response (remove stale `fake` field)
+- [x] **VER-01**: scripts/extract-version.cjs reads milestone version from STATE.md
+- [x] **VER-02**: Extract script generates src/version.ts with version baked as string literal
+- [x] **VER-03**: Extract script syncs package.json version field
+- [x] **VER-04**: Version format uses major.minor only (v1.3+dev local, v1.3+108.a3bc02d CI)
+- [x] **VER-05**: Extract script prints version to stdout for CI consumption
+- [x] **VER-06**: GET /version route returns clean response (remove stale `fake` field)
 
 ### CI/CD
 
@@ -73,12 +73,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLEAN-02 | Phase 14 | Complete |
 | CLEAN-03 | Phase 14 | Complete |
 | CLEAN-04 | Phase 14 | Complete |
-| VER-01 | Phase 15 | Pending |
-| VER-02 | Phase 15 | Pending |
-| VER-03 | Phase 15 | Pending |
-| VER-04 | Phase 15 | Pending |
-| VER-05 | Phase 15 | Pending |
-| VER-06 | Phase 15 | Pending |
+| VER-01 | Phase 15 | Complete |
+| VER-02 | Phase 15 | Complete |
+| VER-03 | Phase 15 | Complete |
+| VER-04 | Phase 15 | Complete |
+| VER-05 | Phase 15 | Complete |
+| VER-06 | Phase 15 | Complete |
 | CI-01 | Phase 16 | Pending |
 | CI-02 | Phase 16 | Pending |
 | CI-03 | Phase 16 | Pending |

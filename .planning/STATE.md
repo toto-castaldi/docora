@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Versioning System
-status: unknown
-last_updated: "2026-02-26T06:22:59.343Z"
+status: in-progress
+last_updated: "2026-02-26T08:05:20Z"
 progress:
   total_phases: 6
   completed_phases: 6
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** See failures before clients report them, and fix them with one click.
-**Current focus:** Phase 14 — Toolchain Cleanup
+**Current focus:** Phase 15 — Version Infrastructure
 
 ## Current Position
 
-Phase: 14 of 17 (Toolchain Cleanup)
-Plan: 2 of 2 (all complete)
-Status: Phase 14 complete
-Last activity: 2026-02-26 — Completed 14-01 (Remove commit tooling)
+Phase: 15 of 17 (Version Infrastructure)
+Plan: 1 of 2 (15-01 complete)
+Status: Phase 15 in progress
+Last activity: 2026-02-26 — Completed 15-01 (Extract-version codegen script)
 
-Progress: [██░░░░░░░░] 25%
+Progress: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
@@ -55,6 +55,8 @@ Progress: [██░░░░░░░░] 25%
 
 ### Decisions
 
+- 15-01: package.json uses semver {major}.{minor}.0 (no suffix) while internal version uses {major}.{minor}+suffix
+- 15-01: Extract script is CommonJS (.cjs) to avoid ESM config dependency
 - 14-02: Delete release job entirely (no reusable parts for Phase 16); comment out docker/deploy jobs to preserve config references for Phase 16
 - 14-01: Version reset to 0.0.0 as neutral placeholder; conventional commit format retained as preferred informal style
 
@@ -69,5 +71,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 14-01-PLAN.md (Remove commit tooling) — Phase 14 fully complete
+Stopped at: Completed 15-01-PLAN.md (Extract-version codegen script)
 Resume file: None
