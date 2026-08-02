@@ -133,6 +133,8 @@ UPDATE apps SET base_url = 'https://your-url.com/webhook' WHERE app_id = 'app_xx
 | DEPLOY_USER    | SSH username                   | root or deploy                             |
 | DEPLOY_SSH_KEY | Private SSH key (full content) | -----BEGIN OPENSSH PRIVATE KEY-----...     |
 
+A push to `main` deploys to both targets in parallel: the droplet (production, via the secrets above) and the jarvis self-hosted runner (staging).
+
 # DB
 
 ```bash
