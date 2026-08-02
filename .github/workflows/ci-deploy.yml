@@ -100,9 +100,10 @@ jobs:
                         VERSION=${{ steps.version.outputs.version }}
 
     # ─────────────────────────────────────────────
-    # Deploy to Production
+    # Deploy to Production (droplet) — UNCHANGED, only renamed from `deploy`.
+    # Removal belongs to the jarvis cutover, after the DNS flip — not here.
     # ─────────────────────────────────────────────
-    deploy:
+    deploy-droplet:
         needs: docker
         runs-on: ubuntu-latest
         steps:
@@ -130,3 +131,55 @@ jobs:
                         docker compose -f docker-compose.yml up -d --remove-orphans
                         docker compose -f docker-compose.yml restart caddy
                         docker image prune -f
+
+    # ─────────────────────────────────────────────
+    # Deploy to jarvis (staging) — SIBLING of deploy-droplet, never its dependant:
+    # a jarvis-side failure must never block a production fix from reaching the droplet.
+    # The workflow as a whole still turns red, which is the intended signal.
+    #
+    # This job runs on a SELF-HOSTED runner that holds exactly one NOPASSWD sudo
+    # entitlement (/usr/local/sbin/docora-deploy.sh). Because this repository is public,
+    # the job is deliberately narrow: push-on-main only, no repository checkout, a
+    # read-only token, and no expression interpolation inside run:.
+    # ─────────────────────────────────────────────
+    deploy-jarvis:
+        needs: docker
+        # Three independent clauses — a fork PR can never reach the runner:
+        #   repository (not a fork) + event_name (never a pull request) + ref (main only).
+        if: >-
+            github.repository == 'toto-castaldi/docora'
+            && github.event_name == 'push'
+            && github.ref == 'refs/heads/main'
+        runs-on: [self-hosted, jarvis, docora]
+        permissions:
+            # Least privilege: this job performs no checkout and calls no GitHub API.
+            contents: read
+        concurrency:
+            group: deploy-jarvis-docora
+            # DELIBERATE: never cancel a running deploy. Mid-run this job is a
+            # `liquibase update` applying changesets; cancelling it can leave the schema
+            # half-migrated or the changelog lock held. A queued deploy is fine; an
+            # interrupted migration is not. Do NOT change this to true.
+            cancel-in-progress: false
+        steps:
+            # NO repository checkout, deliberately: this job builds nothing and reads no
+            # repo file — it only needs the build tag string. Not checking out means no
+            # repo-controlled content ever lands on the machine holding the root
+            # entitlement. Do not add one for convenience.
+            -   name: Deploy Docora to jarvis
+                env:
+                    # Intermediate env var (GitHub's documented script-injection
+                    # mitigation): the expression never enters the run: body.
+                    BUILD_TAG: ${{ needs.docker.outputs.version }}
+                run: |
+                    set -euo pipefail
+                    # Quoted shell expansion. The tag is the ONLY value crossing the sudo
+                    # boundary: no path, no flag, no service or compose project name.
+                    # The script's exit code is the job's verdict (0 green; 64/65 argument
+                    # rejected; 70 digest unresolvable; 71/72 app absent or wrong build;
+                    # 73/74 .env or Postgres volume touched).
+                    sudo -n /usr/local/sbin/docora-deploy.sh "$BUILD_TAG"
+            # NOTE: there is no deploy.log append here. Unlike this project's other
+            # self-hosted runners, the log writer is root inside the script and the file is
+            # /var/lib/docora-deploy/deploy.log (root:root 0644) — the runner cannot forge
+            # entries. Do not "restore" a missing append line here.
