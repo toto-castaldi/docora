@@ -1,5 +1,25 @@
+# Production has TWO base URLs, on purpose.
+#
+# `baseUrl` — the API hostname. Everything a non-browser client calls lives here:
+#   /health, /version and /api/*. This used to point at docora.toto-castaldi.com,
+#   which was already wrong: that hostname serves the documentation site, and the
+#   API answers there only as a side effect of the current reverse-proxy routing.
+#
+# `adminBaseUrl` — the documentation/admin hostname, which is where /admin/api/*
+#   is served. It is NOT reachable on the API hostname: requests to
+#   ^/(admin|docs|openapi\.json) there are answered 404 at the edge, deliberately,
+#   so that the credential-accepting surface exists on exactly one hostname.
+#
+# Expect /admin/api/* to be gated. On the admin hostname those paths sit behind
+# Cloudflare Access, so a plain Bruno request gets a 302 to the Access login page.
+# That is the intended posture, not a defect to route around. To call the admin API
+# programmatically, use an Access service token — send its client id and secret as
+# the CF-Access-Client-Id and CF-Access-Client-Secret headers. Keep those values in
+# your local environment only; never commit them to this repository.
+
 vars {
-  baseUrl: https://docora.toto-castaldi.com
+  baseUrl: https://api-docora.toto-castaldi.com
+  adminBaseUrl: https://docora.toto-castaldi.com
   appToken:
   appId:
   repositoryId:
