@@ -1,5 +1,11 @@
+# Locally a single process serves both the public API and /admin/api/*, so the two
+# base URLs are the same value. They are still two variables, so that a request
+# written against dev keeps working against production, where the admin API lives
+# on a different hostname. See environments/prod.bru for why.
+
 vars {
   baseUrl: http://localhost:3000
+  adminBaseUrl: http://localhost:3000
   appToken:
   appId:
   repositoryId:
