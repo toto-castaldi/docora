@@ -100,42 +100,25 @@ jobs:
                         VERSION=${{ steps.version.outputs.version }}
 
     # ─────────────────────────────────────────────
-    # Deploy to Production (droplet) — UNCHANGED, only renamed from `deploy`.
-    # Removal belongs to the jarvis cutover, after the DNS flip — not here.
+    # REMOVED at Phase 15 (2026-08-05) — the production deploy job that targeted the
+    # DigitalOcean droplet, together with its three repository secrets
+    # (DEPLOY_HOST / DEPLOY_USER / DEPLOY_SSH_KEY, all deleted in the same change).
+    #
+    # Production moved to jarvis at the DNS flip of 2026-08-04T12:44:53Z. The droplet
+    # is kept only as a frozen rollback image until it is destroyed, and a rollback
+    # restarts its existing containers — it never needs a new deploy. Keeping the job
+    # would have kept a live credential path into that host for no benefit.
+    #
+    # This satisfies the last clause of DEPLOY-04 ("the droplet is no longer
+    # redeployed") as a fact rather than as a comment: the proof is
+    # `gh api repos/toto-castaldi/docora/actions/secrets --jq .total_count` = 0.
+    # Do NOT restore this job.
     # ─────────────────────────────────────────────
-    deploy-droplet:
-        needs: docker
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-
-            -   name: Copy files to server
-                uses: appleboy/scp-action@v0.1.7
-                with:
-                    host: ${{ secrets.DEPLOY_HOST }}
-                    username: ${{ secrets.DEPLOY_USER }}
-                    key: ${{ secrets.DEPLOY_SSH_KEY }}
-                    source: "deploy/docker-compose.yml,deploy/caddy/Caddyfile,deploy/liquibase"
-                    target: "/opt/docora"
-                    strip_components: 1
-
-            -   name: Deploy via SSH
-                uses: appleboy/ssh-action@v1
-                with:
-                    host: ${{ secrets.DEPLOY_HOST }}
-                    username: ${{ secrets.DEPLOY_USER }}
-                    key: ${{ secrets.DEPLOY_SSH_KEY }}
-                    script: |
-                        cd /opt/docora
-                        docker compose -f docker-compose.yml pull
-                        docker compose -f docker-compose.yml up -d --remove-orphans
-                        docker compose -f docker-compose.yml restart caddy
-                        docker image prune -f
 
     # ─────────────────────────────────────────────
-    # Deploy to jarvis (staging) — SIBLING of deploy-droplet, never its dependant:
-    # a jarvis-side failure must never block a production fix from reaching the droplet.
-    # The workflow as a whole still turns red, which is the intended signal.
+    # Deploy to jarvis — since Phase 15 this is the ONLY deploy job, and jarvis is
+    # production. It was previously the sibling of the removed droplet job and it keeps
+    # `needs: docker` unchanged: nothing about its trigger surface was widened here.
     #
     # This job runs on a SELF-HOSTED runner that holds exactly one NOPASSWD sudo
     # entitlement (/usr/local/sbin/docora-deploy.sh). Because this repository is public,
